@@ -1,3 +1,4 @@
+import type React from 'react';
 import type { Metadata } from 'next';
 import { HeroSection } from '@/components/landing/HeroSection';
 import { StatsBar } from '@/components/landing/StatsBar';

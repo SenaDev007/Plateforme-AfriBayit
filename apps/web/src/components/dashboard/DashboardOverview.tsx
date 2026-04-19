@@ -1,4 +1,5 @@
 'use client';
+import type React from 'react';
 
 import { motion } from 'framer-motion';
 import { TrendingUp, Heart, CreditCard, Eye } from 'lucide-react';

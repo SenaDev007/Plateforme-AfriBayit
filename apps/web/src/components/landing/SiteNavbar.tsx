@@ -1,4 +1,5 @@
 'use client';
+import type React from 'react';
 
 import { useRouter } from 'next/navigation';
 import { Navbar } from '@afribayit/ui';

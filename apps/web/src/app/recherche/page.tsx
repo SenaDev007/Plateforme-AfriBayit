@@ -1,3 +1,4 @@
+import type React from 'react';
 import type { Metadata } from 'next';
 import { Suspense } from 'react';
 import { SearchResults } from '@/components/search/SearchResults';
