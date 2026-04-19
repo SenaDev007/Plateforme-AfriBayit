@@ -1,0 +1,77 @@
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400;1,600&family=DM+Sans:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --radius: 0.5rem;
+    scroll-behavior: smooth;
+  }
+
+  * {
+    @apply border-charcoal-100;
+  }
+
+  body {
+    @apply bg-white text-charcoal font-sans antialiased;
+    font-feature-settings: 'rlig' 1, 'calt' 1;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-serif;
+  }
+
+  /* Respect reduced motion preference */
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+
+  /* Focus styles for keyboard navigation */
+  :focus-visible {
+    @apply outline-none ring-2 ring-navy ring-offset-2;
+  }
+
+  /* Scrollbar styling */
+  ::-webkit-scrollbar {
+    @apply w-1.5;
+  }
+  ::-webkit-scrollbar-track {
+    @apply bg-charcoal-50;
+  }
+  ::-webkit-scrollbar-thumb {
+    @apply bg-charcoal-200 rounded-full;
+  }
+}
+
+@layer components {
+  /* Glassmorphism utility */
+  .glass {
+    @apply bg-white/70 backdrop-blur-glass border border-white/40 shadow-glass;
+  }
+
+  /* Gold gradient text */
+  .text-gradient-gold {
+    @apply bg-gradient-to-r from-gold-400 to-gold bg-clip-text text-transparent;
+  }
+
+  /* Navy gradient background */
+  .bg-hero {
+    background: linear-gradient(135deg, #001c51 0%, #003087 50%, #006685 100%);
+  }
+
+  /* Section reveal animation */
+  .reveal {
+    @apply opacity-0 translate-y-6;
+  }
+  .reveal.visible {
+    @apply opacity-100 translate-y-0 transition-all duration-700 ease-[cubic-bezier(0.16,1,0.3,1)];
+  }
+}

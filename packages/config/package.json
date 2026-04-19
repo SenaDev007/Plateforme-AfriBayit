@@ -1,0 +1,12 @@
+{
+  "name": "@afribayit/config",
+  "version": "0.1.0",
+  "private": true,
+  "exports": {
+    "./eslint/base": "./eslint/base.js",
+    "./typescript/base": "./typescript/base.json",
+    "./typescript/nextjs": "./typescript/nextjs.json",
+    "./typescript/nestjs": "./typescript/nestjs.json",
+    "./tailwind/base": "./tailwind/base.ts"
+  }
+}

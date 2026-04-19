@@ -1,0 +1,674 @@
+// AfriBayit — Prisma Schema v1.0
+// Database: PostgreSQL 16 with PostGIS extension
+
+generator client {
+  provider        = "prisma-client-js"
+  output          = "../generated/client"
+  previewFeatures = ["postgresqlExtensions", "multiSchema"]
+}
+
+datasource db {
+  provider   = "postgresql"
+  url        = env("DATABASE_URL")
+  directUrl  = env("DIRECT_URL")
+  extensions = [postgis, pg_trgm, unaccent]
+}
+
+// ─── ENUMS ───────────────────────────────────────────────────────────────────
+
+enum UserRole {
+  BUYER
+  SELLER
+  INVESTOR
+  TOURIST
+  ARTISAN
+  ADMIN
+  SUPER_ADMIN
+}
+
+enum KycLevel {
+  NONE
+  LEVEL_1
+  LEVEL_2
+  LEVEL_3
+}
+
+enum KycStatus {
+  PENDING
+  UNDER_REVIEW
+  APPROVED
+  REJECTED
+}
+
+enum PropertyType {
+  HOUSE
+  APARTMENT
+  LAND
+  COMMERCIAL
+  VILLA
+  DUPLEX
+  STUDIO
+  WAREHOUSE
+}
+
+enum PropertyStatus {
+  DRAFT
+  ACTIVE
+  SOLD
+  RENTED
+  SUSPENDED
+  ARCHIVED
+}
+
+enum PropertyPurpose {
+  SALE
+  RENT
+  SHORT_TERM_RENT
+  INVESTMENT
+}
+
+enum TransactionType {
+  PROPERTY_PURCHASE
+  PROPERTY_RENT
+  HOTEL_BOOKING
+  ARTISAN_SERVICE
+  COURSE_ENROLLMENT
+}
+
+enum TransactionStatus {
+  INITIATED
+  FUNDED
+  VALIDATED
+  RELEASED
+  COMPLETED
+  DISPUTED
+  CANCELLED
+  REFUNDED
+}
+
+enum PaymentMethod {
+  MOBILE_MONEY_FEDAPAY
+  CARD_STRIPE
+  BANK_TRANSFER
+  CASH
+}
+
+enum Country {
+  BJ
+  CI
+  BF
+  TG
+  GH
+  SN
+  CM
+  NG
+}
+
+enum Currency {
+  XOF
+  GHS
+  NGN
+  USD
+  EUR
+}
+
+enum HotelRoomType {
+  STANDARD
+  DELUXE
+  SUITE
+  PRESIDENTIAL
+}
+
+enum BookingStatus {
+  PENDING
+  CONFIRMED
+  CHECKED_IN
+  CHECKED_OUT
+  CANCELLED
+}
+
+enum CourseLevel {
+  BEGINNER
+  INTERMEDIATE
+  ADVANCED
+}
+
+enum NotificationType {
+  PROPERTY_NEW
+  PROPERTY_PRICE_DROP
+  TRANSACTION_UPDATE
+  KYC_STATUS
+  MESSAGE_NEW
+  BOOKING_CONFIRMED
+  PAYMENT_RECEIVED
+  SYSTEM
+}
+
+// ─── USERS ────────────────────────────────────────────────────────────────────
+
+model User {
+  id            String    @id @default(cuid())
+  email         String    @unique
+  emailVerified DateTime?
+  phone         String?   @unique
+  phoneVerified Boolean   @default(false)
+  passwordHash  String?
+  firstName     String
+  lastName      String
+  avatar        String?
+  bio           String?
+  role          UserRole  @default(BUYER)
+  country       Country   @default(BJ)
+  city          String?
+  kycLevel      KycLevel  @default(NONE)
+  isActive      Boolean   @default(true)
+  isBanned      Boolean   @default(false)
+  reputationScore Float   @default(0)
+  twoFactorSecret String?
+  twoFactorEnabled Boolean @default(false)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  // Relations
+  accounts        Account[]
+  sessions        Session[]
+  properties      Property[]
+  favorites       Favorite[]
+  buyerTransactions   Transaction[] @relation("BuyerTransactions")
+  sellerTransactions  Transaction[] @relation("SellerTransactions")
+  kycDocuments    KycDocument[]
+  reviews         Review[]        @relation("ReviewAuthor")
+  receivedReviews Review[]        @relation("ReviewTarget")
+  notifications   Notification[]
+  artisanProfile  Artisan?
+  enrollments     Enrollment[]
+  posts           CommunityPost[]
+  groupMemberships GroupMember[]
+  hotelBookings   HotelBooking[]
+
+  @@index([email])
+  @@index([phone])
+  @@index([country])
+  @@map("users")
+}
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? @db.Text
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+  @@map("accounts")
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("sessions")
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+  @@map("verification_tokens")
+}
+
+// ─── KYC ─────────────────────────────────────────────────────────────────────
+
+model KycDocument {
+  id          String    @id @default(cuid())
+  userId      String
+  type        String    // ID_CARD, PASSPORT, SELFIE, PROOF_OF_ADDRESS
+  fileUrl     String
+  fileKey     String    // R2 object key
+  status      KycStatus @default(PENDING)
+  level       KycLevel
+  reviewNote  String?
+  reviewedAt  DateTime?
+  reviewedBy  String?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, status])
+  @@map("kyc_documents")
+}
+
+// ─── PROPERTIES ───────────────────────────────────────────────────────────────
+
+model Property {
+  id              String          @id @default(cuid())
+  slug            String          @unique
+  title           String
+  description     String          @db.Text
+  type            PropertyType
+  purpose         PropertyPurpose
+  status          PropertyStatus  @default(DRAFT)
+  price           Decimal         @db.Decimal(15, 2)
+  currency        Currency        @default(XOF)
+  priceNegotiable Boolean         @default(false)
+  surface         Float?          // m²
+  rooms           Int?
+  bedrooms        Int?
+  bathrooms       Int?
+  floor           Int?
+  totalFloors     Int?
+  yearBuilt       Int?
+  country         Country
+  city            String
+  district        String?
+  address         String?
+  latitude        Float?
+  longitude       Float?
+  // PostGIS point stored as JSON for Prisma compatibility
+  features        Json?           // Array of amenities
+  isVerified      Boolean         @default(false)
+  isFeatured      Boolean         @default(false)
+  viewCount       Int             @default(0)
+  ownerId         String
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
+  publishedAt     DateTime?
+
+  owner           User            @relation(fields: [ownerId], references: [id])
+  images          PropertyImage[]
+  virtualTours    VirtualTour[]
+  favorites       Favorite[]
+  transactions    Transaction[]
+  reviews         Review[]
+
+  @@index([country, city, status])
+  @@index([ownerId])
+  @@index([purpose, status])
+  @@index([price])
+  @@map("properties")
+}
+
+model PropertyImage {
+  id         String   @id @default(cuid())
+  propertyId String
+  url        String
+  fileKey    String
+  alt        String?
+  isPrimary  Boolean  @default(false)
+  order      Int      @default(0)
+  createdAt  DateTime @default(now())
+
+  property Property @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+
+  @@index([propertyId])
+  @@map("property_images")
+}
+
+model VirtualTour {
+  id         String   @id @default(cuid())
+  propertyId String
+  title      String
+  url        String
+  type       String   // MATTERPORT, YOUTUBE_360, IFRAME
+  createdAt  DateTime @default(now())
+
+  property Property @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+
+  @@map("virtual_tours")
+}
+
+model Favorite {
+  id         String   @id @default(cuid())
+  userId     String
+  propertyId String
+  createdAt  DateTime @default(now())
+
+  user     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  property Property @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, propertyId])
+  @@map("favorites")
+}
+
+// ─── HOTELS ───────────────────────────────────────────────────────────────────
+
+model Hotel {
+  id          String   @id @default(cuid())
+  name        String
+  slug        String   @unique
+  description String   @db.Text
+  starRating  Int      @db.SmallInt
+  country     Country
+  city        String
+  address     String
+  latitude    Float?
+  longitude   Float?
+  amenities   Json?
+  images      Json?    // Array of image URLs
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  rooms    HotelRoom[]
+  bookings HotelBooking[]
+
+  @@index([country, city])
+  @@map("hotels")
+}
+
+model HotelRoom {
+  id            String        @id @default(cuid())
+  hotelId       String
+  type          HotelRoomType
+  name          String
+  description   String?
+  pricePerNight Decimal       @db.Decimal(12, 2)
+  currency      Currency      @default(XOF)
+  capacity      Int
+  images        Json?
+  amenities     Json?
+  isAvailable   Boolean       @default(true)
+
+  hotel    Hotel         @relation(fields: [hotelId], references: [id], onDelete: Cascade)
+  bookings HotelBooking[]
+
+  @@index([hotelId])
+  @@map("hotel_rooms")
+}
+
+model HotelBooking {
+  id          String        @id @default(cuid())
+  userId      String
+  hotelId     String
+  roomId      String
+  checkIn     DateTime
+  checkOut    DateTime
+  guests      Int
+  totalPrice  Decimal       @db.Decimal(12, 2)
+  currency    Currency      @default(XOF)
+  status      BookingStatus @default(PENDING)
+  notes       String?
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+
+  user  User      @relation(fields: [userId], references: [id])
+  hotel Hotel     @relation(fields: [hotelId], references: [id])
+  room  HotelRoom @relation(fields: [roomId], references: [id])
+  transaction Transaction?
+
+  @@index([userId])
+  @@index([hotelId, checkIn, checkOut])
+  @@map("hotel_bookings")
+}
+
+// ─── ARTISANS ─────────────────────────────────────────────────────────────────
+
+model Artisan {
+  id           String   @id @default(cuid())
+  userId       String   @unique
+  businessName String
+  profession   String
+  description  String   @db.Text
+  country      Country
+  city         String
+  portfolio    Json?    // Array of portfolio images
+  certifications Json?
+  isVerified   Boolean  @default(false)
+  rating       Float    @default(0)
+  reviewCount  Int      @default(0)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  user     User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  services ArtisanService[]
+
+  @@map("artisans")
+}
+
+model ArtisanService {
+  id          String   @id @default(cuid())
+  artisanId   String
+  name        String
+  description String?
+  price       Decimal? @db.Decimal(12, 2)
+  priceUnit   String?  // HOUR, DAY, PROJECT, SQMETER
+  currency    Currency @default(XOF)
+  isActive    Boolean  @default(true)
+
+  artisan      Artisan       @relation(fields: [artisanId], references: [id], onDelete: Cascade)
+  transactions Transaction[]
+
+  @@map("artisan_services")
+}
+
+// ─── TRANSACTIONS & ESCROW ────────────────────────────────────────────────────
+
+model Transaction {
+  id               String            @id @default(cuid())
+  reference        String            @unique @default(cuid())
+  type             TransactionType
+  status           TransactionStatus @default(INITIATED)
+  amount           Decimal           @db.Decimal(15, 2)
+  currency         Currency          @default(XOF)
+  paymentMethod    PaymentMethod?
+  buyerId          String
+  sellerId         String
+  propertyId       String?
+  hotelBookingId   String?           @unique
+  artisanServiceId String?
+  courseId         String?
+  metadata         Json?
+  notes            String?           @db.Text
+  createdAt        DateTime          @default(now())
+  updatedAt        DateTime          @updatedAt
+  completedAt      DateTime?
+  disputedAt       DateTime?
+
+  buyer          User            @relation("BuyerTransactions", fields: [buyerId], references: [id])
+  seller         User            @relation("SellerTransactions", fields: [sellerId], references: [id])
+  property       Property?       @relation(fields: [propertyId], references: [id])
+  hotelBooking   HotelBooking?   @relation(fields: [hotelBookingId], references: [id])
+  artisanService ArtisanService? @relation(fields: [artisanServiceId], references: [id])
+  escrowAccount  EscrowAccount?
+  ledgerEntries  LedgerEntry[]
+  payments       Payment[]
+
+  @@index([buyerId])
+  @@index([sellerId])
+  @@index([status])
+  @@map("transactions")
+}
+
+model EscrowAccount {
+  id              String   @id @default(cuid())
+  transactionId   String   @unique
+  balance         Decimal  @db.Decimal(15, 2) @default(0)
+  currency        Currency @default(XOF)
+  lockedAt        DateTime?
+  releasedAt      DateTime?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  transaction Transaction @relation(fields: [transactionId], references: [id])
+
+  @@map("escrow_accounts")
+}
+
+model LedgerEntry {
+  id            String   @id @default(cuid())
+  transactionId String
+  type          String   // CREDIT, DEBIT, FEE, REFUND
+  amount        Decimal  @db.Decimal(15, 2)
+  currency      Currency @default(XOF)
+  description   String
+  balanceBefore Decimal  @db.Decimal(15, 2)
+  balanceAfter  Decimal  @db.Decimal(15, 2)
+  metadata      Json?
+  createdAt     DateTime @default(now())
+
+  transaction Transaction @relation(fields: [transactionId], references: [id])
+
+  @@index([transactionId])
+  @@map("ledger_entries")
+}
+
+model Payment {
+  id              String        @id @default(cuid())
+  transactionId   String
+  method          PaymentMethod
+  amount          Decimal       @db.Decimal(15, 2)
+  currency        Currency      @default(XOF)
+  providerRef     String?       // FedaPay or Stripe payment ID
+  providerStatus  String?
+  metadata        Json?
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+
+  transaction Transaction @relation(fields: [transactionId], references: [id])
+
+  @@index([transactionId])
+  @@map("payments")
+}
+
+// ─── COURSES ──────────────────────────────────────────────────────────────────
+
+model Course {
+  id          String      @id @default(cuid())
+  title       String
+  slug        String      @unique
+  description String      @db.Text
+  level       CourseLevel
+  duration    Int?        // minutes
+  price       Decimal?    @db.Decimal(10, 2)
+  currency    Currency    @default(XOF)
+  isFree      Boolean     @default(false)
+  thumbnail   String?
+  instructorId String
+  isPublished Boolean     @default(false)
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+
+  enrollments Enrollment[]
+
+  @@map("courses")
+}
+
+model Enrollment {
+  id          String   @id @default(cuid())
+  userId      String
+  courseId    String
+  progress    Int      @default(0) // 0-100
+  completedAt DateTime?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  course Course @relation(fields: [courseId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, courseId])
+  @@map("enrollments")
+}
+
+// ─── COMMUNITY ────────────────────────────────────────────────────────────────
+
+model CommunityGroup {
+  id          String   @id @default(cuid())
+  name        String
+  description String?  @db.Text
+  country     Country?
+  isPrivate   Boolean  @default(false)
+  coverImage  String?
+  createdAt   DateTime @default(now())
+
+  members GroupMember[]
+  posts   CommunityPost[]
+
+  @@map("community_groups")
+}
+
+model GroupMember {
+  id       String @id @default(cuid())
+  userId   String
+  groupId  String
+  role     String @default("MEMBER") // MEMBER, MODERATOR, ADMIN
+  joinedAt DateTime @default(now())
+
+  user  User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  group CommunityGroup @relation(fields: [groupId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, groupId])
+  @@map("group_members")
+}
+
+model CommunityPost {
+  id        String   @id @default(cuid())
+  authorId  String
+  groupId   String?
+  content   String   @db.Text
+  images    Json?
+  likes     Int      @default(0)
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  author User            @relation(fields: [authorId], references: [id])
+  group  CommunityGroup? @relation(fields: [groupId], references: [id])
+
+  @@index([authorId])
+  @@map("community_posts")
+}
+
+// ─── REVIEWS ─────────────────────────────────────────────────────────────────
+
+model Review {
+  id         String   @id @default(cuid())
+  authorId   String
+  targetId   String
+  propertyId String?
+  rating     Int      @db.SmallInt // 1-5
+  comment    String?  @db.Text
+  isVerified Boolean  @default(false)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  author   User      @relation("ReviewAuthor", fields: [authorId], references: [id])
+  target   User      @relation("ReviewTarget", fields: [targetId], references: [id])
+  property Property? @relation(fields: [propertyId], references: [id])
+
+  @@index([targetId])
+  @@map("reviews")
+}
+
+// ─── NOTIFICATIONS ────────────────────────────────────────────────────────────
+
+model Notification {
+  id        String           @id @default(cuid())
+  userId    String
+  type      NotificationType
+  title     String
+  body      String
+  data      Json?
+  isRead    Boolean          @default(false)
+  readAt    DateTime?
+  createdAt DateTime         @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, isRead])
+  @@map("notifications")
+}
