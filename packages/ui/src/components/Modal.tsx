@@ -8,11 +8,11 @@ import { cn } from '../lib/cn';
 interface ModalProps {
   isOpen: boolean;
   onClose: () => void;
-  title?: string;
-  description?: string;
+  title?: string | undefined;
+  description?: string | undefined;
   children: React.ReactNode;
-  size?: 'sm' | 'md' | 'lg' | 'xl' | 'full';
-  className?: string;
+  size?: 'sm' | 'md' | 'lg' | 'xl' | 'full' | undefined;
+  className?: string | undefined;
 }
 
 const sizeClasses = {

@@ -4,9 +4,9 @@ import * as React from 'react';
 import { cn } from '../lib/cn';
 
 export interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {
-  label?: string;
-  error?: string;
-  hint?: string;
+  label?: string | undefined;
+  error?: string | undefined;
+  hint?: string | undefined;
   /** Icon placed at the left inside the input */
   leftIcon?: React.ReactNode;
   /** Icon or element placed at the right inside the input */
