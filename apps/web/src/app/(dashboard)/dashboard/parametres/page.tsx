@@ -3,7 +3,7 @@ import type React from 'react';
 
 import { useState } from 'react';
 import { Bell, Shield, Globe, Smartphone, Trash2, Eye, EyeOff } from 'lucide-react';
-import { Button, Input, cn } from '@afribayit/ui';
+import { Button, Input, Badge, cn } from '@afribayit/ui';
 import toast from 'react-hot-toast';
 
 const SECTIONS = [
