@@ -5,6 +5,7 @@
   "installCommand": "npm install",
   "framework": "nextjs",
   "outputDirectory": "apps/web/.next",
+  "regions": ["cdg1"],
   "ignoreCommand": "npx turbo-ignore @afribayit/web",
   "rewrites": [
     {

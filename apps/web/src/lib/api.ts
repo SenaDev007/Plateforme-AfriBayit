@@ -53,23 +53,9 @@ async function request<T>(
 export const api = {
   auth: {
     login: (body: { email: string; password: string; totpCode?: string }) =>
-      request<{ accessToken: string; refreshToken: string; user: unknown }>('/auth/login', {
-        method: 'POST',
-        body,
-      }),
-    register: (body: {
-      email: string;
-      password: string;
-      firstName: string;
-      lastName: string;
-      phone?: string;
-      role?: string;
-      country?: string;
-    }) =>
-      request<{ accessToken: string; refreshToken: string; user: unknown }>('/auth/register', {
-        method: 'POST',
-        body,
-      }),
+      request<{ accessToken: string; refreshToken: string; user: unknown }>('/auth/login', { method: 'POST', body }),
+    register: (body: { email: string; password: string; firstName: string; lastName: string; phone?: string; role?: string; country?: string }) =>
+      request<{ accessToken: string; refreshToken: string; user: unknown }>('/auth/register', { method: 'POST', body }),
     me: (token: string) =>
       request<unknown>('/auth/me', { token }),
   },
@@ -111,10 +97,7 @@ export const api = {
     getFavorites: (token: string) =>
       request<unknown[]>('/users/me/favorites', { token }),
     toggleFavorite: (propertyId: string, token: string) =>
-      request<{ favorited: boolean }>(`/users/me/favorites/${propertyId}`, {
-        method: 'POST',
-        token,
-      }),
+      request<{ favorited: boolean }>(`/users/me/favorites/${propertyId}`, { method: 'POST', token }),
   },
 
   notifications: {
@@ -129,6 +112,68 @@ export const api = {
   search: {
     query: (params: URLSearchParams) =>
       request<{ hits: unknown[]; total: number }>(`/search?${params.toString()}`),
+  },
+
+  hotels: {
+    search: (params: URLSearchParams) =>
+      request<{ data: unknown[]; total: number }>(`/hotels?${params.toString()}`),
+    findBySlug: (slug: string) =>
+      request<unknown>(`/hotels/${slug}`),
+    checkAvailability: (id: string, checkin: string, checkout: string) =>
+      request<unknown[]>(`/hotels/${id}/availability?checkin=${checkin}&checkout=${checkout}`),
+    book: (id: string, body: { roomId: string; checkin: string; checkout: string; guestCount: number }, token: string) =>
+      request<unknown>(`/hotels/${id}/book`, { method: 'POST', body, token }),
+    create: (body: unknown, token: string) =>
+      request<unknown>('/hotels', { method: 'POST', body, token }),
+  },
+
+  artisans: {
+    search: (params: URLSearchParams) =>
+      request<{ data: unknown[]; total: number }>(`/artisans?${params.toString()}`),
+    findBySlug: (slug: string) =>
+      request<unknown>(`/artisans/${slug}`),
+    createProfile: (body: unknown, token: string) =>
+      request<unknown>('/artisans', { method: 'POST', body, token }),
+    addReview: (body: { artisanId: string; rating: number; comment: string }, token: string) =>
+      request<unknown>('/artisans/reviews', { method: 'POST', body, token }),
+    toggleAvailability: (id: string, token: string) =>
+      request<unknown>(`/artisans/${id}/availability`, { method: 'PATCH', token }),
+  },
+
+  courses: {
+    findAll: (params?: URLSearchParams) =>
+      request<{ data: unknown[]; total: number }>(`/courses${params ? `?${params.toString()}` : ''}`),
+    findBySlug: (slug: string) =>
+      request<unknown>(`/courses/${slug}`),
+    enroll: (id: string, token: string) =>
+      request<unknown>(`/courses/${id}/enroll`, { method: 'POST', token }),
+    getMyEnrollments: (token: string) =>
+      request<unknown[]>('/courses/me/enrollments', { token }),
+    updateProgress: (enrollmentId: string, progress: number, token: string) =>
+      request<unknown>(`/courses/enrollments/${enrollmentId}/progress`, { method: 'PATCH', body: { progress }, token }),
+    create: (body: unknown, token: string) =>
+      request<unknown>('/courses', { method: 'POST', body, token }),
+  },
+
+  community: {
+    getPosts: (params?: URLSearchParams) =>
+      request<{ data: unknown[]; total: number }>(`/community/posts${params ? `?${params.toString()}` : ''}`),
+    getPost: (slug: string) =>
+      request<unknown>(`/community/posts/${slug}`),
+    createPost: (body: { title: string; content: string; category: string; tags?: string[] }, token: string) =>
+      request<unknown>('/community/posts', { method: 'POST', body, token }),
+    toggleLike: (id: string, token: string) =>
+      request<{ liked: boolean }>(`/community/posts/${id}/like`, { method: 'POST', token }),
+    addComment: (id: string, content: string, token: string) =>
+      request<unknown>(`/community/posts/${id}/comments`, { method: 'POST', body: { content }, token }),
+    getGroups: (category?: string) =>
+      request<unknown[]>(`/community/groups${category ? `?category=${category}` : ''}`),
+    createGroup: (body: { name: string; description: string; category: string }, token: string) =>
+      request<unknown>('/community/groups', { method: 'POST', body, token }),
+    joinGroup: (id: string, token: string) =>
+      request<unknown>(`/community/groups/${id}/join`, { method: 'POST', token }),
+    leaveGroup: (id: string, token: string) =>
+      request<unknown>(`/community/groups/${id}/leave`, { method: 'DELETE', token }),
   },
 } as const;
 

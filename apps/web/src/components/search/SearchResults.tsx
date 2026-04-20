@@ -3,8 +3,8 @@ import Link from 'next/link';
 import { LayoutGrid, List, Map } from 'lucide-react';
 import { PropertyCard } from '@afribayit/ui';
 import type { PropertyCardData } from '@afribayit/ui';
+import { MapView } from './MapView';
 
-// Mock data — replace with real API fetch
 const MOCK_RESULTS: PropertyCardData[] = Array.from({ length: 9 }, (_, i) => ({
   id: String(i + 1),
   slug: `propriete-${i + 1}`,
@@ -23,16 +23,25 @@ const MOCK_RESULTS: PropertyCardData[] = Array.from({ length: 9 }, (_, i) => ({
   isFeatured: i % 4 === 0,
 }));
 
+const MAP_PROPERTIES = MOCK_RESULTS.map((p, i) => ({
+  id: p.id,
+  slug: p.slug,
+  title: p.title,
+  price: p.price,
+  currency: p.currency,
+  latitude: 6.3654 + (i * 0.02 - 0.04),
+  longitude: 2.4183 + (i * 0.015 - 0.03),
+  type: p.type ?? 'HOUSE',
+  purpose: p.purpose ?? 'SALE',
+}));
+
 interface SearchResultsProps {
   searchParams: Record<string, string | undefined>;
 }
 
 export async function SearchResults({ searchParams }: SearchResultsProps): Promise<React.ReactElement> {
-  // TODO: Replace with real API call
-  // const { data, total } = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/properties?${new URLSearchParams(searchParams)}`).then(r => r.json());
   const results = MOCK_RESULTS;
   const total = results.length;
-
   const view = searchParams['vue'] ?? 'grille';
 
   return (
@@ -42,8 +51,6 @@ export async function SearchResults({ searchParams }: SearchResultsProps): Promi
         <p className="text-sm text-charcoal-400">
           <span className="font-semibold text-charcoal">{total}</span> propriétés trouvées
         </p>
-
-        {/* View toggle */}
         <div className="flex items-center gap-1 rounded-lg border border-charcoal-100 p-1">
           {[
             { value: 'grille', Icon: LayoutGrid, label: 'Vue grille' },
@@ -65,27 +72,28 @@ export async function SearchResults({ searchParams }: SearchResultsProps): Promi
         </div>
       </div>
 
-      {/* Results grid */}
-      {results.length > 0 ? (
-        <div
-          className={
-            view === 'liste'
-              ? 'flex flex-col gap-4'
-              : 'grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-5'
-          }
-        >
-          {results.map((property) => (
-            <Link key={property.id} href={`/proprietes/${property.slug}`} className="block">
-              <PropertyCard property={property} />
-            </Link>
-          ))}
-        </div>
-      ) : (
-        <div className="flex flex-col items-center justify-center py-20 gap-4">
-          <span className="text-5xl" aria-hidden="true">🏘️</span>
-          <p className="text-lg font-semibold text-charcoal">Aucune propriété trouvée</p>
-          <p className="text-sm text-charcoal-400">Modifiez vos critères de recherche.</p>
-        </div>
+      {/* Map view */}
+      {view === 'carte' && (
+        <MapView properties={MAP_PROPERTIES} className="h-[600px]" />
+      )}
+
+      {/* Grid / List view */}
+      {view !== 'carte' && (
+        results.length > 0 ? (
+          <div className={view === 'liste' ? 'flex flex-col gap-4' : 'grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-5'}>
+            {results.map((property) => (
+              <Link key={property.id} href={`/proprietes/${property.slug}`} className="block">
+                <PropertyCard property={property} />
+              </Link>
+            ))}
+          </div>
+        ) : (
+          <div className="flex flex-col items-center justify-center py-20 gap-4">
+            <span className="text-5xl" aria-hidden="true">🏘️</span>
+            <p className="text-lg font-semibold text-charcoal">Aucune propriété trouvée</p>
+            <p className="text-sm text-charcoal-400">Modifiez vos critères de recherche.</p>
+          </div>
+        )
       )}
     </div>
   );

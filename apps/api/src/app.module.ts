@@ -7,17 +7,19 @@ import { PropertiesModule } from './modules/properties/properties.module';
 import { TransactionsModule } from './modules/transactions/transactions.module';
 import { NotificationsModule } from './modules/notifications/notifications.module';
 import { SearchModule } from './modules/search/search.module';
+import { HotelsModule } from './modules/hotels/hotels.module';
+import { ArtisansModule } from './modules/artisans/artisans.module';
+import { CoursesModule } from './modules/courses/courses.module';
+import { CommunityModule } from './modules/community/community.module';
 import { DatabaseModule } from './database/database.module';
 
 @Module({
   imports: [
-    // Config — loads .env
     ConfigModule.forRoot({
       isGlobal: true,
       envFilePath: ['.env', '.env.local'],
     }),
 
-    // Rate limiting
     ThrottlerModule.forRootAsync({
       imports: [ConfigModule],
       inject: [ConfigService],
@@ -39,6 +41,10 @@ import { DatabaseModule } from './database/database.module';
     TransactionsModule,
     NotificationsModule,
     SearchModule,
+    HotelsModule,
+    ArtisansModule,
+    CoursesModule,
+    CommunityModule,
   ],
 })
 export class AppModule {}
