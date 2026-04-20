@@ -51,7 +51,7 @@ const MOCK_ARTISANS: Artisan[] = [
     category: 'MASON', categoryLabel: 'Maçon', categoryEmoji: '🧱',
     city: 'Ouagadougou', country: 'Burkina Faso',
     rating: 4.8, reviewCount: 112, jobsDone: 89,
-    hourlyRate: undefined, currency: 'XOF',
+    currency: 'XOF',
     bio: 'Entreprise de maçonnerie et gros œuvre. Constructions neuves, rénovations, clôtures.',
     isAvailable: false, isCertified: true,
     specialties: ['Gros œuvre', 'Rénovation', 'Clôture', 'Carrelage'],
