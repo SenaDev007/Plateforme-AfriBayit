@@ -12,9 +12,7 @@ const nextConfig: NextConfig = {
       { protocol: 'https', hostname: 'picsum.photos' },
     ],
   },
-  experimental: {
-    typedRoutes: true,
-  },
+  typedRoutes: true,
   // Required for Turbo monorepo: skip unnecessary packages from being bundled
   serverExternalPackages: ['@prisma/client', 'prisma'],
   async headers() {

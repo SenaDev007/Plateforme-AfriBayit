@@ -10,7 +10,7 @@ export const metadata: Metadata = {
     default: 'AfriBayit — Immobilier Pan-Africain',
   },
   description:
-    'La super-app immobilière de l'Afrique de l'Ouest. Achetez, vendez, louez en toute confiance avec notre système d'escrow sécurisé.',
+    "La super-app immobilière de l'Afrique de l'Ouest. Achetez, vendez, louez en toute confiance avec notre système d'escrow sécurisé.",
   keywords: ['immobilier', 'afrique', 'bénin', 'côte d\'ivoire', 'propriété', 'location', 'achat'],
   authors: [{ name: 'AfriBayit' }],
   creator: 'YEHI OR Tech',
