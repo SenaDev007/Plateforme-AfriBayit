@@ -1,8 +1,7 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "buildCommand": "npx turbo run build --filter=@afribayit/web...",
-  "devCommand": "npx turbo run dev --filter=@afribayit/web",
-  "installCommand": "npm install --workspace=apps/web --workspace=packages/ui --workspace=packages/db --workspace=packages/config --include-workspace-root",
+  "installCommand": "npm install --legacy-peer-deps",
   "framework": "nextjs",
   "outputDirectory": "apps/web/.next",
   "regions": ["cdg1"],
