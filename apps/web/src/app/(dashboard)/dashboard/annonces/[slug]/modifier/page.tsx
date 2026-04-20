@@ -9,11 +9,12 @@ export const metadata: Metadata = {
   description: "Modifiez votre propriété sur AfriBayit",
 };
 
-export default function ModifierAnnoncePage({
+export default async function ModifierAnnoncePage({
   params,
 }: {
-  params: { slug: string };
-}): React.ReactElement {
+  params: Promise<{ slug: string }>;
+}): Promise<React.ReactElement> {
+  const { slug } = await params;
   return (
     <div className="flex flex-col gap-6">
       <div className="flex items-center gap-3">
@@ -29,7 +30,7 @@ export default function ModifierAnnoncePage({
       <div>
         <h1 className="font-serif text-2xl font-bold text-charcoal">Modifier l'annonce</h1>
         <p className="text-sm text-charcoal-400 mt-0.5">
-          Réf. <span className="font-mono text-charcoal">{params.slug}</span>
+          Réf. <span className="font-mono text-charcoal">{slug}</span>
         </p>
       </div>
 

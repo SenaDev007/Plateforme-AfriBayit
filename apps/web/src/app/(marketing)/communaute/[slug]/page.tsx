@@ -55,11 +55,12 @@ const MOCK_COMMENTS = [
   },
 ];
 
-export default function CommunautePostPage({
+export default async function CommunautePostPage({
   params,
 }: {
-  params: { slug: string };
-}): React.ReactElement {
+  params: Promise<{ slug: string }>;
+}): Promise<React.ReactElement> {
+  await params;
   const post = MOCK_POST;
 
   return (
