@@ -42,14 +42,14 @@ const MOCK_COMMENTS = [
   {
     id: '1',
     author: { name: 'Serge T.', avatar: 'ST', city: 'Lomé' },
-    content: 'Merci pour ce partage ! J'ai vécu exactement la même chose à Lomé l'année dernière.',
+    content: "Merci pour ce partage ! J'ai vécu exactement la même chose à Lomé l'année dernière.",
     likes: 42,
     createdAt: '2026-04-16',
   },
   {
     id: '2',
     author: { name: 'Fatou D.', avatar: 'FD', city: 'Abidjan' },
-    content: 'Le point sur l'escrow AfriBayit est crucial. J'ai utilisé ce service pour mon dernier achat et ça m'a sauvé.',
+    content: "Le point sur l'escrow AfriBayit est crucial. J'ai utilisé ce service pour mon dernier achat et ça m'a sauvé.",
     likes: 31,
     createdAt: '2026-04-17',
   },

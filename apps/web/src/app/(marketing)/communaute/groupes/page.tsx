@@ -6,21 +6,21 @@ import { Badge, Button } from '@afribayit/ui';
 
 export const metadata: Metadata = {
   title: 'Groupes — Communauté AfriBayit',
-  description: 'Rejoignez des groupes thématiques sur l'immobilier en Afrique de l'Ouest.',
+  description: "Rejoignez des groupes thématiques sur l'immobilier en Afrique de l'Ouest.",
 };
 
 const GROUPS = [
   {
     id: '1', name: 'Investisseurs Bénin', emoji: '🇧🇯', memberCount: 1240,
-    category: 'Investissement', description: 'Opportunités d'investissement immobilier au Bénin.',
+    category: 'Investissement', description: "Opportunités d'investissement immobilier au Bénin.",
   },
   {
     id: '2', name: 'Primo-accédants CI', emoji: '🇨🇮', memberCount: 890,
-    category: 'Achat', description: 'Conseils pour les primo-accédants en Côte d'Ivoire.',
+    category: 'Achat', description: "Conseils pour les primo-accédants en Côte d'Ivoire.",
   },
   {
     id: '3', name: 'Agents immobiliers West Africa', emoji: '🏢', memberCount: 2100,
-    category: 'Professionnel', description: 'Réseau des professionnels de l'immobilier en Afrique de l'Ouest.',
+    category: 'Professionnel', description: "Réseau des professionnels de l'immobilier en Afrique de l'Ouest.",
   },
   {
     id: '4', name: 'Location Lomé', emoji: '🇹🇬', memberCount: 430,

@@ -5,8 +5,8 @@ import { ChevronLeft } from 'lucide-react';
 import { PublishPropertyForm } from '@/components/property/PublishPropertyForm';
 
 export const metadata: Metadata = {
-  title: 'Modifier l'annonce',
-  description: 'Modifiez votre propriété sur AfriBayit',
+  title: "Modifier l'annonce",
+  description: "Modifiez votre propriété sur AfriBayit",
 };
 
 export default function ModifierAnnoncePage({
