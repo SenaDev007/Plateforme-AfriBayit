@@ -1,4 +1,5 @@
 import type React from 'react';
+import type { Route } from 'next';
 import Link from 'next/link';
 import { Star, MapPin, CheckCircle2, Clock, Phone } from 'lucide-react';
 import { Badge } from '@afribayit/ui';
@@ -143,7 +144,7 @@ function ArtisanCard({ artisan }: { artisan: Artisan }): React.ReactElement {
       </div>
 
       <div className="flex gap-2 pt-1 border-t border-charcoal-50">
-        <Link href={`/artisans/${artisan.slug}`} className="flex-1">
+        <Link href={`/artisans/${artisan.slug}` as Route} className="flex-1">
           <button className="w-full rounded-lg border border-navy text-navy text-sm font-medium py-2 hover:bg-navy/5 transition-colors">
             Voir le profil
           </button>

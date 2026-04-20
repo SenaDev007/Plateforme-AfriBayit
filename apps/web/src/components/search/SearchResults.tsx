@@ -1,4 +1,5 @@
 import type React from 'react';
+import type { Route } from 'next';
 import Link from 'next/link';
 import { LayoutGrid, List, Map } from 'lucide-react';
 import { PropertyCard } from '@afribayit/ui';
@@ -59,7 +60,7 @@ export async function SearchResults({ searchParams }: SearchResultsProps): Promi
           ].map(({ value, Icon, label }) => (
             <Link
               key={value}
-              href={`/recherche?${new URLSearchParams({ ...searchParams, vue: value } as Record<string, string>).toString()}`}
+              href={`/recherche?${new URLSearchParams({ ...searchParams, vue: value } as Record<string, string>).toString()}` as Route}
               className={`flex items-center justify-center rounded-md p-2 transition-colors ${
                 view === value ? 'bg-navy text-white' : 'text-charcoal-400 hover:bg-charcoal-50'
               }`}
@@ -82,7 +83,7 @@ export async function SearchResults({ searchParams }: SearchResultsProps): Promi
         results.length > 0 ? (
           <div className={view === 'liste' ? 'flex flex-col gap-4' : 'grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-5'}>
             {results.map((property) => (
-              <Link key={property.id} href={`/proprietes/${property.slug}`} className="block">
+              <Link key={property.id} href={`/proprietes/${property.slug}` as Route} className="block">
                 <PropertyCard property={property} />
               </Link>
             ))}

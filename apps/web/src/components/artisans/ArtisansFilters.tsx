@@ -1,5 +1,6 @@
 'use client';
 import type React from 'react';
+import type { Route } from 'next';
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
@@ -43,7 +44,7 @@ export function ArtisansFilters({ initialParams }: ArtisansFiltersProps): React.
   const applyFilters = (): void => {
     const params = new URLSearchParams();
     Object.entries(filters).forEach(([k, v]) => { if (v) params.set(k, v); });
-    router.push(`/artisans?${params.toString()}`);
+    router.push(`/artisans?${params.toString()}` as Route);
   };
 
   const resetFilters = (): void => {

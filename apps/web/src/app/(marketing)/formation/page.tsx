@@ -1,5 +1,6 @@
 import type React from 'react';
-import type { Metadata } from 'react';
+import type { Metadata } from 'next';
+import type { Route } from 'next';
 import Link from 'next/link';
 import { BookOpen, Clock, Users, Star, Play, Award } from 'lucide-react';
 import { Badge, Button } from '@afribayit/ui';
@@ -149,7 +150,7 @@ function CourseCard({ course }: { course: Course }): React.ReactElement {
           ) : (
             <p className="font-mono font-bold text-navy">{course.price.toLocaleString('fr-FR')} <span className="text-sm font-normal text-charcoal-400">FCFA</span></p>
           )}
-          <Link href={`/formation/${course.slug}`}>
+          <Link href={`/formation/${course.slug}` as Route}>
             <Button size="sm">{course.isFree ? 'Commencer' : 'S\'inscrire'}</Button>
           </Link>
         </div>

@@ -1,4 +1,5 @@
 import type React from 'react';
+import type { Route } from 'next';
 import Link from 'next/link';
 import { ArrowRight } from 'lucide-react';
 import { PropertyCard, PropertyCardSkeleton } from '@afribayit/ui';
@@ -135,7 +136,7 @@ export async function RecentListings(): Promise<React.ReactElement> {
         {/* Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
           {listings.map((property) => (
-            <Link key={property.id} href={`/proprietes/${property.slug}`} className="block">
+            <Link key={property.id} href={`/proprietes/${property.slug}` as Route} className="block">
               <PropertyCard property={property} />
             </Link>
           ))}

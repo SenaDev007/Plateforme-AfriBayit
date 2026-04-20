@@ -1,5 +1,6 @@
 import type React from 'react';
 import type { Metadata } from 'next';
+import type { Route } from 'next';
 import Link from 'next/link';
 import { MessageSquare, Users, TrendingUp, Pin, ThumbsUp, Eye, Plus } from 'lucide-react';
 import { Badge, Button } from '@afribayit/ui';
@@ -105,7 +106,7 @@ function PostCard({ post }: { post: Post }): React.ReactElement {
             )}
           </div>
 
-          <Link href={`/communaute/${post.slug}`} className="block group">
+          <Link href={`/communaute/${post.slug}` as Route} className="block group">
             <h3 className="font-semibold text-charcoal leading-snug group-hover:text-navy transition-colors mb-1.5">
               {post.title}
             </h3>

@@ -1,5 +1,6 @@
 'use client';
 import type React from 'react';
+import type { Route } from 'next';
 
 import { useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
@@ -54,7 +55,7 @@ export function SearchFilters({ initialParams }: SearchFiltersProps): React.Reac
     Object.entries(filters).forEach(([k, v]) => {
       if (v) params.set(k, v);
     });
-    router.push(`/recherche?${params.toString()}`);
+    router.push(`/recherche?${params.toString()}` as Route);
   };
 
   const resetFilters = (): void => {

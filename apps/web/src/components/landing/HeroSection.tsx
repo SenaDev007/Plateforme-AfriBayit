@@ -1,5 +1,6 @@
 'use client';
 import type React from 'react';
+import type { Route } from 'next';
 
 import { motion } from 'framer-motion';
 import { useRouter } from 'next/navigation';
@@ -68,7 +69,7 @@ export function HeroSection(): React.ReactElement {
     if (params.city) searchParams.set('ville', params.city);
     if (params.purpose) searchParams.set('but', params.purpose);
     if (params.type) searchParams.set('type', params.type);
-    router.push(`/recherche?${searchParams.toString()}`);
+    router.push(`/recherche?${searchParams.toString()}` as Route);
   };
 
   return (

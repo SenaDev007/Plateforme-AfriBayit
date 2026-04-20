@@ -1,5 +1,6 @@
 'use client';
 import type React from 'react';
+import type { Route } from 'next';
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
@@ -38,7 +39,7 @@ export function HotelsFilters({ initialParams }: HotelsFiltersProps): React.Reac
     const params = new URLSearchParams();
     Object.entries(filters).forEach(([k, v]) => { if (v) params.set(k, v); });
     if (selectedAmenities.length) params.set('amenities', selectedAmenities.join(','));
-    router.push(`/hotels?${params.toString()}`);
+    router.push(`/hotels?${params.toString()}` as Route);
   };
 
   const resetFilters = (): void => {

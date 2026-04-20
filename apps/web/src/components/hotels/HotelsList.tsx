@@ -1,4 +1,5 @@
 import type React from 'react';
+import type { Route } from 'next';
 import Link from 'next/link';
 import { Star, MapPin, Wifi, Car, Waves, CheckCircle2 } from 'lucide-react';
 import { Badge } from '@afribayit/ui';
@@ -63,7 +64,7 @@ function StarRating({ rating, reviewCount }: { rating: number; reviewCount: numb
 
 function HotelCard({ hotel }: { hotel: Hotel }): React.ReactElement {
   return (
-    <Link href={`/hotels/${hotel.slug}`} className="group block bg-white rounded-xl border border-charcoal-100 overflow-hidden hover:shadow-lg transition-all hover:-translate-y-1 duration-300">
+    <Link href={`/hotels/${hotel.slug}` as Route} className="group block bg-white rounded-xl border border-charcoal-100 overflow-hidden hover:shadow-lg transition-all hover:-translate-y-1 duration-300">
       <div className="relative h-48 overflow-hidden">
         <img src={hotel.imageUrl} alt={hotel.name} className="h-full w-full object-cover group-hover:scale-105 transition-transform duration-500" />
         {hotel.isFeatured && (

@@ -1,5 +1,6 @@
 'use client';
 import type React from 'react';
+import type { Route } from 'next';
 
 import { useState } from 'react';
 import Link from 'next/link';
@@ -157,14 +158,14 @@ function AnnonceCard({ annonce, onDelete }: { annonce: Annonce; onDelete: (id: s
                 >
                   {annonce.status === 'PUBLISHED' && (
                     <Link
-                      href={`/proprietes/${annonce.slug}`}
+                      href={`/proprietes/${annonce.slug}` as Route}
                       className="flex items-center gap-2 px-3 py-2 text-sm text-charcoal hover:bg-charcoal-50"
                     >
                       <Eye className="h-4 w-4" /> Voir l'annonce
                     </Link>
                   )}
                   <Link
-                    href={`/dashboard/annonces/${annonce.slug}/modifier`}
+                    href={`/dashboard/annonces/${annonce.slug}/modifier` as Route}
                     className="flex items-center gap-2 px-3 py-2 text-sm text-charcoal hover:bg-charcoal-50"
                   >
                     <Pencil className="h-4 w-4" /> Modifier
@@ -198,7 +199,7 @@ function AnnonceCard({ annonce, onDelete }: { annonce: Annonce; onDelete: (id: s
 
         {/* Actions */}
         <div className="flex gap-2 pt-1">
-          <Link href={`/dashboard/annonces/${annonce.slug}/modifier`}>
+          <Link href={`/dashboard/annonces/${annonce.slug}/modifier` as Route}>
             <Button variant="ghost" size="sm" className="gap-1.5">
               <Pencil className="h-3.5 w-3.5" aria-hidden="true" /> Modifier
             </Button>
