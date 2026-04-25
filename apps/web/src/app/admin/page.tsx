@@ -1,6 +1,7 @@
 'use client';
 
 import type React from 'react';
+import type { Route } from 'next';
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useSession } from 'next-auth/react';
@@ -41,14 +42,14 @@ export default function AdminHomePage(): React.ReactElement {
       value: loading ? '…' : stats.totalUsers.toLocaleString('fr-FR'),
       icon: Users,
       color: 'bg-blue-50 text-blue-600',
-      href: '/admin/users',
+      href: '/admin/users' as Route,
     },
     {
       label: 'KYC en attente',
       value: loading ? '…' : stats.pendingKyc.toLocaleString('fr-FR'),
       icon: ShieldCheck,
       color: stats.pendingKyc > 0 ? 'bg-amber-50 text-amber-600' : 'bg-emerald-50 text-emerald-600',
-      href: '/admin/kyc',
+      href: '/admin/kyc' as Route,
       alert: stats.pendingKyc > 0,
     },
   ];
@@ -56,19 +57,19 @@ export default function AdminHomePage(): React.ReactElement {
   const QUICK_LINKS = [
     {
       label: 'Réviser les KYC en attente',
-      href: '/admin/kyc',
+      href: '/admin/kyc' as Route,
       icon: FileCheck,
       desc: "Approuver ou rejeter les documents d'identité soumis.",
     },
     {
       label: 'Gérer les utilisateurs',
-      href: '/admin/users',
+      href: '/admin/users' as Route,
       icon: Users,
       desc: 'Modifier les rôles, bannir ou réactiver des comptes.',
     },
     {
       label: 'Statistiques avancées',
-      href: '/admin/stats',
+      href: '/admin/stats' as Route,
       icon: BarChart3,
       desc: 'Analyser les métriques clés de la plateforme.',
     },

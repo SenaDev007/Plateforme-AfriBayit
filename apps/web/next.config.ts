@@ -44,6 +44,7 @@ const pwaConfig = withPWA({
 
 const baseConfig: NextConfig = {
   transpilePackages: ['@afribayit/ui', '@afribayit/db'],
+  typedRoutes: true,
   images: {
     remotePatterns: [
       { protocol: 'https', hostname: 'media.afribayit.com' },
@@ -53,9 +54,6 @@ const baseConfig: NextConfig = {
       { protocol: 'https', hostname: 'images.unsplash.com' },
       { protocol: 'https', hostname: 'picsum.photos' },
     ],
-  },
-  experimental: {
-    typedRoutes: true,
   },
   serverExternalPackages: ['@prisma/client', 'prisma'],
   async headers() {

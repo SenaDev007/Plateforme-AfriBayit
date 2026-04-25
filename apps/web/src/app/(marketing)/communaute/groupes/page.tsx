@@ -110,7 +110,7 @@ export default async function GroupesPage(): Promise<React.ReactElement> {
             </p>
           </div>
           <Link
-            href="/communaute/groupes/nouveau"
+            href={'/communaute/groupes/nouveau' as import('next').Route}
             className="bg-navy hover:bg-navy/90 inline-flex items-center gap-1.5 rounded-lg px-4 py-2 text-sm font-medium text-white transition-colors"
           >
             + Créer un groupe

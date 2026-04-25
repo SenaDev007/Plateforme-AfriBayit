@@ -1,15 +1,16 @@
 'use client';
 
+import type { Route } from 'next';
 import Link from 'next/link';
 import { Users, ShieldCheck, LayoutDashboard, Settings } from 'lucide-react';
 import { usePathname } from 'next/navigation';
 import { cn } from '@/lib/utils';
 
-const NAV_ITEMS = [
+const NAV_ITEMS: { label: string; href: Route; icon: React.ElementType }[] = [
   { label: 'Tableau de bord', href: '/admin', icon: LayoutDashboard },
   { label: 'Vérification KYC', href: '/admin/kyc', icon: ShieldCheck },
   { label: 'Utilisateurs', href: '/admin/users', icon: Users },
-  { label: 'Paramètres', href: '/admin/settings', icon: Settings },
+  { label: 'Paramètres', href: '/admin/settings' as Route, icon: Settings },
 ];
 
 export function AdminSidebar() {
