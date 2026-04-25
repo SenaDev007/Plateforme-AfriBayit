@@ -1,7 +1,8 @@
-import { Injectable, Inject } from '@nestjs/common';
+import { Injectable, Inject, Optional } from '@nestjs/common';
 import type { PrismaClient, NotificationType } from '@afribayit/db';
 import { EmailService } from './channels/email.service';
 import { SmsService } from './channels/sms.service';
+import { NotificationsGateway } from '../../gateways/notifications.gateway';
 
 interface CreateNotificationDto {
   userId: string;
@@ -21,11 +22,12 @@ export class NotificationsService {
     @Inject('PRISMA') private readonly prisma: PrismaClient,
     private readonly emailService: EmailService,
     private readonly smsService: SmsService,
+    @Optional() private readonly gateway?: NotificationsGateway,
   ) {}
 
-  /** Create in-app notification + optionally send email/SMS */
+  /** Create in-app notification + optionally send email/SMS + push via WebSocket */
   async create(dto: CreateNotificationDto): Promise<void> {
-    await this.prisma.notification.create({
+    const saved = await this.prisma.notification.create({
       data: {
         userId: dto.userId,
         type: dto.type,
@@ -40,6 +42,14 @@ export class NotificationsService {
             }
           : {}),
       },
+    });
+
+    this.gateway?.sendToUser(dto.userId, 'notification', {
+      id: saved.id,
+      type: saved.type,
+      title: saved.title,
+      body: saved.body,
+      createdAt: saved.createdAt.toISOString(),
     });
 
     if (dto.sendEmail && dto.email) {

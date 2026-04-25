@@ -20,13 +20,14 @@ import {
 } from 'lucide-react';
 import { cn } from '@afribayit/ui';
 import { Badge } from '@afribayit/ui';
+import { useNotifications } from '@/hooks/useNotifications';
 
-const NAV_ITEMS: Array<{ label: string; href: Route; icon: React.ElementType; badge?: string }> = [
+const NAV_ITEMS: Array<{ label: string; href: Route; icon: React.ElementType }> = [
   { label: "Vue d'ensemble", href: '/dashboard', icon: LayoutDashboard },
   { label: 'Mes annonces', href: '/dashboard/annonces', icon: Building2 },
   { label: 'Favoris', href: '/dashboard/favoris', icon: Heart },
   { label: 'Transactions', href: '/dashboard/transactions', icon: CreditCard },
-  { label: 'Notifications', href: '/dashboard/notifications', icon: Bell, badge: '3' },
+  { label: 'Notifications', href: '/dashboard/notifications', icon: Bell },
   { label: 'Profil & KYC', href: '/dashboard/profil', icon: User },
   { label: 'Paramètres', href: '/dashboard/parametres', icon: Settings },
 ];
@@ -38,6 +39,7 @@ interface DashboardLayoutProps {
 export function DashboardLayout({ children }: DashboardLayoutProps): React.ReactElement {
   const pathname = usePathname();
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const { unreadCount } = useNotifications();
 
   return (
     <div className="bg-charcoal-50 flex min-h-screen">
@@ -85,7 +87,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps): React.React
 
         {/* Navigation */}
         <nav className="flex-1 space-y-0.5 overflow-y-auto px-3 py-4">
-          {NAV_ITEMS.map(({ label, href, icon: Icon, badge }) => {
+          {NAV_ITEMS.map(({ label, href, icon: Icon }) => {
             const isActive = pathname === href;
             return (
               <Link
@@ -102,9 +104,9 @@ export function DashboardLayout({ children }: DashboardLayoutProps): React.React
               >
                 <Icon className="h-4 w-4 flex-shrink-0" aria-hidden="true" />
                 <span className="flex-1">{label}</span>
-                {badge && (
+                {href === '/dashboard/notifications' && unreadCount > 0 && (
                   <span className="bg-danger flex h-5 w-5 items-center justify-center rounded-full text-[10px] font-bold text-white">
-                    {badge}
+                    {unreadCount > 99 ? '99+' : unreadCount}
                   </span>
                 )}
                 {isActive && <ChevronRight className="text-navy h-3 w-3" aria-hidden="true" />}
@@ -147,16 +149,19 @@ export function DashboardLayout({ children }: DashboardLayoutProps): React.React
             <Menu className="h-5 w-5" aria-hidden="true" />
           </button>
           <div className="flex-1" />
-          <button
+          <Link
+            href="/dashboard/notifications"
             className="text-charcoal-400 hover:text-charcoal hover:bg-charcoal-50 relative rounded-lg p-2"
-            aria-label="Notifications (3 non lues)"
+            aria-label={`Notifications${unreadCount > 0 ? ` (${unreadCount} non lues)` : ''}`}
           >
             <Bell className="h-5 w-5" aria-hidden="true" />
-            <span
-              className="bg-danger absolute right-1.5 top-1.5 h-2 w-2 rounded-full"
-              aria-hidden="true"
-            />
-          </button>
+            {unreadCount > 0 && (
+              <span
+                className="bg-danger absolute right-1.5 top-1.5 h-2 w-2 rounded-full"
+                aria-hidden="true"
+              />
+            )}
+          </Link>
         </header>
 
         {/* Page content */}
