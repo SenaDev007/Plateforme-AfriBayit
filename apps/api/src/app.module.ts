@@ -14,6 +14,7 @@ import { HotelsModule } from './modules/hotels/hotels.module';
 import { ArtisansModule } from './modules/artisans/artisans.module';
 import { CoursesModule } from './modules/courses/courses.module';
 import { CommunityModule } from './modules/community/community.module';
+import { MessagesModule } from './modules/messages/messages.module';
 import { DatabaseModule } from './database/database.module';
 import { QueueModule } from './modules/queue/queue.module';
 import { GatewaysModule } from './gateways/gateways.module';
@@ -78,6 +79,7 @@ import { SecurityModule } from './modules/security/security.module';
     ArtisansModule,
     CoursesModule,
     CommunityModule,
+    MessagesModule,
   ],
   providers: [
     // Apply ThrottlerGuard globally — every route is rate-limited by default
