@@ -28,13 +28,6 @@ export const metadata: Metadata = {
     siteName: 'AfriBayit',
     title: 'AfriBayit — Immobilier Pan-Africain',
     description: "Achetez, vendez et louez des propriétés en Afrique de l'Ouest en toute sécurité.",
-    images: [{ url: '/og-image.svg', width: 1200, height: 630, alt: 'AfriBayit' }],
-  },
-  twitter: {
-    card: 'summary_large_image',
-    title: 'AfriBayit',
-    description: "La super-app immobilière de l'Afrique de l'Ouest",
-    images: ['/og-image.svg'],
   },
   robots: { index: true, follow: true },
 };
