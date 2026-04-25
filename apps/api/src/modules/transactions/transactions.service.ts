@@ -89,10 +89,12 @@ export class TransactionsService {
       },
       include: {
         property: { select: { title: true, slug: true } },
-        escrowAccount: true,
+        buyer: { select: { id: true, firstName: true, lastName: true } },
+        seller: { select: { id: true, firstName: true, lastName: true } },
+        escrowAccount: { select: { balance: true, currency: true } },
       },
       orderBy: { createdAt: 'desc' },
-    });
+    }) as unknown as Transaction[];
   }
 
   /** Get single transaction — only buyer or seller can access */
