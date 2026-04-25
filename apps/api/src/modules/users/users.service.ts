@@ -163,6 +163,44 @@ export class UsersService {
     });
   }
 
+  /** GDPR — export all personal data for a user */
+  async exportMyData(userId: string) {
+    const user = await this.prisma.user.findUnique({
+      where: { id: userId },
+      include: {
+        properties: { select: { id: true, title: true, status: true, createdAt: true } },
+        kycDocuments: { select: { type: true, status: true, level: true, createdAt: true } },
+        receivedReviews: { select: { rating: true, comment: true, createdAt: true } },
+        favorites: {
+          include: { property: { select: { id: true, title: true } } },
+        },
+      },
+    });
+    if (!user) throw new NotFoundException('Utilisateur introuvable.');
+    const { passwordHash: _, twoFactorSecret: __, ...safeUser } = user;
+    return safeUser;
+  }
+
+  /** GDPR — anonymise and deactivate account (right to erasure) */
+  async deleteMyAccount(userId: string): Promise<void> {
+    await this.prisma.user.update({
+      where: { id: userId },
+      data: {
+        email: `deleted-${userId}@deleted.afribayit.com`,
+        firstName: 'Deleted',
+        lastName: 'User',
+        phone: null,
+        avatar: null,
+        bio: null,
+        passwordHash: '',
+        twoFactorSecret: null,
+        twoFactorEnabled: false,
+        isActive: false,
+        isBanned: true,
+      },
+    });
+  }
+
   /** Get user favorites */
 
   async getFavorites(userId: string) {

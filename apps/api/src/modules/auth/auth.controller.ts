@@ -1,5 +1,13 @@
 import {
-  Controller, Post, Body, UseGuards, HttpCode, HttpStatus, Get, Version,
+  Controller,
+  Post,
+  Body,
+  UseGuards,
+  HttpCode,
+  HttpStatus,
+  Get,
+  Version,
+  Headers,
 } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
 import { Throttle } from '@nestjs/throttler';
@@ -60,5 +68,17 @@ export class AuthController {
   async verify2FA(@CurrentUser() user: User, @Body() body: { token: string }) {
     await this.authService.verify2FA(user.id, body.token);
     return { message: '2FA activé avec succès.' };
+  }
+
+  @Post('logout')
+  @Version('1')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Déconnexion — invalide le token courant' })
+  async logout(@Headers('authorization') auth: string) {
+    const token = auth?.replace(/^Bearer\s+/i, '') ?? '';
+    await this.authService.logout(token);
+    return { message: 'Déconnecté avec succès.' };
   }
 }

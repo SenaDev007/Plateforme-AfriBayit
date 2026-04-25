@@ -9,6 +9,8 @@ import {
   UseGuards,
   Version,
   Query,
+  HttpCode,
+  HttpStatus,
 } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
 import { UsersService } from './users.service';
@@ -51,6 +53,21 @@ export class UsersController {
     @Body() body: Parameters<UsersService['submitKycDocument']>[1],
   ) {
     return this.usersService.submitKycDocument(user.id, body);
+  }
+
+  @Get('me/data-export')
+  @Version('1')
+  @ApiOperation({ summary: 'Exporter mes données personnelles (RGPD)' })
+  exportMyData(@CurrentUser() user: User) {
+    return this.usersService.exportMyData(user.id);
+  }
+
+  @Delete('me')
+  @Version('1')
+  @HttpCode(HttpStatus.NO_CONTENT)
+  @ApiOperation({ summary: "Supprimer mon compte (RGPD — droit à l'effacement)" })
+  async deleteMyAccount(@CurrentUser() user: User) {
+    await this.usersService.deleteMyAccount(user.id);
   }
 
   @Get('me/favorites')

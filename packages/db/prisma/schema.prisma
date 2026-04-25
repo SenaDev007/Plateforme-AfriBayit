@@ -672,3 +672,25 @@ model Notification {
   @@index([userId, isRead])
   @@map("notifications")
 }
+
+// ─── AUDIT & SECURITY ─────────────────────────────────────────────────────────
+
+model AuditLog {
+  id          String   @id @default(cuid())
+  actorId     String?
+  actorIp     String?
+  actorRole   String?
+  action      String
+  resource    String
+  resourceId  String?
+  tenantId    String?
+  metadata    Json?
+  result      String   @default("SUCCESS")
+  createdAt   DateTime @default(now())
+
+  @@index([actorId])
+  @@index([action])
+  @@index([tenantId])
+  @@index([createdAt])
+  @@map("audit_logs")
+}

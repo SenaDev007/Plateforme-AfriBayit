@@ -1,15 +1,18 @@
 import { Injectable, UnauthorizedException, ConflictException, Inject } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
+import { randomUUID } from 'crypto';
 import * as bcrypt from 'bcryptjs';
 import * as speakeasy from 'speakeasy';
 import type { PrismaClient, User } from '@afribayit/db';
 import type { RegisterDto } from './dto/register.dto';
 import type { LoginDto } from './dto/login.dto';
+import { JwtBlacklistService } from '../security/jwt-blacklist.service';
 
 interface JwtPayload {
   sub: string;
   email: string;
   role: string;
+  jti: string;
 }
 
 export interface AuthTokens {
@@ -23,6 +26,7 @@ export class AuthService {
   constructor(
     @Inject('PRISMA') private readonly prisma: PrismaClient,
     private readonly jwtService: JwtService,
+    private readonly blacklistService: JwtBlacklistService,
   ) {}
 
   /** Hash and register a new user */
@@ -106,16 +110,31 @@ export class AuthService {
     });
   }
 
+  /** Blacklist the current access token (logout) */
+  async logout(token: string): Promise<void> {
+    const decoded = this.jwtService.decode(token) as { jti?: string; exp?: number } | null;
+    if (!decoded?.jti) return;
+    const now = Math.floor(Date.now() / 1000);
+    const ttl = (decoded.exp ?? now + 3600) - now;
+    if (ttl > 0) {
+      await this.blacklistService.blacklist(decoded.jti, ttl);
+    }
+  }
+
   /** Validate user by ID — used by JWT strategy */
   async validateById(id: string): Promise<User | null> {
     return this.prisma.user.findUnique({ where: { id, isActive: true } });
   }
 
   private generateTokens(user: User): AuthTokens {
-    const payload: JwtPayload = { sub: user.id, email: user.email, role: user.role };
+    const jti = randomUUID();
+    const payload: JwtPayload = { sub: user.id, email: user.email, role: user.role, jti };
 
     const accessToken = this.jwtService.sign(payload);
-    const refreshToken = this.jwtService.sign(payload, { expiresIn: '30d' });
+    const refreshToken = this.jwtService.sign(
+      { ...payload, jti: randomUUID() },
+      { expiresIn: '30d' },
+    );
 
     const { passwordHash: _, twoFactorSecret: __, ...safeUser } = user;
 

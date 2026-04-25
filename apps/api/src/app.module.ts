@@ -17,6 +17,7 @@ import { CommunityModule } from './modules/community/community.module';
 import { DatabaseModule } from './database/database.module';
 import { QueueModule } from './modules/queue/queue.module';
 import { GatewaysModule } from './gateways/gateways.module';
+import { SecurityModule } from './modules/security/security.module';
 
 @Module({
   imports: [
@@ -66,6 +67,7 @@ import { GatewaysModule } from './gateways/gateways.module';
 
     // Feature modules
     DatabaseModule,
+    SecurityModule,
     AuthModule,
     UsersModule,
     PropertiesModule,

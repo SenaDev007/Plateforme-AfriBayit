@@ -3,12 +3,14 @@ import { PassportStrategy } from '@nestjs/passport';
 import { ExtractJwt, Strategy } from 'passport-jwt';
 import { ConfigService } from '@nestjs/config';
 import { AuthService } from '../auth.service';
+import { JwtBlacklistService } from '../../security/jwt-blacklist.service';
 import type { User } from '@afribayit/db';
 
 interface JwtPayload {
   sub: string;
   email: string;
   role: string;
+  jti?: string;
 }
 
 @Injectable()
@@ -16,6 +18,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
   constructor(
     config: ConfigService,
     private readonly authService: AuthService,
+    private readonly blacklistService: JwtBlacklistService,
   ) {
     super({
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
@@ -25,6 +28,9 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
   }
 
   async validate(payload: JwtPayload): Promise<User> {
+    if (payload.jti && (await this.blacklistService.isBlacklisted(payload.jti))) {
+      throw new UnauthorizedException('Token révoqué.');
+    }
     const user = await this.authService.validateById(payload.sub);
     if (!user) throw new UnauthorizedException('Token invalide ou expiré.');
     return user;
