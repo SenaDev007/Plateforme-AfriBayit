@@ -1,6 +1,48 @@
 import type { NextConfig } from 'next';
+import createNextIntlPlugin from 'next-intl/plugin';
+import withPWA from '@ducanh2912/next-pwa';
 
-const nextConfig: NextConfig = {
+const withNextIntl = createNextIntlPlugin('./src/i18n/config.ts');
+
+const pwaConfig = withPWA({
+  dest: 'public',
+  cacheOnFrontEndNav: true,
+  aggressiveFrontEndNavCaching: true,
+  reloadOnOnline: true,
+  disable: process.env.NODE_ENV === 'development',
+  workboxOptions: {
+    disableDevLogs: true,
+    runtimeCaching: [
+      {
+        urlPattern: /^https:\/\/api\.afribayit\.com\/.*/i,
+        handler: 'NetworkFirst',
+        options: {
+          cacheName: 'api-cache',
+          expiration: { maxEntries: 200, maxAgeSeconds: 24 * 60 * 60 },
+          networkTimeoutSeconds: 10,
+        },
+      },
+      {
+        urlPattern: /^https:\/\/media\.afribayit\.com\/.*/i,
+        handler: 'CacheFirst',
+        options: {
+          cacheName: 'media-cache',
+          expiration: { maxEntries: 500, maxAgeSeconds: 7 * 24 * 60 * 60 },
+        },
+      },
+      {
+        urlPattern: /^https:\/\/fonts\.(googleapis|gstatic)\.com\/.*/i,
+        handler: 'CacheFirst',
+        options: {
+          cacheName: 'google-fonts',
+          expiration: { maxEntries: 20, maxAgeSeconds: 365 * 24 * 60 * 60 },
+        },
+      },
+    ],
+  },
+});
+
+const baseConfig: NextConfig = {
   transpilePackages: ['@afribayit/ui', '@afribayit/db'],
   images: {
     remotePatterns: [
@@ -12,8 +54,9 @@ const nextConfig: NextConfig = {
       { protocol: 'https', hostname: 'picsum.photos' },
     ],
   },
-  typedRoutes: true,
-  // Required for Turbo monorepo: skip unnecessary packages from being bundled
+  experimental: {
+    typedRoutes: true,
+  },
   serverExternalPackages: ['@prisma/client', 'prisma'],
   async headers() {
     return [
@@ -36,7 +79,7 @@ const nextConfig: NextConfig = {
               "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
               "font-src 'self' https://fonts.gstatic.com",
               "img-src 'self' data: blob: https: http:",
-              "connect-src 'self' https://*.mapbox.com https://api.fedapay.com https://api.stripe.com",
+              "connect-src 'self' https://*.mapbox.com https://api.fedapay.com https://api.stripe.com wss://*.afribayit.com ws://localhost:*",
               "frame-src 'none'",
             ].join('; '),
           },
@@ -46,4 +89,4 @@ const nextConfig: NextConfig = {
   },
 };
 
-export default nextConfig;
+export default pwaConfig(withNextIntl(baseConfig));

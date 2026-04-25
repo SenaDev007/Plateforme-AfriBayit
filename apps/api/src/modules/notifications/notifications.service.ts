@@ -31,7 +31,14 @@ export class NotificationsService {
         type: dto.type,
         title: dto.title,
         body: dto.body,
-        data: dto.data,
+        ...(dto.data !== undefined
+          ? {
+              data: dto.data as unknown as Record<
+                string,
+                string | number | boolean | null | object
+              >,
+            }
+          : {}),
       },
     });
 

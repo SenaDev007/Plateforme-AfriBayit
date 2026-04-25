@@ -23,10 +23,7 @@ class ApiError extends Error {
   }
 }
 
-async function request<T>(
-  path: string,
-  options: RequestOptions = {},
-): Promise<ApiResponse<T>> {
+async function request<T>(path: string, options: RequestOptions = {}): Promise<ApiResponse<T>> {
   const { body, token, ...fetchOptions } = options;
 
   const headers = new Headers(fetchOptions.headers);
@@ -36,11 +33,11 @@ async function request<T>(
   const response = await fetch(`${BASE_URL}/api/v1${path}`, {
     ...fetchOptions,
     headers,
-    body: body != null ? JSON.stringify(body) : undefined,
+    body: body != null ? JSON.stringify(body) : null,
   });
 
   if (!response.ok) {
-    const errorBody = await response.json().catch(() => ({})) as unknown;
+    const errorBody = (await response.json().catch(() => ({}))) as unknown;
     const message = (errorBody as { message?: string })?.message ?? `API error ${response.status}`;
     throw new ApiError(response.status, message, errorBody);
   }
@@ -53,18 +50,32 @@ async function request<T>(
 export const api = {
   auth: {
     login: (body: { email: string; password: string; totpCode?: string }) =>
-      request<{ accessToken: string; refreshToken: string; user: unknown }>('/auth/login', { method: 'POST', body }),
-    register: (body: { email: string; password: string; firstName: string; lastName: string; phone?: string; role?: string; country?: string }) =>
-      request<{ accessToken: string; refreshToken: string; user: unknown }>('/auth/register', { method: 'POST', body }),
-    me: (token: string) =>
-      request<unknown>('/auth/me', { token }),
+      request<{ accessToken: string; refreshToken: string; user: unknown }>('/auth/login', {
+        method: 'POST',
+        body,
+      }),
+    register: (body: {
+      email: string;
+      password: string;
+      firstName: string;
+      lastName: string;
+      phone?: string;
+      role?: string;
+      country?: string;
+    }) =>
+      request<{ accessToken: string; refreshToken: string; user: unknown }>('/auth/register', {
+        method: 'POST',
+        body,
+      }),
+    me: (token: string) => request<unknown>('/auth/me', { token }),
   },
 
   properties: {
     search: (params: URLSearchParams, token?: string) =>
-      request<{ data: unknown[]; total: number }>(`/properties?${params.toString()}`, { token }),
-    findBySlug: (slug: string) =>
-      request<unknown>(`/properties/${slug}`),
+      request<{ data: unknown[]; total: number }>(`/properties?${params.toString()}`, {
+        ...(token !== undefined ? { token } : {}),
+      }),
+    findBySlug: (slug: string) => request<unknown>(`/properties/${slug}`),
     create: (body: unknown, token: string) =>
       request<unknown>('/properties', { method: 'POST', body, token }),
     update: (slug: string, body: unknown, token: string) =>
@@ -81,28 +92,39 @@ export const api = {
   transactions: {
     create: (body: unknown, token: string) =>
       request<unknown>('/transactions', { method: 'POST', body, token }),
-    findAll: (token: string) =>
-      request<unknown[]>('/transactions', { token }),
-    findOne: (id: string, token: string) =>
-      request<unknown>(`/transactions/${id}`, { token }),
+    findAll: (token: string) => request<unknown[]>('/transactions', { token }),
+    findOne: (id: string, token: string) => request<unknown>(`/transactions/${id}`, { token }),
     release: (id: string, token: string) =>
       request<unknown>(`/transactions/${id}/release`, { method: 'POST', token }),
   },
 
   users: {
-    me: (token: string) =>
-      request<unknown>('/users/me', { token }),
+    me: (token: string) => request<unknown>('/users/me', { token }),
     updateProfile: (body: unknown, token: string) =>
       request<unknown>('/users/me', { method: 'PATCH', body, token }),
-    getFavorites: (token: string) =>
-      request<unknown[]>('/users/me/favorites', { token }),
+    getFavorites: (token: string) => request<unknown[]>('/users/me/favorites', { token }),
     toggleFavorite: (propertyId: string, token: string) =>
-      request<{ favorited: boolean }>(`/users/me/favorites/${propertyId}`, { method: 'POST', token }),
+      request<{ favorited: boolean }>(`/users/me/favorites/${propertyId}`, {
+        method: 'POST',
+        token,
+      }),
+    submitKyc: (
+      body: { type: string; fileUrl: string; fileKey: string; level: string },
+      token: string,
+    ) => request<void>('/users/me/kyc', { method: 'POST', body, token }),
+    getPendingKyc: (token: string) => request<unknown[]>('/users/admin/kyc/pending', { token }),
+    reviewKyc: (id: string, body: { status: string; note: string }, token: string) =>
+      request<unknown>(`/users/admin/kyc/review/${id}`, { method: 'PATCH', body, token }),
+    getAdminUsers: (params: Record<string, string>, token: string) =>
+      request<unknown[]>(`/users/admin?${new URLSearchParams(params).toString()}`, { token }),
+    updateUserRole: (id: string, body: { role: string }, token: string) =>
+      request<unknown>(`/users/admin/${id}/role`, { method: 'PATCH', body, token }),
+    updateUserStatus: (id: string, body: { status: string }, token: string) =>
+      request<unknown>(`/users/admin/${id}/status`, { method: 'PATCH', body, token }),
   },
 
   notifications: {
-    getAll: (token: string) =>
-      request<unknown[]>('/notifications', { token }),
+    getAll: (token: string) => request<unknown[]>('/notifications', { token }),
     markRead: (id: string, token: string) =>
       request<void>(`/notifications/${id}/read`, { method: 'PATCH', token }),
     markAllRead: (token: string) =>
@@ -117,12 +139,14 @@ export const api = {
   hotels: {
     search: (params: URLSearchParams) =>
       request<{ data: unknown[]; total: number }>(`/hotels?${params.toString()}`),
-    findBySlug: (slug: string) =>
-      request<unknown>(`/hotels/${slug}`),
+    findBySlug: (slug: string) => request<unknown>(`/hotels/${slug}`),
     checkAvailability: (id: string, checkin: string, checkout: string) =>
       request<unknown[]>(`/hotels/${id}/availability?checkin=${checkin}&checkout=${checkout}`),
-    book: (id: string, body: { roomId: string; checkin: string; checkout: string; guestCount: number }, token: string) =>
-      request<unknown>(`/hotels/${id}/book`, { method: 'POST', body, token }),
+    book: (
+      id: string,
+      body: { roomId: string; checkin: string; checkout: string; guestCount: number },
+      token: string,
+    ) => request<unknown>(`/hotels/${id}/book`, { method: 'POST', body, token }),
     create: (body: unknown, token: string) =>
       request<unknown>('/hotels', { method: 'POST', body, token }),
   },
@@ -130,8 +154,7 @@ export const api = {
   artisans: {
     search: (params: URLSearchParams) =>
       request<{ data: unknown[]; total: number }>(`/artisans?${params.toString()}`),
-    findBySlug: (slug: string) =>
-      request<unknown>(`/artisans/${slug}`),
+    findBySlug: (slug: string) => request<unknown>(`/artisans/${slug}`),
     createProfile: (body: unknown, token: string) =>
       request<unknown>('/artisans', { method: 'POST', body, token }),
     addReview: (body: { artisanId: string; rating: number; comment: string }, token: string) =>
@@ -142,30 +165,41 @@ export const api = {
 
   courses: {
     findAll: (params?: URLSearchParams) =>
-      request<{ data: unknown[]; total: number }>(`/courses${params ? `?${params.toString()}` : ''}`),
-    findBySlug: (slug: string) =>
-      request<unknown>(`/courses/${slug}`),
+      request<{ data: unknown[]; total: number }>(
+        `/courses${params ? `?${params.toString()}` : ''}`,
+      ),
+    findBySlug: (slug: string) => request<unknown>(`/courses/${slug}`),
     enroll: (id: string, token: string) =>
       request<unknown>(`/courses/${id}/enroll`, { method: 'POST', token }),
-    getMyEnrollments: (token: string) =>
-      request<unknown[]>('/courses/me/enrollments', { token }),
+    getMyEnrollments: (token: string) => request<unknown[]>('/courses/me/enrollments', { token }),
     updateProgress: (enrollmentId: string, progress: number, token: string) =>
-      request<unknown>(`/courses/enrollments/${enrollmentId}/progress`, { method: 'PATCH', body: { progress }, token }),
+      request<unknown>(`/courses/enrollments/${enrollmentId}/progress`, {
+        method: 'PATCH',
+        body: { progress },
+        token,
+      }),
     create: (body: unknown, token: string) =>
       request<unknown>('/courses', { method: 'POST', body, token }),
   },
 
   community: {
     getPosts: (params?: URLSearchParams) =>
-      request<{ data: unknown[]; total: number }>(`/community/posts${params ? `?${params.toString()}` : ''}`),
-    getPost: (slug: string) =>
-      request<unknown>(`/community/posts/${slug}`),
-    createPost: (body: { title: string; content: string; category: string; tags?: string[] }, token: string) =>
-      request<unknown>('/community/posts', { method: 'POST', body, token }),
+      request<{ data: unknown[]; total: number }>(
+        `/community/posts${params ? `?${params.toString()}` : ''}`,
+      ),
+    getPost: (slug: string) => request<unknown>(`/community/posts/${slug}`),
+    createPost: (
+      body: { title: string; content: string; category: string; tags?: string[] },
+      token: string,
+    ) => request<unknown>('/community/posts', { method: 'POST', body, token }),
     toggleLike: (id: string, token: string) =>
       request<{ liked: boolean }>(`/community/posts/${id}/like`, { method: 'POST', token }),
     addComment: (id: string, content: string, token: string) =>
-      request<unknown>(`/community/posts/${id}/comments`, { method: 'POST', body: { content }, token }),
+      request<unknown>(`/community/posts/${id}/comments`, {
+        method: 'POST',
+        body: { content },
+        token,
+      }),
     getGroups: (category?: string) =>
       request<unknown[]>(`/community/groups${category ? `?category=${category}` : ''}`),
     createGroup: (body: { name: string; description: string; category: string }, token: string) =>

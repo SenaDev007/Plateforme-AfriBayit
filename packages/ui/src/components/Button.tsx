@@ -67,8 +67,7 @@ const buttonVariants = cva(
 );
 
 export interface ButtonProps
-  extends React.ButtonHTMLAttributes<HTMLButtonElement>,
-    VariantProps<typeof buttonVariants> {
+  extends React.ButtonHTMLAttributes<HTMLButtonElement>, VariantProps<typeof buttonVariants> {
   /** Show loading spinner */
   loading?: boolean;
   /** Stretch to full container width */
@@ -78,7 +77,10 @@ export interface ButtonProps
 }
 
 export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
-  ({ className, variant, size, loading, fullWidth, animated = true, children, disabled, ...props }, ref) => {
+  (
+    { className, variant, size, loading, fullWidth, animated = true, children, disabled, ...props },
+    ref,
+  ) => {
     const classes = cn(buttonVariants({ variant, size }), fullWidth && 'w-full', className);
 
     const content = (
@@ -91,7 +93,14 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
             viewBox="0 0 24 24"
             aria-hidden="true"
           >
-            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+            <circle
+              className="opacity-25"
+              cx="12"
+              cy="12"
+              r="10"
+              stroke="currentColor"
+              strokeWidth="4"
+            />
             <path
               className="opacity-75"
               fill="currentColor"
@@ -111,7 +120,7 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
           disabled={disabled ?? loading}
           whileTap={{ scale: 0.97 }}
           transition={{ duration: 0.1 }}
-          {...(props as React.ComponentProps<typeof motion.button>)}
+          {...(props as unknown as React.ComponentProps<typeof motion.button>)}
         >
           {content}
         </motion.button>

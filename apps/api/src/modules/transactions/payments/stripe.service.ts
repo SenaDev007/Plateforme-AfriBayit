@@ -10,7 +10,7 @@ export class StripeService {
 
   constructor(private readonly config: ConfigService) {
     this.stripe = new Stripe(config.getOrThrow<string>('STRIPE_SECRET_KEY'), {
-      apiVersion: '2024-11-20.acacia',
+      apiVersion: '2025-02-24.acacia',
     });
     this.webhookSecret = config.getOrThrow<string>('STRIPE_WEBHOOK_SECRET');
   }
@@ -28,7 +28,7 @@ export class StripeService {
         amount: params.amount, // In smallest currency unit (cents/francs)
         currency: params.currency.toLowerCase(),
         description: params.description,
-        receipt_email: params.customerEmail,
+        ...(params.customerEmail ? { receipt_email: params.customerEmail } : {}),
         metadata: { reference: params.reference },
         automatic_payment_methods: { enabled: true },
       });
@@ -39,7 +39,7 @@ export class StripeService {
       };
     } catch (error) {
       this.logger.error('Stripe PaymentIntent creation failed', error);
-      throw new BadRequestException('Impossible d\'initier le paiement par carte.');
+      throw new BadRequestException("Impossible d'initier le paiement par carte.");
     }
   }
 

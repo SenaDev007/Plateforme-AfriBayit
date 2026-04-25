@@ -1,5 +1,11 @@
 import { Injectable, Inject, NotFoundException, ForbiddenException } from '@nestjs/common';
-import type { PrismaClient, Transaction, TransactionType, PaymentMethod } from '@afribayit/db';
+import type {
+  PrismaClient,
+  Transaction,
+  TransactionType,
+  PaymentMethod,
+  Currency,
+} from '@afribayit/db';
 import { EscrowService } from './escrow.service';
 import { FedaPayService } from './payments/fedapay.service';
 import { StripeService } from './payments/stripe.service';
@@ -26,23 +32,25 @@ export class TransactionsService {
   ) {}
 
   /** Initiate a new transaction and create escrow account */
-  async create(dto: CreateTransactionDto): Promise<{ transaction: Transaction; paymentUrl?: string; clientSecret?: string }> {
+  async create(
+    dto: CreateTransactionDto,
+  ): Promise<{ transaction: Transaction; paymentUrl?: string; clientSecret?: string }> {
     const transaction = await this.prisma.transaction.create({
       data: {
         type: dto.type,
         amount: dto.amount,
-        currency: dto.currency,
+        currency: dto.currency as Currency,
         paymentMethod: dto.paymentMethod,
         buyerId: dto.buyerId,
         sellerId: dto.sellerId,
-        propertyId: dto.propertyId,
-        hotelBookingId: dto.hotelBookingId,
-        artisanServiceId: dto.artisanServiceId,
+        ...(dto.propertyId !== undefined ? { propertyId: dto.propertyId } : {}),
+        ...(dto.hotelBookingId !== undefined ? { hotelBookingId: dto.hotelBookingId } : {}),
+        ...(dto.artisanServiceId !== undefined ? { artisanServiceId: dto.artisanServiceId } : {}),
         status: 'INITIATED',
         escrowAccount: {
           create: {
             balance: 0,
-            currency: dto.currency,
+            currency: dto.currency as Currency,
           },
         },
       },
@@ -104,9 +112,17 @@ export class TransactionsService {
 
   /** Buyer confirms goods received — release escrow */
   async releaseEscrow(transactionId: string, buyerId: string): Promise<Transaction> {
-    const transaction = await this.prisma.transaction.findUniqueOrThrow({ where: { id: transactionId } });
-    if (transaction.buyerId !== buyerId) throw new ForbiddenException('Seul l\'acheteur peut libérer les fonds.');
-    return this.escrowService.transition(transactionId, 'RELEASED', buyerId, 'Libération confirmée par l\'acheteur');
+    const transaction = await this.prisma.transaction.findUniqueOrThrow({
+      where: { id: transactionId },
+    });
+    if (transaction.buyerId !== buyerId)
+      throw new ForbiddenException("Seul l'acheteur peut libérer les fonds.");
+    return this.escrowService.transition(
+      transactionId,
+      'RELEASED',
+      buyerId,
+      "Libération confirmée par l'acheteur",
+    );
   }
 
   /** Handle FedaPay webhook */
@@ -122,9 +138,19 @@ export class TransactionsService {
     const status = this.fedapayService.mapStatus(String(payload['status']));
     if (status === 'FUNDED') {
       await this.escrowService.fundEscrow(transaction.id, transaction.amount);
-      await this.escrowService.transition(transaction.id, 'FUNDED', 'SYSTEM', 'FedaPay payment confirmed');
+      await this.escrowService.transition(
+        transaction.id,
+        'FUNDED',
+        'SYSTEM',
+        'FedaPay payment confirmed',
+      );
     } else if (status === 'CANCELLED') {
-      await this.escrowService.transition(transaction.id, 'CANCELLED', 'SYSTEM', 'FedaPay payment failed');
+      await this.escrowService.transition(
+        transaction.id,
+        'CANCELLED',
+        'SYSTEM',
+        'FedaPay payment failed',
+      );
     }
   }
 }

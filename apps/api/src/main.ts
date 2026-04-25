@@ -1,6 +1,7 @@
 import { NestFactory } from '@nestjs/core';
 import { ValidationPipe, VersioningType } from '@nestjs/common';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
+import { IoAdapter } from '@nestjs/platform-socket.io';
 import helmet from 'helmet';
 import compression from 'compression';
 import { AppModule } from './app.module';
@@ -12,13 +13,13 @@ async function bootstrap(): Promise<void> {
   });
 
   // Security
+  // WebSocket adapter (Socket.io)
+  app.useWebSocketAdapter(new IoAdapter(app));
+
   app.use(helmet());
   app.use(compression());
   app.enableCors({
-    origin: [
-      'http://localhost:3000',
-      /\.afribayit\.com$/,
-    ],
+    origin: ['http://localhost:3000', /\.afribayit\.com$/],
     credentials: true,
   });
 

@@ -64,7 +64,12 @@ export class HotelsService {
     }
 
     const [hotels, total] = await Promise.all([
-      this.prisma.hotel.findMany({ where, skip, take: limit, include: { rooms: true, images: true } }),
+      this.prisma.hotel.findMany({
+        where,
+        skip,
+        take: limit,
+        include: { rooms: true, images: true },
+      }),
       this.prisma.hotel.count({ where }),
     ]);
 
@@ -103,20 +108,27 @@ export class HotelsService {
       where: {
         hotelId,
         status: { notIn: ['CANCELLED', 'REJECTED'] },
-        OR: [
-          { checkin: { lte: new Date(checkout) }, checkout: { gte: new Date(checkin) } },
-        ],
+        OR: [{ checkin: { lte: new Date(checkout) }, checkout: { gte: new Date(checkin) } }],
       },
       select: { roomId: true },
     });
-    const bookedRoomIds = new Set(bookings.map((b) => b.roomId));
-    return rooms.map((r) => ({ ...r, available: !bookedRoomIds.has(r.id) }));
+    const bookedRoomIds = new Set(bookings.map((b: { roomId: string }) => b.roomId));
+    return rooms.map((r: { id: string }) => ({ ...r, available: !bookedRoomIds.has(r.id) }));
   }
 
-  async book(data: { hotelId: string; roomId: string; guestId: string; checkin: string; checkout: string; guestCount: number }) {
+  async book(data: {
+    hotelId: string;
+    roomId: string;
+    guestId: string;
+    checkin: string;
+    checkout: string;
+    guestCount: number;
+  }) {
     const room = await this.prisma.hotelRoom.findUnique({ where: { id: data.roomId } });
     if (!room) throw new NotFoundException('Chambre introuvable');
-    const nights = Math.ceil((new Date(data.checkout).getTime() - new Date(data.checkin).getTime()) / 86400000);
+    const nights = Math.ceil(
+      (new Date(data.checkout).getTime() - new Date(data.checkin).getTime()) / 86400000,
+    );
     const totalPrice = room.pricePerNight * nights;
 
     return this.prisma.hotelBooking.create({

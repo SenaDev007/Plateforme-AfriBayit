@@ -1,11 +1,20 @@
 import {
-  Controller, Get, Post, Patch, Param, Body, Query, UseGuards, Version,
+  Controller,
+  Get,
+  Post,
+  Patch,
+  Param,
+  Body,
+  Query,
+  UseGuards,
+  Version,
 } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
 import { PropertiesService } from './properties.service';
 import { StorageService } from './storage.service';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
 import { CurrentUser } from '../../common/decorators/current-user.decorator';
+import { compactQuery } from '../../common/utils/query';
 import type { User, PropertyType, PropertyPurpose, Country } from '@afribayit/db';
 
 @ApiTags('Properties')
@@ -30,7 +39,9 @@ export class PropertiesController {
     @Query('page') page = 1,
     @Query('limit') limit = 12,
   ) {
-    return this.propertiesService.search({ q, city, purpose, type, prixMin, prixMax, country, page, limit });
+    return this.propertiesService.search(
+      compactQuery({ q, city, purpose, type, prixMin, prixMax, country, page, limit }),
+    );
   }
 
   @Get(':slug')

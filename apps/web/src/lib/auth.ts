@@ -33,7 +33,12 @@ export const authConfig: NextAuthConfig = {
         if (!parsed.success) return null;
 
         try {
-          const { data } = await api.auth.login(parsed.data);
+          const { email, password, totpCode } = parsed.data;
+          const { data } = await api.auth.login({
+            email,
+            password,
+            ...(totpCode !== undefined ? { totpCode } : {}),
+          });
           const user = data.user as { id: string; email: string; firstName: string; role: string };
           return {
             id: user.id,
@@ -74,4 +79,9 @@ export const authConfig: NextAuthConfig = {
   session: { strategy: 'jwt' },
 };
 
-export const { handlers, auth, signIn, signOut } = NextAuth(authConfig);
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const nextAuth = NextAuth(authConfig) as any;
+export const handlers = nextAuth.handlers as ReturnType<typeof NextAuth>['handlers'];
+export const auth = nextAuth.auth as ReturnType<typeof NextAuth>['auth'];
+export const signIn = nextAuth.signIn as ReturnType<typeof NextAuth>['signIn'];
+export const signOut = nextAuth.signOut as ReturnType<typeof NextAuth>['signOut'];

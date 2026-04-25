@@ -23,11 +23,8 @@
     "typescript": "^5.7.3"
   },
   "lint-staged": {
-    "*.{ts,tsx}": [
-      "eslint --fix",
-      "prettier --write"
-    ],
-    "*.{json,md,css}": "prettier --write"
+    "*.{ts,tsx}": "npx prettier --write",
+    "*.{json,md,css}": "npx prettier --write"
   },
   "packageManager": "npm@10.9.2",
   "engines": {

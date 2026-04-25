@@ -1,5 +1,12 @@
 import { Injectable, Inject, NotFoundException, ForbiddenException } from '@nestjs/common';
-import type { PrismaClient, Property, PropertyType, PropertyPurpose, Country } from '@afribayit/db';
+import type {
+  PrismaClient,
+  Property,
+  PropertyType,
+  PropertyPurpose,
+  Country,
+  Currency,
+} from '@afribayit/db';
 
 interface CreatePropertyDto {
   title: string;
@@ -43,13 +50,15 @@ export class PropertiesService {
   /** Create a new property listing */
   async create(ownerId: string, dto: CreatePropertyDto): Promise<Property> {
     const slug = this.generateSlug(dto.title, dto.city);
+    const { features, currency, ...rest } = dto;
     return this.prisma.property.create({
       data: {
-        ...dto,
+        ...rest,
+        ...(currency !== undefined ? { currency: currency as Currency } : {}),
         slug,
         ownerId,
         status: 'DRAFT',
-        features: dto.features ? { set: dto.features } : undefined,
+        ...(features ? { features: { set: features } } : {}),
       },
     });
   }
@@ -67,10 +76,20 @@ export class PropertiesService {
       ...(filters.type && { type: filters.type }),
       ...(filters.country && { country: filters.country }),
       ...(filters.prixMin || filters.prixMax
-        ? { price: { gte: filters.prixMin, lte: filters.prixMax } }
+        ? {
+            price: {
+              ...(filters.prixMin !== undefined && { gte: filters.prixMin }),
+              ...(filters.prixMax !== undefined && { lte: filters.prixMax }),
+            },
+          }
         : {}),
       ...(filters.surfaceMin || filters.surfaceMax
-        ? { surface: { gte: filters.surfaceMin, lte: filters.surfaceMax } }
+        ? {
+            surface: {
+              ...(filters.surfaceMin !== undefined && { gte: filters.surfaceMin }),
+              ...(filters.surfaceMax !== undefined && { lte: filters.surfaceMax }),
+            },
+          }
         : {}),
       ...(filters.chambres && { bedrooms: { gte: filters.chambres } }),
     };
@@ -101,8 +120,11 @@ export class PropertiesService {
         virtualTours: true,
         owner: {
           select: {
-            id: true, firstName: true, lastName: true,
-            reputationScore: true, kycLevel: true,
+            id: true,
+            firstName: true,
+            lastName: true,
+            reputationScore: true,
+            kycLevel: true,
           },
         },
         reviews: {
@@ -127,9 +149,15 @@ export class PropertiesService {
     if (!property) throw new NotFoundException('Propriété introuvable.');
     if (property.ownerId !== ownerId) throw new ForbiddenException('Accès refusé.');
 
+    const { features, currency, ...rest } = dto;
     return this.prisma.property.update({
       where: { slug },
-      data: { ...dto, updatedAt: new Date() },
+      data: {
+        ...rest,
+        ...(currency !== undefined ? { currency: currency as Currency } : {}),
+        ...(features !== undefined ? { features: { set: features } } : {}),
+        updatedAt: new Date(),
+      },
     });
   }
 

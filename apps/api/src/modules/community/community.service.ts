@@ -1,5 +1,5 @@
 import { Injectable, Inject, NotFoundException, ForbiddenException } from '@nestjs/common';
-import type { PrismaClient } from '@prisma/client';
+import type { PrismaClient, Prisma } from '@prisma/client';
 
 export interface CreatePostDto {
   title: string;
@@ -106,11 +106,13 @@ export class CommunityService {
 
   async createGroup(dto: CreateGroupDto, creatorId: string) {
     const slug = this.generateSlug(dto.name);
-    return this.prisma.$transaction(async (tx) => {
+    return this.prisma.$transaction(async (tx: Prisma.TransactionClient) => {
       const group = await tx.communityGroup.create({
         data: { ...dto, slug, creatorId, isPrivate: dto.isPrivate ?? false },
       });
-      await tx.groupMember.create({ data: { groupId: group.id, userId: creatorId, role: 'ADMIN' } });
+      await tx.groupMember.create({
+        data: { groupId: group.id, userId: creatorId, role: 'ADMIN' },
+      });
       return group;
     });
   }

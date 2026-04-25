@@ -2,7 +2,7 @@ import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { Client } from '@elastic/elasticsearch';
 
-interface PropertyDoc {
+export interface PropertyDoc {
   id: string;
   title: string;
   description: string;
@@ -104,13 +104,12 @@ export class SearchService implements OnModuleInit {
       from: params.from ?? 0,
       size: params.size ?? 12,
       query: { bool: { must, filter } },
-      sort: [{ _score: 'desc' }, { publishedAt: 'desc' }],
+      sort: [{ _score: { order: 'desc' } }, { publishedAt: { order: 'desc' } }],
     });
 
     const hits = result.hits.hits.map((h) => h._source!);
-    const total = typeof result.hits.total === 'number'
-      ? result.hits.total
-      : (result.hits.total?.value ?? 0);
+    const total =
+      typeof result.hits.total === 'number' ? result.hits.total : (result.hits.total?.value ?? 0);
 
     return { hits, total };
   }

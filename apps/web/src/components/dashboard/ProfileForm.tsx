@@ -7,6 +7,8 @@ import { z } from 'zod';
 import { Input, Button, Card, Badge } from '@afribayit/ui';
 import toast from 'react-hot-toast';
 import { CheckCircle2, AlertCircle, Upload } from 'lucide-react';
+import { KycUploadForm } from './KycUploadForm';
+import { useState } from 'react';
 
 const profileSchema = z.object({
   firstName: z.string().min(2),
@@ -25,7 +27,12 @@ const KYC_STEPS = [
 ];
 
 export function ProfileForm(): React.ReactElement {
-  const { register, handleSubmit, formState: { errors, isSubmitting } } = useForm<ProfileFormData>({
+  const [activeKycStep, setActiveKycStep] = useState<number | null>(null);
+  const {
+    register,
+    handleSubmit,
+    formState: { errors, isSubmitting },
+  } = useForm<ProfileFormData>({
     resolver: zodResolver(profileSchema),
     defaultValues: {
       firstName: 'Aminata',
@@ -45,49 +52,84 @@ export function ProfileForm(): React.ReactElement {
     <div className="flex flex-col gap-5">
       {/* Profile card */}
       <Card>
-        <h2 className="font-serif text-lg font-semibold text-charcoal mb-5">Informations personnelles</h2>
-        <form onSubmit={(e) => { void handleSubmit(onSubmit)(e); }} noValidate className="flex flex-col gap-4">
-          <div className="flex items-center gap-4 mb-2">
-            <div className="flex h-16 w-16 items-center justify-center rounded-full bg-navy text-white text-2xl font-semibold">
+        <h2 className="text-charcoal mb-5 font-serif text-lg font-semibold">
+          Informations personnelles
+        </h2>
+        <form
+          onSubmit={(e) => {
+            void handleSubmit(onSubmit)(e);
+          }}
+          noValidate
+          className="flex flex-col gap-4"
+        >
+          <div className="mb-2 flex items-center gap-4">
+            <div className="bg-navy flex h-16 w-16 items-center justify-center rounded-full text-2xl font-semibold text-white">
               AK
             </div>
             <div>
-              <p className="text-sm font-medium text-charcoal">Aminata Koné</p>
-              <p className="text-xs text-charcoal-400">Acheteur · Cotonou, Bénin</p>
-              <Badge variant="success" className="mt-1">KYC Niveau 1</Badge>
+              <p className="text-charcoal text-sm font-medium">Aminata Koné</p>
+              <p className="text-charcoal-400 text-xs">Acheteur · Cotonou, Bénin</p>
+              <Badge variant="success" className="mt-1">
+                KYC Niveau 1
+              </Badge>
             </div>
           </div>
 
           <div className="grid grid-cols-2 gap-3">
-            <Input label="Prénom" required error={errors.firstName?.message} {...register('firstName')} />
-            <Input label="Nom" required error={errors.lastName?.message} {...register('lastName')} />
+            <Input
+              label="Prénom"
+              required
+              error={errors.firstName?.message}
+              {...register('firstName')}
+            />
+            <Input
+              label="Nom"
+              required
+              error={errors.lastName?.message}
+              {...register('lastName')}
+            />
           </div>
-          <Input label="Téléphone" type="tel" error={errors.phone?.message} {...register('phone')} />
+          <Input
+            label="Téléphone"
+            type="tel"
+            error={errors.phone?.message}
+            {...register('phone')}
+          />
           <Input label="Ville" {...register('city')} />
           <div className="flex flex-col gap-1.5">
-            <label className="text-sm font-medium text-charcoal">Bio (optionnel)</label>
+            <label className="text-charcoal text-sm font-medium">Bio (optionnel)</label>
             <textarea
               {...register('bio')}
               rows={3}
-              className="rounded-md border border-charcoal-200 px-3 py-2.5 text-sm text-charcoal focus:outline-none focus:ring-2 focus:ring-navy/30 focus:border-navy resize-none"
+              className="border-charcoal-200 text-charcoal focus:ring-navy/30 focus:border-navy resize-none rounded-md border px-3 py-2.5 text-sm focus:outline-none focus:ring-2"
               placeholder="Quelques mots sur vous…"
             />
-            {errors.bio && <p className="text-xs text-danger">{errors.bio.message}</p>}
+            {errors.bio && <p className="text-danger text-xs">{errors.bio.message}</p>}
           </div>
-          <Button type="submit" loading={isSubmitting}>Sauvegarder</Button>
+          <Button type="submit" loading={isSubmitting}>
+            Sauvegarder
+          </Button>
         </form>
       </Card>
 
       {/* KYC Status */}
       <Card>
-        <h2 className="font-serif text-lg font-semibold text-charcoal mb-5">Vérification KYC</h2>
+        <h2 className="text-charcoal mb-5 font-serif text-lg font-semibold">Vérification KYC</h2>
         <div className="space-y-4">
           {KYC_STEPS.map((step) => (
-            <div key={step.level} className="flex items-start gap-4 p-4 rounded-lg border border-charcoal-100">
-              <div className={`flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full ${
-                step.status === 'APPROVED' ? 'bg-emerald text-white' :
-                step.status === 'PENDING' ? 'bg-gold/20 text-gold-600' : 'bg-charcoal-100 text-charcoal-400'
-              }`}>
+            <div
+              key={step.level}
+              className="border-charcoal-100 flex items-start gap-4 rounded-lg border p-4"
+            >
+              <div
+                className={`flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full ${
+                  step.status === 'APPROVED'
+                    ? 'bg-emerald text-white'
+                    : step.status === 'PENDING'
+                      ? 'bg-gold/20 text-gold-600'
+                      : 'bg-charcoal-100 text-charcoal-400'
+                }`}
+              >
                 {step.status === 'APPROVED' ? (
                   <CheckCircle2 className="h-4 w-4" aria-hidden="true" />
                 ) : (
@@ -96,16 +138,29 @@ export function ProfileForm(): React.ReactElement {
               </div>
               <div className="flex-1">
                 <div className="flex items-center justify-between">
-                  <p className="text-sm font-medium text-charcoal">{step.label}</p>
-                  <Badge variant={step.status === 'APPROVED' ? 'success' : step.status === 'PENDING' ? 'gold' : 'default'}>
-                    {step.status === 'APPROVED' ? 'Approuvé' : step.status === 'PENDING' ? 'En cours' : 'Non commencé'}
+                  <p className="text-charcoal text-sm font-medium">{step.label}</p>
+                  <Badge
+                    variant={
+                      step.status === 'APPROVED'
+                        ? 'success'
+                        : step.status === 'PENDING'
+                          ? 'gold'
+                          : 'default'
+                    }
+                  >
+                    {step.status === 'APPROVED'
+                      ? 'Approuvé'
+                      : step.status === 'PENDING'
+                        ? 'En cours'
+                        : 'Non commencé'}
                   </Badge>
                 </div>
-                <p className="text-xs text-charcoal-400 mt-0.5">{step.desc}</p>
+                <p className="text-charcoal-400 mt-0.5 text-xs">{step.desc}</p>
               </div>
               {step.status === 'NONE' && (
                 <button
-                  className="flex items-center gap-1.5 rounded-pill border border-navy px-3 py-1.5 text-xs font-medium text-navy hover:bg-navy/5 transition-colors"
+                  onClick={() => setActiveKycStep(step.level)}
+                  className="rounded-pill border-navy text-navy hover:bg-navy/5 flex items-center gap-1.5 border px-3 py-1.5 text-xs font-medium transition-colors"
                   aria-label={`Commencer ${step.label}`}
                 >
                   <Upload className="h-3 w-3" aria-hidden="true" />
@@ -116,6 +171,10 @@ export function ProfileForm(): React.ReactElement {
           ))}
         </div>
       </Card>
+
+      {activeKycStep && (
+        <KycUploadForm level={activeKycStep} onSuccess={() => setActiveKycStep(null)} />
+      )}
     </div>
   );
 }

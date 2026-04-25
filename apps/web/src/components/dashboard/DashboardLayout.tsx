@@ -1,18 +1,28 @@
 'use client';
 import type React from 'react';
+import type { Route } from 'next';
 
 import { useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import {
-  LayoutDashboard, Heart, CreditCard, Bell, Settings,
-  User, Building2, LogOut, Menu, X, ChevronRight
+  LayoutDashboard,
+  Heart,
+  CreditCard,
+  Bell,
+  Settings,
+  User,
+  Building2,
+  LogOut,
+  Menu,
+  X,
+  ChevronRight,
 } from 'lucide-react';
 import { cn } from '@afribayit/ui';
 import { Badge } from '@afribayit/ui';
 
-const NAV_ITEMS = [
-  { label: 'Vue d\'ensemble', href: '/dashboard', icon: LayoutDashboard },
+const NAV_ITEMS: Array<{ label: string; href: Route; icon: React.ElementType; badge?: string }> = [
+  { label: "Vue d'ensemble", href: '/dashboard', icon: LayoutDashboard },
   { label: 'Mes annonces', href: '/dashboard/annonces', icon: Building2 },
   { label: 'Favoris', href: '/dashboard/favoris', icon: Heart },
   { label: 'Transactions', href: '/dashboard/transactions', icon: CreditCard },
@@ -30,11 +40,11 @@ export function DashboardLayout({ children }: DashboardLayoutProps): React.React
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   return (
-    <div className="min-h-screen bg-charcoal-50 flex">
+    <div className="bg-charcoal-50 flex min-h-screen">
       {/* Sidebar */}
       <aside
         className={cn(
-          'fixed inset-y-0 left-0 z-50 w-64 bg-white border-r border-charcoal-100',
+          'border-charcoal-100 fixed inset-y-0 left-0 z-50 w-64 border-r bg-white',
           'flex flex-col transition-transform duration-300 ease-[cubic-bezier(0.16,1,0.3,1)]',
           'lg:relative lg:translate-x-0',
           isSidebarOpen ? 'translate-x-0' : '-translate-x-full',
@@ -42,14 +52,14 @@ export function DashboardLayout({ children }: DashboardLayoutProps): React.React
         aria-label="Navigation dashboard"
       >
         {/* Logo */}
-        <div className="flex items-center justify-between h-16 px-5 border-b border-charcoal-100">
+        <div className="border-charcoal-100 flex h-16 items-center justify-between border-b px-5">
           <Link href="/" className="font-serif text-2xl font-bold">
             <span className="text-navy">Afri</span>
             <span className="text-gold">Bayit</span>
           </Link>
           <button
             onClick={() => setIsSidebarOpen(false)}
-            className="lg:hidden p-1 text-charcoal-400 hover:text-charcoal"
+            className="text-charcoal-400 hover:text-charcoal p-1 lg:hidden"
             aria-label="Fermer le menu"
           >
             <X className="h-5 w-5" aria-hidden="true" />
@@ -57,22 +67,24 @@ export function DashboardLayout({ children }: DashboardLayoutProps): React.React
         </div>
 
         {/* User mini */}
-        <div className="px-5 py-4 border-b border-charcoal-100">
+        <div className="border-charcoal-100 border-b px-5 py-4">
           <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-navy text-white font-semibold text-sm">
+            <div className="bg-navy flex h-10 w-10 items-center justify-center rounded-full text-sm font-semibold text-white">
               AK
             </div>
-            <div className="flex-1 min-w-0">
-              <p className="font-medium text-charcoal text-sm truncate">Aminata Koné</p>
+            <div className="min-w-0 flex-1">
+              <p className="text-charcoal truncate text-sm font-medium">Aminata Koné</p>
               <div className="flex items-center gap-1">
-                <Badge variant="success" className="text-[10px] py-0">KYC ✓</Badge>
+                <Badge variant="success" className="py-0 text-[10px]">
+                  KYC ✓
+                </Badge>
               </div>
             </div>
           </div>
         </div>
 
         {/* Navigation */}
-        <nav className="flex-1 px-3 py-4 space-y-0.5 overflow-y-auto">
+        <nav className="flex-1 space-y-0.5 overflow-y-auto px-3 py-4">
           {NAV_ITEMS.map(({ label, href, icon: Icon, badge }) => {
             const isActive = pathname === href;
             return (
@@ -91,20 +103,20 @@ export function DashboardLayout({ children }: DashboardLayoutProps): React.React
                 <Icon className="h-4 w-4 flex-shrink-0" aria-hidden="true" />
                 <span className="flex-1">{label}</span>
                 {badge && (
-                  <span className="flex h-5 w-5 items-center justify-center rounded-full bg-danger text-white text-[10px] font-bold">
+                  <span className="bg-danger flex h-5 w-5 items-center justify-center rounded-full text-[10px] font-bold text-white">
                     {badge}
                   </span>
                 )}
-                {isActive && <ChevronRight className="h-3 w-3 text-navy" aria-hidden="true" />}
+                {isActive && <ChevronRight className="text-navy h-3 w-3" aria-hidden="true" />}
               </Link>
             );
           })}
         </nav>
 
         {/* Logout */}
-        <div className="p-3 border-t border-charcoal-100">
+        <div className="border-charcoal-100 border-t p-3">
           <button
-            className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-charcoal-400 hover:bg-danger/5 hover:text-danger transition-colors w-full"
+            className="text-charcoal-400 hover:bg-danger/5 hover:text-danger flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors"
             aria-label="Se déconnecter"
           >
             <LogOut className="h-4 w-4" aria-hidden="true" />
@@ -116,19 +128,19 @@ export function DashboardLayout({ children }: DashboardLayoutProps): React.React
       {/* Overlay mobile */}
       {isSidebarOpen && (
         <div
-          className="fixed inset-0 z-40 bg-charcoal/50 lg:hidden"
+          className="bg-charcoal/50 fixed inset-0 z-40 lg:hidden"
           onClick={() => setIsSidebarOpen(false)}
           aria-hidden="true"
         />
       )}
 
       {/* Main */}
-      <div className="flex-1 flex flex-col min-w-0">
+      <div className="flex min-w-0 flex-1 flex-col">
         {/* Top bar */}
-        <header className="sticky top-0 z-30 h-16 bg-white border-b border-charcoal-100 flex items-center px-4 sm:px-6 gap-4">
+        <header className="border-charcoal-100 sticky top-0 z-30 flex h-16 items-center gap-4 border-b bg-white px-4 sm:px-6">
           <button
             onClick={() => setIsSidebarOpen(true)}
-            className="lg:hidden p-2 text-charcoal-400 hover:text-charcoal"
+            className="text-charcoal-400 hover:text-charcoal p-2 lg:hidden"
             aria-label="Ouvrir le menu"
             aria-expanded={isSidebarOpen}
           >
@@ -136,11 +148,14 @@ export function DashboardLayout({ children }: DashboardLayoutProps): React.React
           </button>
           <div className="flex-1" />
           <button
-            className="relative p-2 text-charcoal-400 hover:text-charcoal rounded-lg hover:bg-charcoal-50"
+            className="text-charcoal-400 hover:text-charcoal hover:bg-charcoal-50 relative rounded-lg p-2"
             aria-label="Notifications (3 non lues)"
           >
             <Bell className="h-5 w-5" aria-hidden="true" />
-            <span className="absolute top-1.5 right-1.5 h-2 w-2 rounded-full bg-danger" aria-hidden="true" />
+            <span
+              className="bg-danger absolute right-1.5 top-1.5 h-2 w-2 rounded-full"
+              aria-hidden="true"
+            />
           </button>
         </header>
 

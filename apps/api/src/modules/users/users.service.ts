@@ -29,7 +29,10 @@ export class UsersService {
     return safeUser as Omit<User, 'passwordHash' | 'twoFactorSecret'>;
   }
 
-  async updateProfile(id: string, dto: UpdateProfileDto): Promise<Omit<User, 'passwordHash' | 'twoFactorSecret'>> {
+  async updateProfile(
+    id: string,
+    dto: UpdateProfileDto,
+  ): Promise<Omit<User, 'passwordHash' | 'twoFactorSecret'>> {
     const user = await this.prisma.user.update({
       where: { id },
       data: dto,
@@ -39,12 +42,15 @@ export class UsersService {
   }
 
   /** Submit KYC document reference after R2 upload */
-  async submitKycDocument(userId: string, params: {
-    type: string;
-    fileUrl: string;
-    fileKey: string;
-    level: KycLevel;
-  }): Promise<void> {
+  async submitKycDocument(
+    userId: string,
+    params: {
+      type: string;
+      fileUrl: string;
+      fileKey: string;
+      level: KycLevel;
+    },
+  ): Promise<void> {
     await this.prisma.kycDocument.create({
       data: {
         userId,
@@ -57,7 +63,108 @@ export class UsersService {
     });
   }
 
+  /** Find all KYC documents pending review */
+  async findPendingKycDocuments() {
+    return this.prisma.kycDocument.findMany({
+      where: { status: 'PENDING' },
+      include: {
+        user: {
+          select: {
+            id: true,
+            firstName: true,
+            lastName: true,
+            email: true,
+          },
+        },
+      },
+      orderBy: { createdAt: 'asc' },
+    });
+  }
+
+  /** Review a KYC document and update user level if approved */
+  async reviewKycDocument(
+    documentId: string,
+    status: 'APPROVED' | 'REJECTED',
+    note: string,
+    adminId: string,
+  ) {
+    const document = await this.prisma.kycDocument.update({
+      where: { id: documentId },
+      data: {
+        status,
+        reviewNote: note,
+        reviewedAt: new Date(),
+        reviewedBy: adminId,
+      },
+    });
+
+    if (status === 'APPROVED') {
+      await this.updateUserKycLevel(document.userId);
+    }
+
+    return document;
+  }
+
+  /** Calculate and update the user's KYC level based on approved documents */
+  private async updateUserKycLevel(userId: string) {
+    const approvedDocs = await this.prisma.kycDocument.findMany({
+      where: {
+        userId,
+        status: 'APPROVED',
+      },
+      select: { level: true },
+    });
+
+    if (approvedDocs.length === 0) return;
+
+    const levels = approvedDocs.map((doc) => doc.level);
+
+    // Determine the highest achieved level
+    let targetLevel: KycLevel = 'NONE';
+    if (levels.includes('LEVEL_3')) targetLevel = 'LEVEL_3';
+    else if (levels.includes('LEVEL_2')) targetLevel = 'LEVEL_2';
+    else if (levels.includes('LEVEL_1')) targetLevel = 'LEVEL_1';
+
+    await this.prisma.user.update({
+      where: { id: userId },
+      data: { kycLevel: targetLevel },
+    });
+  }
+
+  /** Find all users with pagination and filters */
+  async findAllUsers(params: { skip?: number; take?: number; role?: string; status?: string }) {
+    const { skip = 0, take = 20, role, status } = params;
+
+    return this.prisma.user.findMany({
+      where: {
+        ...(role ? { role: role as any } : {}),
+        ...(status === 'BANNED' ? { isBanned: true } : {}),
+        ...(status === 'ACTIVE' ? { isBanned: false } : {}),
+      },
+      skip,
+      take,
+      orderBy: { createdAt: 'desc' },
+    });
+  }
+
+  /** Update user role */
+  async updateUserRole(id: string, role: any) {
+    return this.prisma.user.update({
+      where: { id },
+      data: { role },
+    });
+  }
+
+  /** Ban or unban a user */
+  async updateUserStatus(id: string, status: 'ACTIVE' | 'BANNED') {
+    return this.prisma.user.update({
+      where: { id },
+      data: { isBanned: status === 'BANNED' },
+    });
+  }
+
   /** Get user favorites */
+
   async getFavorites(userId: string) {
     return this.prisma.favorite.findMany({
       where: { userId },

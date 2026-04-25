@@ -12,7 +12,7 @@ interface JwtPayload {
   role: string;
 }
 
-interface AuthTokens {
+export interface AuthTokens {
   accessToken: string;
   refreshToken: string;
   user: Omit<User, 'passwordHash' | 'twoFactorSecret'>;
@@ -38,7 +38,7 @@ export class AuthService {
         passwordHash,
         firstName: dto.firstName,
         lastName: dto.lastName,
-        phone: dto.phone,
+        ...(dto.phone !== undefined && { phone: dto.phone }),
         role: dto.role ?? 'BUYER',
         country: dto.country ?? 'BJ',
       },

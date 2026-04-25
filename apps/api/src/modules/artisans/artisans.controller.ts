@@ -1,12 +1,22 @@
 import {
-  Controller, Get, Post, Patch, Param, Body, Query,
-  UseGuards, ParseIntPipe, DefaultValuePipe, ParseBoolPipe,
+  Controller,
+  Get,
+  Post,
+  Patch,
+  Param,
+  Body,
+  Query,
+  UseGuards,
+  ParseIntPipe,
+  DefaultValuePipe,
+  ParseBoolPipe,
   ParseFloatPipe,
 } from '@nestjs/common';
 import { ApiTags, ApiBearerAuth, ApiOperation } from '@nestjs/swagger';
 import { ArtisansService } from './artisans.service';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
 import { CurrentUser } from '../../common/decorators/current-user.decorator';
+import { compactQuery } from '../../common/utils/query';
 
 @ApiTags('Artisans')
 @Controller('artisans')
@@ -14,7 +24,7 @@ export class ArtisansController {
   constructor(private readonly artisansService: ArtisansService) {}
 
   @Get()
-  @ApiOperation({ summary: 'Recherche d\'artisans avec filtres' })
+  @ApiOperation({ summary: "Recherche d'artisans avec filtres" })
   search(
     @Query('ville') ville?: string,
     @Query('categorie') categorie?: string,
@@ -22,11 +32,13 @@ export class ArtisansController {
     @Query('page', new DefaultValuePipe(1), ParseIntPipe) page?: number,
     @Query('limit', new DefaultValuePipe(12), ParseIntPipe) limit?: number,
   ) {
-    return this.artisansService.search({ ville, categorie, noteMin: noteMin || undefined, page, limit });
+    return this.artisansService.search(
+      compactQuery({ ville, categorie, noteMin: noteMin || undefined, page, limit }),
+    );
   }
 
   @Get(':slug')
-  @ApiOperation({ summary: 'Profil d\'un artisan par slug' })
+  @ApiOperation({ summary: "Profil d'un artisan par slug" })
   findBySlug(@Param('slug') slug: string) {
     return this.artisansService.findBySlug(slug);
   }
@@ -65,10 +77,7 @@ export class ArtisansController {
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Basculer la disponibilité' })
-  toggleAvailability(
-    @Param('id') id: string,
-    @CurrentUser() user: { id: string },
-  ) {
+  toggleAvailability(@Param('id') id: string, @CurrentUser() user: { id: string }) {
     return this.artisansService.toggleAvailability(id, user.id);
   }
 }

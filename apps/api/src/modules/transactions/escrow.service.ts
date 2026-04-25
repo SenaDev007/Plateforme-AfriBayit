@@ -45,8 +45,8 @@ export class EscrowService {
         where: { id: transactionId },
         data: {
           status: toStatus,
-          completedAt: toStatus === 'COMPLETED' ? new Date() : undefined,
-          disputedAt: toStatus === 'DISPUTED' ? new Date() : undefined,
+          ...(toStatus === 'COMPLETED' ? { completedAt: new Date() } : {}),
+          ...(toStatus === 'DISPUTED' ? { disputedAt: new Date() } : {}),
         },
       }),
       this.prisma.ledgerEntry.create({
@@ -57,7 +57,11 @@ export class EscrowService {
           currency: transaction.currency,
           description: `${transaction.status} → ${toStatus}${note ? ` | ${note}` : ''} | Acteur: ${actorId}`,
           balanceBefore: transaction.escrowAccount?.balance ?? new Decimal(0),
-          balanceAfter: this.getNewBalance(transaction.escrowAccount?.balance, transaction.amount, toStatus),
+          balanceAfter: this.getNewBalance(
+            transaction.escrowAccount?.balance,
+            transaction.amount,
+            toStatus,
+          ),
           metadata: { fromStatus: transaction.status, toStatus, actorId },
         },
       }),
