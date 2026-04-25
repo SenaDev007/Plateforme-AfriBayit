@@ -8,55 +8,53 @@ interface PropertyPageProps {
   params: Promise<{ slug: string }>;
 }
 
-// Mock property — replace with real API fetch
-async function getProperty(slug: string) {
-  // TODO: fetch from API
-  if (!slug) return null;
-  return {
-    id: '1',
-    slug,
-    title: 'Villa Les Cocotiers — Cotonou Riviera',
-    description:
-      'Magnifique villa avec piscine en bord de mer. 4 chambres, salon spacieux, cuisine entièrement équipée. Accès direct à la plage de Fidjrossè. Gardiennage 24h/24, groupe électrogène, fosse septique. Titre foncier disponible.',
-    type: 'VILLA',
-    purpose: 'SALE' as const,
-    price: 85000000,
-    currency: 'XOF',
-    surface: 350,
-    bedrooms: 4,
-    bathrooms: 3,
-    floor: null,
-    yearBuilt: 2019,
-    country: 'Bénin',
-    city: 'Cotonou',
-    district: 'Riviera',
-    address: 'Rue des Cocotiers, Fidjrossè, Cotonou',
-    latitude: 6.3703,
-    longitude: 2.3912,
-    features: ['Piscine', 'Groupe électrogène', 'Gardiennage', 'Climatisation', 'Jardin', 'Parking 3 véhicules'],
-    isVerified: true,
-    isFeatured: true,
-    images: [
-      { url: 'https://images.unsplash.com/photo-1613977257363-707ba9348227?w=1200&q=85', alt: 'Vue principale' },
-      { url: 'https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?w=1200&q=85', alt: 'Piscine' },
-      { url: 'https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?w=1200&q=85', alt: 'Salon' },
-      { url: 'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=1200&q=85', alt: 'Chambre principale' },
-    ],
-    agent: {
-      name: 'Kodjo Mensah',
-      avatar: null,
-      phone: '+229 97 00 00 00',
-      email: 'kodjo@afribayit.com',
-      rating: 4.8,
-      reviewCount: 23,
-      isVerified: true,
-    },
-  };
+interface ApiProperty {
+  id: string;
+  slug: string;
+  title: string;
+  description: string;
+  type: string;
+  purpose: 'SALE' | 'RENT' | 'SHORT_TERM_RENT' | 'INVESTMENT';
+  price: unknown;
+  currency: string;
+  surface?: number | null;
+  bedrooms?: number | null;
+  bathrooms?: number | null;
+  floor?: number | null;
+  yearBuilt?: number | null;
+  country: string;
+  city: string;
+  district?: string | null;
+  address?: string | null;
+  latitude?: number | null;
+  longitude?: number | null;
+  features?: unknown;
+  isVerified: boolean;
+  isFeatured: boolean;
+  images: Array<{ url: string; alt?: string | null; isPrimary?: boolean }>;
+  owner?: {
+    id: string;
+    firstName: string;
+    lastName: string;
+    reputationScore?: number;
+    kycLevel?: string;
+  } | null;
+}
+
+async function fetchProperty(slug: string): Promise<ApiProperty | null> {
+  try {
+    const apiUrl = process.env['NEXT_PUBLIC_API_URL'] ?? 'http://localhost:4000';
+    const res = await fetch(`${apiUrl}/api/v1/properties/${slug}`, { next: { revalidate: 120 } });
+    if (!res.ok) return null;
+    return (await res.json()) as ApiProperty;
+  } catch {
+    return null;
+  }
 }
 
 export async function generateMetadata({ params }: PropertyPageProps): Promise<Metadata> {
   const { slug } = await params;
-  const property = await getProperty(slug);
+  const property = await fetchProperty(slug);
   if (!property) return { title: 'Propriété introuvable' };
   return {
     title: property.title,
@@ -69,17 +67,59 @@ export async function generateMetadata({ params }: PropertyPageProps): Promise<M
   };
 }
 
-export default async function PropertyPage({ params }: PropertyPageProps): Promise<React.ReactElement> {
+export default async function PropertyPage({
+  params,
+}: PropertyPageProps): Promise<React.ReactElement> {
   const { slug } = await params;
-  const property = await getProperty(slug);
+  const property = await fetchProperty(slug);
 
   if (!property) notFound();
+
+  const features = Array.isArray(property.features) ? (property.features as string[]) : [];
+
+  const detailData = {
+    id: property.id,
+    slug: property.slug,
+    title: property.title,
+    description: property.description,
+    type: property.type,
+    purpose: property.purpose,
+    price: Number(property.price),
+    currency: property.currency,
+    ...(property.surface != null ? { surface: property.surface } : {}),
+    ...(property.bedrooms != null ? { bedrooms: property.bedrooms } : {}),
+    ...(property.bathrooms != null ? { bathrooms: property.bathrooms } : {}),
+    ...(property.floor != null ? { floor: property.floor } : {}),
+    ...(property.yearBuilt != null ? { yearBuilt: property.yearBuilt } : {}),
+    country: property.country,
+    city: property.city,
+    ...(property.district ? { district: property.district } : {}),
+    ...(property.address ? { address: property.address } : {}),
+    ...(property.latitude != null ? { latitude: property.latitude } : {}),
+    ...(property.longitude != null ? { longitude: property.longitude } : {}),
+    features,
+    isVerified: property.isVerified,
+    isFeatured: property.isFeatured,
+    images: property.images.map((img) => ({
+      url: img.url,
+      alt: img.alt ?? property.title,
+    })),
+    agent: {
+      name: property.owner ? `${property.owner.firstName} ${property.owner.lastName}` : 'AfriBayit',
+      avatar: null,
+      phone: '+229 97 00 00 00',
+      email: 'contact@afribayit.com',
+      rating: property.owner?.reputationScore ?? 0,
+      reviewCount: 0,
+      isVerified: property.owner?.kycLevel !== 'NONE',
+    },
+  };
 
   return (
     <div className="min-h-screen bg-white">
       <SiteNavbar />
       <main id="main-content" className="pt-16">
-        <PropertyDetail property={property} />
+        <PropertyDetail property={detailData} />
       </main>
     </div>
   );

@@ -6,70 +6,71 @@ import { PropertyCard } from '@afribayit/ui';
 import type { PropertyCardData } from '@afribayit/ui';
 import { MapView } from './MapView';
 
-const TITLES = [
-  'Villa Prestige',
-  'Appartement T3',
-  'Terrain 500m²',
-  'Duplex moderne',
-  'Studio meublé',
-];
-const CITIES = ['Cotonou', 'Abidjan', 'Ouagadougou', 'Lomé', 'Porto-Novo'];
-const COUNTRIES = ['Bénin', "Côte d'Ivoire", 'Burkina Faso', 'Togo', 'Bénin'];
-const PRICES = [85000000, 280000, 12000000, 45000000, 85000];
-const TYPES = ['VILLA', 'APARTMENT', 'LAND', 'DUPLEX', 'STUDIO'];
-const PURPOSES = [
-  'SALE',
-  'RENT',
-  'SALE',
-  'SALE',
-  'SHORT_TERM_RENT',
-] as PropertyCardData['purpose'][];
-const PHOTOS = [
-  '1613977257363-707ba9348227',
-  '1502672260266-1c1ef2d93688',
-  '1549517045-bc93de075e53',
-  '1600596542815-ffad4c1539a9',
-  '1522708323590-d24dbb6b0267',
-];
-const BEDROOMS = [4, 3, 0, 5, 1];
-const BATHROOMS = [3, 2, 0, 3, 1];
-const SURFACES = [350, 110, 500, 280, 45];
+interface ApiProperty {
+  id: string;
+  slug: string;
+  title: string;
+  city: string;
+  country: string;
+  price: unknown;
+  currency: string;
+  bedrooms?: number | null;
+  bathrooms?: number | null;
+  surface?: number | null;
+  purpose: string;
+  type: string;
+  isVerified: boolean;
+  isFeatured: boolean;
+  latitude?: number | null;
+  longitude?: number | null;
+  images?: Array<{ url: string; isPrimary?: boolean }>;
+}
+
+function toCardData(p: ApiProperty): PropertyCardData {
+  const primaryImage = p.images?.find((img) => img.isPrimary) ?? p.images?.[0];
+  return {
+    id: p.id,
+    slug: p.slug,
+    title: p.title,
+    city: p.city,
+    country: p.country,
+    price: Number(p.price),
+    currency: p.currency,
+    ...(p.bedrooms ? { bedrooms: p.bedrooms } : {}),
+    ...(p.bathrooms ? { bathrooms: p.bathrooms } : {}),
+    ...(p.surface ? { surface: p.surface } : {}),
+    purpose: p.purpose as PropertyCardData['purpose'],
+    type: p.type,
+    imageUrl:
+      primaryImage?.url ??
+      `https://images.unsplash.com/photo-1613977257363-707ba9348227?w=600&q=80`,
+    isVerified: p.isVerified,
+    isFeatured: p.isFeatured,
+  };
+}
 
 const MOCK_RESULTS: PropertyCardData[] = Array.from({ length: 9 }, (_, i) => {
   const v = i % 5;
-  const bedrooms = BEDROOMS[v];
-  const bathrooms = BATHROOMS[v];
-  const surface = SURFACES[v];
   return {
     id: String(i + 1),
     slug: `propriete-${i + 1}`,
-    title: TITLES[v] ?? 'Propriété',
-    city: CITIES[v] ?? 'Cotonou',
-    country: COUNTRIES[v] ?? 'Bénin',
-    price: PRICES[v] ?? 1000000,
+    title:
+      ['Villa Prestige', 'Appartement T3', 'Terrain 500m²', 'Duplex moderne', 'Studio meublé'][v] ??
+      'Propriété',
+    city: ['Cotonou', 'Abidjan', 'Ouagadougou', 'Lomé', 'Porto-Novo'][v] ?? 'Cotonou',
+    country: ['Bénin', "Côte d'Ivoire", 'Burkina Faso', 'Togo', 'Bénin'][v] ?? 'Bénin',
+    price: [85000000, 280000, 12000000, 45000000, 85000][v] ?? 1000000,
     currency: 'XOF',
-    ...(bedrooms ? { bedrooms } : {}),
-    ...(bathrooms ? { bathrooms } : {}),
-    ...(surface ? { surface } : {}),
-    purpose: PURPOSES[v] ?? 'SALE',
-    type: TYPES[v] ?? 'HOUSE',
-    imageUrl: `https://images.unsplash.com/photo-${PHOTOS[v] ?? PHOTOS[0]}?w=600&q=80`,
+    ...([4, 3, 0, 5, 1][v] ? { bedrooms: [4, 3, 0, 5, 1][v] } : {}),
+    ...([3, 2, 0, 3, 1][v] ? { bathrooms: [3, 2, 0, 3, 1][v] } : {}),
+    ...([350, 110, 500, 280, 45][v] ? { surface: [350, 110, 500, 280, 45][v] } : {}),
+    purpose: ['SALE', 'RENT', 'SALE', 'SALE', 'SHORT_TERM_RENT'][v] as PropertyCardData['purpose'],
+    type: ['VILLA', 'APARTMENT', 'LAND', 'DUPLEX', 'STUDIO'][v] ?? 'HOUSE',
+    imageUrl: `https://images.unsplash.com/photo-${'1613977257363-707ba9348227,1502672260266-1c1ef2d93688,1549517045-bc93de075e53,1600596542815-ffad4c1539a9,1522708323590-d24dbb6b0267'.split(',')[v]}?w=600&q=80`,
     isVerified: i % 3 !== 0,
     isFeatured: i % 4 === 0,
   };
 });
-
-const MAP_PROPERTIES = MOCK_RESULTS.map((p, i) => ({
-  id: p.id,
-  slug: p.slug,
-  title: p.title,
-  price: p.price,
-  currency: p.currency,
-  latitude: 6.3654 + (i * 0.02 - 0.04),
-  longitude: 2.4183 + (i * 0.015 - 0.03),
-  type: p.type ?? 'HOUSE',
-  purpose: p.purpose ?? 'SALE',
-}));
 
 interface SearchResultsProps {
   searchParams: Record<string, string | undefined>;
@@ -78,13 +79,55 @@ interface SearchResultsProps {
 export async function SearchResults({
   searchParams,
 }: SearchResultsProps): Promise<React.ReactElement> {
-  const results = MOCK_RESULTS;
-  const total = results.length;
+  let results: PropertyCardData[] = MOCK_RESULTS;
+  let total = MOCK_RESULTS.length;
+
+  try {
+    const params = new URLSearchParams();
+    if (searchParams['q']) params.set('q', searchParams['q']);
+    if (searchParams['city']) params.set('city', searchParams['city']);
+    if (searchParams['but']) params.set('purpose', searchParams['but']);
+    if (searchParams['type']) params.set('type', searchParams['type']);
+    if (searchParams['prixMin']) params.set('prixMin', searchParams['prixMin']);
+    if (searchParams['prixMax']) params.set('prixMax', searchParams['prixMax']);
+    if (searchParams['surfaceMin']) params.set('surfaceMin', searchParams['surfaceMin']);
+    if (searchParams['surfaceMax']) params.set('surfaceMax', searchParams['surfaceMax']);
+    if (searchParams['chambres']) params.set('chambres', searchParams['chambres']);
+    if (searchParams['country']) params.set('country', searchParams['country']);
+    params.set('page', searchParams['page'] ?? '1');
+    params.set('limit', '12');
+
+    const apiUrl = process.env['NEXT_PUBLIC_API_URL'] ?? 'http://localhost:4000';
+    const res = await fetch(`${apiUrl}/api/v1/properties?${params.toString()}`, {
+      next: { revalidate: 30 },
+    });
+
+    if (res.ok) {
+      const data = (await res.json()) as { data: ApiProperty[]; total: number };
+      if (data.data && data.data.length > 0) {
+        results = data.data.map(toCardData);
+        total = data.total;
+      }
+    }
+  } catch {
+    // fall back to static data
+  }
+
   const view = searchParams['vue'] ?? 'grille';
+  const mapProperties = results.map((p, i) => ({
+    id: p.id,
+    slug: p.slug,
+    title: p.title,
+    price: p.price,
+    currency: p.currency,
+    latitude: 6.3654 + (i * 0.02 - 0.04),
+    longitude: 2.4183 + (i * 0.015 - 0.03),
+    type: p.type ?? 'HOUSE',
+    purpose: (p.purpose ?? 'SALE') as string,
+  }));
 
   return (
     <div className="flex flex-col gap-5">
-      {/* Toolbar */}
       <div className="flex items-center justify-between">
         <p className="text-charcoal-400 text-sm">
           <span className="text-charcoal font-semibold">{total}</span> propriétés trouvées
@@ -112,10 +155,8 @@ export async function SearchResults({
         </div>
       </div>
 
-      {/* Map view */}
-      {view === 'carte' && <MapView properties={MAP_PROPERTIES} className="h-[600px]" />}
+      {view === 'carte' && <MapView properties={mapProperties} className="h-[600px]" />}
 
-      {/* Grid / List view */}
       {view !== 'carte' &&
         (results.length > 0 ? (
           <div

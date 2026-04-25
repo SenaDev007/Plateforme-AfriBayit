@@ -168,15 +168,16 @@ export const api = {
     search: (params: URLSearchParams) =>
       request<{ data: unknown[]; total: number }>(`/hotels?${params.toString()}`),
     findBySlug: (slug: string) => request<unknown>(`/hotels/${slug}`),
-    checkAvailability: (id: string, checkin: string, checkout: string) =>
-      request<unknown[]>(`/hotels/${id}/availability?checkin=${checkin}&checkout=${checkout}`),
+    checkAvailability: (id: string, checkIn: string, checkOut: string) =>
+      request<unknown[]>(`/hotels/${id}/availability?checkIn=${checkIn}&checkOut=${checkOut}`),
     book: (
       id: string,
-      body: { roomId: string; checkin: string; checkout: string; guestCount: number },
+      body: { roomId: string; checkIn: string; checkOut: string; guests: number; notes?: string },
       token: string,
     ) => request<unknown>(`/hotels/${id}/book`, { method: 'POST', body, token }),
     create: (body: unknown, token: string) =>
       request<unknown>('/hotels', { method: 'POST', body, token }),
+    getMyBookings: (token: string) => request<unknown[]>('/hotels/my-bookings', { token }),
   },
 
   artisans: {

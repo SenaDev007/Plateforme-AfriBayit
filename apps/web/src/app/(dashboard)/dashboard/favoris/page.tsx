@@ -1,55 +1,123 @@
+'use client';
+
 import type React from 'react';
-import type { Metadata } from 'next';
+import { useState, useEffect } from 'react';
+import type { Route } from 'next';
+import Link from 'next/link';
+import { useSession } from 'next-auth/react';
 import { DashboardLayout } from '@/components/dashboard/DashboardLayout';
 import { PropertyCard, PropertyCardSkeleton } from '@afribayit/ui';
 import type { PropertyCardData } from '@afribayit/ui';
-import { Suspense } from 'react';
+import { api } from '@/lib/api';
 
-export const metadata: Metadata = { title: 'Mes favoris', robots: { index: false } };
+interface FavoriteRecord {
+  id: string;
+  property: {
+    id: string;
+    slug: string;
+    title: string;
+    city: string;
+    country: string;
+    price: unknown;
+    currency: string;
+    bedrooms?: number | null;
+    bathrooms?: number | null;
+    surface?: number | null;
+    purpose: string;
+    type: string;
+    isVerified: boolean;
+    isFeatured: boolean;
+    images: Array<{ url: string; isPrimary?: boolean }>;
+  };
+}
 
-// Mock data — replace with real API call using user session
-const MOCK_FAVORITES: PropertyCardData[] = [
-  {
-    id: '1', slug: 'villa-cocotiers-cotonou', title: 'Villa Les Cocotiers', city: 'Cotonou',
-    country: 'Bénin', price: 85000000, currency: 'XOF', bedrooms: 4, bathrooms: 3, surface: 350,
-    purpose: 'SALE', type: 'VILLA', imageUrl: 'https://images.unsplash.com/photo-1613977257363-707ba9348227?w=400&q=80',
-    isVerified: true, isFeatured: true,
-  },
-  {
-    id: '2', slug: 'appart-riviera-abidjan', title: 'Appartement Riviera Golf', city: 'Abidjan',
-    country: "Côte d'Ivoire", price: 280000, currency: 'XOF', bedrooms: 3, bathrooms: 2, surface: 110,
-    purpose: 'RENT', type: 'APARTMENT', imageUrl: 'https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?w=400&q=80',
-    isVerified: true,
-  },
-];
-
-function FavoritesGrid(): React.ReactElement {
-  return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-5">
-      {MOCK_FAVORITES.map((property) => (
-        <a key={property.id} href={`/proprietes/${property.slug}`} className="block">
-          <PropertyCard property={property} />
-        </a>
-      ))}
-    </div>
-  );
+function toCardData(fav: FavoriteRecord): PropertyCardData {
+  const p = fav.property;
+  const primaryImage = p.images.find((img) => img.isPrimary) ?? p.images[0];
+  return {
+    id: p.id,
+    slug: p.slug,
+    title: p.title,
+    city: p.city,
+    country: p.country,
+    price: Number(p.price),
+    currency: p.currency,
+    ...(p.bedrooms ? { bedrooms: p.bedrooms } : {}),
+    ...(p.bathrooms ? { bathrooms: p.bathrooms } : {}),
+    ...(p.surface ? { surface: p.surface } : {}),
+    purpose: p.purpose as PropertyCardData['purpose'],
+    type: p.type,
+    imageUrl: primaryImage?.url ?? '',
+    isVerified: p.isVerified,
+    isFeatured: p.isFeatured,
+  };
 }
 
 export default function FavoritesPage(): React.ReactElement {
+  const { data: session } = useSession();
+  const [favorites, setFavorites] = useState<PropertyCardData[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    if (!session?.accessToken) {
+      setLoading(false);
+      return;
+    }
+    api.users
+      .getFavorites(session.accessToken as string)
+      .then((res) => {
+        const records = res.data as FavoriteRecord[];
+        setFavorites(records.map(toCardData));
+      })
+      .catch(() => setFavorites([]))
+      .finally(() => setLoading(false));
+  }, [session]);
+
   return (
     <DashboardLayout>
       <div className="flex flex-col gap-6">
         <div>
-          <h1 className="font-serif text-2xl font-bold text-charcoal">Mes favoris</h1>
-          <p className="text-charcoal-400 mt-1">{MOCK_FAVORITES.length} propriété(s) sauvegardée(s)</p>
+          <h1 className="text-charcoal font-serif text-2xl font-bold">Mes favoris</h1>
+          <p className="text-charcoal-400 mt-1">
+            {loading ? '…' : `${favorites.length} propriété(s) sauvegardée(s)`}
+          </p>
         </div>
-        <Suspense fallback={
-          <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-5">
-            {Array.from({ length: 6 }).map((_, i) => <PropertyCardSkeleton key={i} />)}
+
+        {loading ? (
+          <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-3">
+            {Array.from({ length: 6 }).map((_, i) => (
+              <PropertyCardSkeleton key={i} />
+            ))}
           </div>
-        }>
-          <FavoritesGrid />
-        </Suspense>
+        ) : favorites.length === 0 ? (
+          <div className="border-charcoal-100 rounded-xl border bg-white p-12 text-center">
+            <p className="mb-3 text-4xl" aria-hidden="true">
+              🤍
+            </p>
+            <p className="text-charcoal font-semibold">Aucun favori pour l&apos;instant</p>
+            <p className="text-charcoal-400 mt-1 text-sm">
+              Explorez les propriétés et cliquez sur le cœur pour les sauvegarder ici.
+            </p>
+            <Link
+              href="/recherche"
+              className="bg-navy hover:bg-navy/90 mt-4 inline-block rounded-lg px-4 py-2 text-sm font-medium text-white transition-colors"
+            >
+              Explorer les propriétés
+            </Link>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-3">
+            {favorites.map((property) => (
+              <Link
+                key={property.id}
+                href={`/proprietes/${property.slug}` as Route}
+                className="block"
+              >
+                <PropertyCard property={property} />
+              </Link>
+            ))}
+          </div>
+        )}
       </div>
     </DashboardLayout>
   );
