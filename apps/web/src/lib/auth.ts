@@ -64,6 +64,7 @@ export const authConfig: NextAuthConfig = {
     },
     async session({ session, token }) {
       if (session.user) {
+        if (token.sub !== undefined) (session.user as { id?: string }).id = token.sub;
         (session.user as { role?: string }).role = token['role'] as string;
         (session as { accessToken?: string }).accessToken = token['accessToken'] as string;
       }

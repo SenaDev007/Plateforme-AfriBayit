@@ -211,6 +211,14 @@ export const api = {
       request<unknown>('/courses', { method: 'POST', body, token }),
   },
 
+  messages: {
+    getConversations: (token: string) => request<unknown[]>('/messages/conversations', { token }),
+    getMessages: (id: string, token: string) =>
+      request<{ data: unknown[]; total: number }>(`/messages/conversations/${id}`, { token }),
+    getUnreadCount: (token: string) =>
+      request<{ count: number }>('/messages/unread-count', { token }),
+  },
+
   community: {
     getPosts: (params?: URLSearchParams) =>
       request<{ data: unknown[]; total: number }>(
