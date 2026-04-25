@@ -7,55 +7,122 @@ interface Props {
   params: Promise<{ slug: string }>;
 }
 
+interface ApiRoom {
+  id: string;
+  name: string;
+  type: string;
+  pricePerNight: number | string;
+  capacity: number;
+  isAvailable: boolean;
+  description?: string;
+}
+
+interface ApiHotel {
+  id: string;
+  slug: string;
+  name: string;
+  type?: string | null;
+  starRating: number;
+  description: string;
+  city: string;
+  country: string;
+  district?: string | null;
+  address: string;
+  images?: unknown;
+  amenities?: unknown;
+  rooms: ApiRoom[];
+}
+
+function parseJsonArray(val: unknown): string[] {
+  if (Array.isArray(val)) return val.map((v) => String(v));
+  return [];
+}
+
+function parseImages(val: unknown): { url: string; alt: string }[] {
+  if (!Array.isArray(val)) return [];
+  return val.map((v: unknown) => {
+    const obj = v as Record<string, string>;
+    return { url: obj['url'] ?? obj['src'] ?? '', alt: obj['alt'] ?? '' };
+  });
+}
+
+const ROOM_TYPE_LABELS: Record<string, string> = {
+  STANDARD: 'Double Standard',
+  DELUXE: 'Deluxe',
+  SUITE: 'Suite King',
+  PRESIDENTIAL: 'Suite Présidentielle',
+};
+
+async function fetchHotel(slug: string): Promise<ApiHotel | null> {
+  try {
+    const apiUrl = process.env['NEXT_PUBLIC_API_URL'] ?? 'http://localhost:4000';
+    const res = await fetch(`${apiUrl}/api/v1/hotels/${slug}`, { next: { revalidate: 120 } });
+    if (!res.ok) return null;
+    return (await res.json()) as ApiHotel;
+  } catch {
+    return null;
+  }
+}
+
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
+  const hotel = await fetchHotel(slug);
   return {
-    title: `Hôtel ${slug}`,
-    description: 'Réservez cet hébergement en Afrique de l\'Ouest via AfriBayit.',
+    title: hotel ? `${hotel.name} — AfriBayit Hôtels` : `Hôtel — AfriBayit`,
+    description: hotel
+      ? `${hotel.name} à ${hotel.city}. Réservez cet hébergement en Afrique de l'Ouest via AfriBayit.`
+      : "Réservez cet hébergement en Afrique de l'Ouest via AfriBayit.",
   };
 }
 
-const MOCK_HOTEL = {
-  id: '1',
-  slug: 'hotel-du-lac-nokoue',
-  name: 'Hôtel du Lac Nokoué',
-  type: 'HOTEL',
-  stars: 5,
-  description: `L'Hôtel du Lac Nokoué est un établissement 5 étoiles niché au bord du célèbre lac Nokoué à Cotonou. Avec une architecture inspirée de l'authentique architecture lagunaire béninoise, cet hôtel offre une expérience unique alliant luxe moderne et culture locale.
-
-Ses 45 chambres et suites offrent toutes une vue imprenable sur le lac. Le restaurant gastronomique propose une carte mêlant cuisines béninoise et internationale, avec des produits frais issus des marchés locaux.
-
-Idéalement situé à 15 minutes de l'aéroport international de Cotonou et à 5 minutes du quartier d'affaires, l'hôtel est parfait pour les voyageurs d'affaires comme les touristes.`,
-  city: 'Cotonou',
-  country: 'Bénin',
-  district: 'Akpakpa',
-  address: 'Boulevard de la Marina, Cotonou',
-  latitude: 6.3654,
-  longitude: 2.4183,
-  pricePerNight: 75000,
-  currency: 'XOF',
-  rating: 4.8,
-  reviewCount: 127,
-  stars_count: 5,
-  amenities: ['Piscine', 'WiFi', 'Restauration', 'Gym', 'Spa', 'Navette aéroport', 'Climatisation', 'Parking', 'Bar', 'Salle de conférence'],
-  images: [
-    { url: 'https://images.unsplash.com/photo-1566073771259-6a8506099945?w=1200&q=85', alt: 'Vue extérieure' },
-    { url: 'https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?w=1200&q=85', alt: 'Piscine' },
-    { url: 'https://images.unsplash.com/photo-1590490360182-c33d57733427?w=1200&q=85', alt: 'Chambre deluxe' },
-    { url: 'https://images.unsplash.com/photo-1584132967334-10e028bd69f7?w=1200&q=85', alt: 'Restaurant' },
-  ],
-  rooms: [
-    { id: '1', name: 'Chambre Standard', bedType: 'Double', surface: 28, pricePerNight: 75000, maxGuests: 2, available: true },
-    { id: '2', name: 'Chambre Supérieure Vue Lac', bedType: 'King', surface: 35, pricePerNight: 95000, maxGuests: 2, available: true },
-    { id: '3', name: 'Suite Junior', bedType: 'King + Salon', surface: 55, pricePerNight: 145000, maxGuests: 3, available: false },
-    { id: '4', name: 'Suite Présidentielle', bedType: 'King + 2 chambres', surface: 120, pricePerNight: 280000, maxGuests: 6, available: true },
-  ],
-  isVerified: true,
-  isFeatured: true,
-};
-
 export default async function HotelDetailPage({ params }: Props): Promise<React.ReactElement> {
   const { slug } = await params;
-  if (!slug) notFound();
-  return <HotelDetail hotel={MOCK_HOTEL} />;
+  const hotel = await fetchHotel(slug);
+
+  if (!hotel) notFound();
+
+  const images = parseImages(hotel.images);
+  const amenities = parseJsonArray(hotel.amenities);
+  const minPrice = hotel.rooms.length
+    ? Math.min(...hotel.rooms.map((r) => Number(r.pricePerNight)))
+    : 0;
+
+  const detailData = {
+    id: hotel.id,
+    slug: hotel.slug,
+    name: hotel.name,
+    type: hotel.type ?? 'HOTEL',
+    stars: hotel.starRating,
+    description: hotel.description,
+    city: hotel.city,
+    country: hotel.country,
+    ...(hotel.district ? { district: hotel.district } : {}),
+    address: hotel.address,
+    pricePerNight: minPrice,
+    currency: 'XOF',
+    rating: 0,
+    reviewCount: 0,
+    amenities,
+    images: images.length
+      ? images
+      : [
+          {
+            url: 'https://images.unsplash.com/photo-1566073771259-6a8506099945?w=1200&q=85',
+            alt: hotel.name,
+          },
+        ],
+    rooms: hotel.rooms.map((r) => ({
+      id: r.id,
+      name: r.name,
+      bedType: ROOM_TYPE_LABELS[r.type] ?? r.type,
+      surface: 0,
+      pricePerNight: Number(r.pricePerNight),
+      maxGuests: r.capacity,
+      available: r.isAvailable,
+    })),
+    isVerified: false,
+    isFeatured: false,
+  };
+
+  return <HotelDetail hotel={detailData} />;
 }

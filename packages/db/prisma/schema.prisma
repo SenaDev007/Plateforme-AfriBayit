@@ -188,6 +188,7 @@ model User {
   groupMemberships GroupMember[]
   createdGroups       CommunityGroup[]  @relation("GroupCreator")
   hotelBookings       HotelBooking[]
+  hotelOwned          Hotel[]           @relation("HotelOwner")
   conversationsAsA    Conversation[]    @relation("ConversationA")
   conversationsAsB    Conversation[]    @relation("ConversationB")
   sentMessages        DirectMessage[]
@@ -358,18 +359,23 @@ model Hotel {
   name        String
   slug        String   @unique
   description String   @db.Text
+  type        String?
   starRating  Int      @db.SmallInt
   country     Country
   city        String
   address     String
+  district    String?
   latitude    Float?
   longitude   Float?
   amenities   Json?
-  images      Json?    // Array of image URLs
+  images      Json?
+  ownerId     String?
+  isPublished Boolean  @default(false)
   isActive    Boolean  @default(true)
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
+  owner    User?        @relation("HotelOwner", fields: [ownerId], references: [id])
   rooms    HotelRoom[]
   bookings HotelBooking[]
 
