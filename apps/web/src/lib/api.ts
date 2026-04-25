@@ -126,6 +126,21 @@ export const api = {
       request<unknown>(`/transactions/${id}/release`, { method: 'POST', token }),
   },
 
+  disputes: {
+    open: (transactionId: string, body: { reason: string; description?: string }, token: string) =>
+      request<unknown>(`/disputes/transactions/${transactionId}`, { method: 'POST', body, token }),
+    findForTransaction: (transactionId: string, token: string) =>
+      request<unknown>(`/disputes/transactions/${transactionId}`, { token }),
+    findAll: (token: string) => request<unknown[]>('/disputes', { token }),
+    markUnderReview: (id: string, token: string) =>
+      request<unknown>(`/disputes/${id}/review`, { method: 'PATCH', token }),
+    resolve: (
+      id: string,
+      body: { resolution: string; action: 'RESOLVED' | 'REFUNDED' },
+      token: string,
+    ) => request<unknown>(`/disputes/${id}/resolve`, { method: 'PATCH', body, token }),
+  },
+
   users: {
     me: (token: string) => request<unknown>('/users/me', { token }),
     updateProfile: (body: unknown, token: string) =>

@@ -4,10 +4,12 @@ import { TransactionsService } from './transactions.service';
 import { EscrowService } from './escrow.service';
 import { FedaPayService } from './payments/fedapay.service';
 import { StripeService } from './payments/stripe.service';
+import { DisputesService } from './disputes.service';
+import { DisputesController } from './disputes.controller';
 
 @Module({
-  controllers: [TransactionsController],
-  providers: [TransactionsService, EscrowService, FedaPayService, StripeService],
-  exports: [TransactionsService, EscrowService],
+  controllers: [TransactionsController, DisputesController],
+  providers: [TransactionsService, EscrowService, FedaPayService, StripeService, DisputesService],
+  exports: [TransactionsService, EscrowService, DisputesService],
 })
 export class TransactionsModule {}

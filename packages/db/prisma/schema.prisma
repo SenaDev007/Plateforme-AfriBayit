@@ -500,6 +500,7 @@ model Transaction {
   escrowAccount  EscrowAccount?
   ledgerEntries  LedgerEntry[]
   payments       Payment[]
+  dispute        Dispute?
 
   @@index([buyerId])
   @@index([sellerId])
@@ -556,6 +557,24 @@ model Payment {
 
   @@index([transactionId])
   @@map("payments")
+}
+
+model Dispute {
+  id            String   @id @default(cuid())
+  transactionId String   @unique
+  reason        String   @db.Text
+  description   String?  @db.Text
+  status        String   @default("OPEN") // OPEN, UNDER_REVIEW, RESOLVED, REFUNDED
+  resolution    String?  @db.Text
+  resolvedBy    String?
+  resolvedAt    DateTime?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  transaction Transaction @relation(fields: [transactionId], references: [id])
+
+  @@index([status])
+  @@map("disputes")
 }
 
 // ─── COURSES ──────────────────────────────────────────────────────────────────
