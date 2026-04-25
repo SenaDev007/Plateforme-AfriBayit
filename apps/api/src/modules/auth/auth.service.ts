@@ -1,12 +1,21 @@
-import { Injectable, UnauthorizedException, ConflictException, Inject } from '@nestjs/common';
+import {
+  Injectable,
+  UnauthorizedException,
+  ConflictException,
+  BadRequestException,
+  Inject,
+} from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
-import { randomUUID } from 'crypto';
+import { CACHE_MANAGER } from '@nestjs/cache-manager';
+import { randomUUID, randomBytes } from 'crypto';
 import * as bcrypt from 'bcryptjs';
 import * as speakeasy from 'speakeasy';
+import type { Cache } from 'cache-manager';
 import type { PrismaClient, User } from '@afribayit/db';
 import type { RegisterDto } from './dto/register.dto';
 import type { LoginDto } from './dto/login.dto';
 import { JwtBlacklistService } from '../security/jwt-blacklist.service';
+import { EmailService } from '../notifications/channels/email.service';
 
 interface JwtPayload {
   sub: string;
@@ -21,15 +30,19 @@ export interface AuthTokens {
   user: Omit<User, 'passwordHash' | 'twoFactorSecret'>;
 }
 
+const RESET_PREFIX = 'auth:reset:';
+const VERIFY_PREFIX = 'auth:verify:';
+
 @Injectable()
 export class AuthService {
   constructor(
     @Inject('PRISMA') private readonly prisma: PrismaClient,
+    @Inject(CACHE_MANAGER) private readonly cache: Cache,
     private readonly jwtService: JwtService,
     private readonly blacklistService: JwtBlacklistService,
+    private readonly emailService: EmailService,
   ) {}
 
-  /** Hash and register a new user */
   async register(dto: RegisterDto): Promise<AuthTokens> {
     const existing = await this.prisma.user.findUnique({ where: { email: dto.email } });
     if (existing) throw new ConflictException('Un compte existe déjà avec cet email.');
@@ -48,10 +61,12 @@ export class AuthService {
       },
     });
 
+    // Send verification email asynchronously (don't block register)
+    void this.sendVerificationEmail(user.id, user.email, user.firstName);
+
     return this.generateTokens(user);
   }
 
-  /** Validate credentials and return tokens */
   async login(dto: LoginDto): Promise<AuthTokens> {
     const user = await this.prisma.user.findUnique({ where: { email: dto.email } });
 
@@ -62,7 +77,6 @@ export class AuthService {
 
     if (user.isBanned) throw new UnauthorizedException('Compte suspendu. Contactez le support.');
 
-    // 2FA check
     if (user.twoFactorEnabled && dto.totpCode) {
       const verified = speakeasy.totp.verify({
         secret: user.twoFactorSecret ?? '',
@@ -76,7 +90,123 @@ export class AuthService {
     return this.generateTokens(user);
   }
 
-  /** Setup TOTP 2FA for a user — returns QR data URI */
+  async refreshTokens(refreshToken: string): Promise<AuthTokens> {
+    try {
+      const payload = await this.jwtService.verifyAsync<{ sub: string; jti?: string }>(
+        refreshToken,
+      );
+      if (payload.jti && (await this.blacklistService.isBlacklisted(payload.jti))) {
+        throw new UnauthorizedException('Refresh token révoqué.');
+      }
+      // One-time use: blacklist the consumed refresh token
+      if (payload.jti) {
+        const decoded = this.jwtService.decode(refreshToken) as {
+          jti?: string;
+          exp?: number;
+        } | null;
+        const now = Math.floor(Date.now() / 1000);
+        const ttl = (decoded?.exp ?? now + 86400 * 30) - now;
+        if (ttl > 0) await this.blacklistService.blacklist(payload.jti, ttl);
+      }
+      const user = await this.prisma.user.findUniqueOrThrow({ where: { id: payload.sub } });
+      return this.generateTokens(user);
+    } catch {
+      throw new UnauthorizedException('Refresh token invalide ou expiré.');
+    }
+  }
+
+  async logout(token: string): Promise<void> {
+    const decoded = this.jwtService.decode(token) as { jti?: string; exp?: number } | null;
+    if (!decoded?.jti) return;
+    const now = Math.floor(Date.now() / 1000);
+    const ttl = (decoded.exp ?? now + 3600) - now;
+    if (ttl > 0) {
+      await this.blacklistService.blacklist(decoded.jti, ttl);
+    }
+  }
+
+  async changePassword(userId: string, oldPassword: string, newPassword: string): Promise<void> {
+    const user = await this.prisma.user.findUniqueOrThrow({ where: { id: userId } });
+    const isValid = await bcrypt.compare(oldPassword, user.passwordHash ?? '');
+    if (!isValid) throw new UnauthorizedException('Mot de passe actuel incorrect.');
+    const passwordHash = await bcrypt.hash(newPassword, 12);
+    await this.prisma.user.update({ where: { id: userId }, data: { passwordHash } });
+  }
+
+  async forgotPassword(email: string): Promise<void> {
+    const user = await this.prisma.user.findUnique({ where: { email } });
+    if (!user) return; // Silent fail — don't reveal if email exists
+
+    const token = randomBytes(32).toString('hex');
+    await this.cache.set(`${RESET_PREFIX}${token}`, user.id, 3600 * 1000);
+
+    const resetUrl = `https://afribayit.com/reinitialiser-mot-de-passe?token=${token}`;
+    await this.emailService.send({
+      to: email,
+      subject: 'Réinitialisation de votre mot de passe AfriBayit',
+      html: `
+        <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto;">
+          <div style="background: #003087; padding: 24px; text-align: center;">
+            <h1 style="color: white; margin: 0; font-size: 28px;">Afri<span style="color: #D4AF37;">Bayit</span></h1>
+          </div>
+          <div style="padding: 32px;">
+            <p>Bonjour ${user.firstName},</p>
+            <p>Vous avez demandé la réinitialisation de votre mot de passe.</p>
+            <p>Ce lien expire dans <strong>1 heure</strong>.</p>
+            <a href="${resetUrl}" style="background: #003087; color: white; padding: 12px 24px; border-radius: 24px; text-decoration: none; display: inline-block; margin: 16px 0;">
+              Réinitialiser mon mot de passe
+            </a>
+            <p style="color: #666; font-size: 14px;">Si vous n'avez pas fait cette demande, ignorez cet email.</p>
+          </div>
+        </div>
+      `,
+    });
+  }
+
+  async resetPassword(token: string, newPassword: string): Promise<void> {
+    const userId = await this.cache.get<string>(`${RESET_PREFIX}${token}`);
+    if (!userId) throw new BadRequestException('Lien de réinitialisation invalide ou expiré.');
+    const passwordHash = await bcrypt.hash(newPassword, 12);
+    await this.prisma.user.update({ where: { id: userId }, data: { passwordHash } });
+    await this.cache.del(`${RESET_PREFIX}${token}`);
+  }
+
+  async sendVerificationEmail(userId: string, email: string, firstName: string): Promise<void> {
+    const token = randomBytes(32).toString('hex');
+    await this.cache.set(`${VERIFY_PREFIX}${token}`, userId, 24 * 3600 * 1000);
+
+    const verifyUrl = `https://afribayit.com/verifier-email?token=${token}`;
+    await this.emailService.send({
+      to: email,
+      subject: 'Vérifiez votre adresse email AfriBayit',
+      html: `
+        <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto;">
+          <div style="background: #003087; padding: 24px; text-align: center;">
+            <h1 style="color: white; margin: 0; font-size: 28px;">Afri<span style="color: #D4AF37;">Bayit</span></h1>
+          </div>
+          <div style="padding: 32px;">
+            <p>Bonjour ${firstName},</p>
+            <p>Bienvenue sur AfriBayit ! Veuillez vérifier votre adresse email.</p>
+            <p>Ce lien expire dans <strong>24 heures</strong>.</p>
+            <a href="${verifyUrl}" style="background: #003087; color: white; padding: 12px 24px; border-radius: 24px; text-decoration: none; display: inline-block; margin: 16px 0;">
+              Vérifier mon email
+            </a>
+          </div>
+        </div>
+      `,
+    });
+  }
+
+  async verifyEmail(token: string): Promise<void> {
+    const userId = await this.cache.get<string>(`${VERIFY_PREFIX}${token}`);
+    if (!userId) throw new BadRequestException('Lien de vérification invalide ou expiré.');
+    await this.prisma.user.update({
+      where: { id: userId },
+      data: { emailVerified: new Date() },
+    });
+    await this.cache.del(`${VERIFY_PREFIX}${token}`);
+  }
+
   async setup2FA(userId: string): Promise<{ secret: string; otpauthUrl: string }> {
     const secret = speakeasy.generateSecret({ name: 'AfriBayit', length: 20 });
 
@@ -91,7 +221,6 @@ export class AuthService {
     };
   }
 
-  /** Verify TOTP token and enable 2FA */
   async verify2FA(userId: string, token: string): Promise<void> {
     const user = await this.prisma.user.findUniqueOrThrow({ where: { id: userId } });
 
@@ -110,18 +239,6 @@ export class AuthService {
     });
   }
 
-  /** Blacklist the current access token (logout) */
-  async logout(token: string): Promise<void> {
-    const decoded = this.jwtService.decode(token) as { jti?: string; exp?: number } | null;
-    if (!decoded?.jti) return;
-    const now = Math.floor(Date.now() / 1000);
-    const ttl = (decoded.exp ?? now + 3600) - now;
-    if (ttl > 0) {
-      await this.blacklistService.blacklist(decoded.jti, ttl);
-    }
-  }
-
-  /** Validate user by ID — used by JWT strategy */
   async validateById(id: string): Promise<User | null> {
     return this.prisma.user.findUnique({ where: { id, isActive: true } });
   }

@@ -7,6 +7,6 @@ import { SmsService } from './channels/sms.service';
 @Module({
   controllers: [NotificationsController],
   providers: [NotificationsService, EmailService, SmsService],
-  exports: [NotificationsService],
+  exports: [NotificationsService, EmailService],
 })
 export class NotificationsModule {}

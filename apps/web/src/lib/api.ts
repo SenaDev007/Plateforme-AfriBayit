@@ -68,6 +68,34 @@ export const api = {
         body,
       }),
     me: (token: string) => request<unknown>('/auth/me', { token }),
+    refresh: (refreshToken: string) =>
+      request<{ accessToken: string; refreshToken: string; user: unknown }>('/auth/refresh', {
+        method: 'POST',
+        body: { refreshToken },
+      }),
+    logout: (token: string) =>
+      request<{ message: string }>('/auth/logout', { method: 'POST', token }),
+    forgotPassword: (email: string) =>
+      request<{ message: string }>('/auth/forgot-password', {
+        method: 'POST',
+        body: { email },
+      }),
+    resetPassword: (token: string, newPassword: string) =>
+      request<{ message: string }>('/auth/reset-password', {
+        method: 'POST',
+        body: { token, newPassword },
+      }),
+    verifyEmail: (token: string) =>
+      request<{ message: string }>('/auth/verify-email', {
+        method: 'POST',
+        body: { token },
+      }),
+    changePassword: (oldPassword: string, newPassword: string, token: string) =>
+      request<{ message: string }>('/auth/change-password', {
+        method: 'PATCH',
+        body: { oldPassword, newPassword },
+        token,
+      }),
   },
 
   properties: {
