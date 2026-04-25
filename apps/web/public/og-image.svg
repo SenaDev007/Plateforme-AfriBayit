@@ -1,0 +1,24 @@
+<svg width="1200" height="630" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#001a4d"/>
+      <stop offset="100%" stop-color="#003087"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Background -->
+  <rect width="1200" height="630" fill="url(#bg)"/>
+
+  <!-- Gold top bar -->
+  <rect width="1200" height="8" fill="#D4AF37"/>
+
+  <!-- Logo text -->
+  <text x="600" y="280" font-family="Arial, sans-serif" font-size="96" font-weight="bold" fill="#FFFFFF" text-anchor="middle">Afri</text>
+  <text x="600" y="380" font-family="Arial, sans-serif" font-size="96" font-weight="bold" fill="#D4AF37" text-anchor="middle">Bayit</text>
+
+  <!-- Tagline -->
+  <text x="600" y="480" font-family="Arial, sans-serif" font-size="48" fill="#FFFFFF" text-anchor="middle">Immobilier Pan-Africain</text>
+
+  <!-- Footer -->
+  <text x="600" y="580" font-family="Arial, sans-serif" font-size="32" fill="rgba(255,255,255,0.8)" text-anchor="middle">afribayit.com</text>
+</svg>
