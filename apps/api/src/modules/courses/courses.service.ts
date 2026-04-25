@@ -4,12 +4,11 @@ import type { PrismaClient } from '@prisma/client';
 export interface CreateCourseDto {
   title: string;
   description: string;
-  category: string;
+  category?: string;
   level: 'BEGINNER' | 'INTERMEDIATE' | 'ADVANCED';
-  price: number;
+  price?: number;
   currency?: string;
   thumbnailUrl?: string;
-  language?: string;
   tags?: string[];
 }
 
@@ -63,9 +62,15 @@ export class CoursesService {
     const slug = this.generateSlug(dto.title);
     return this.prisma.course.create({
       data: {
-        ...dto,
+        title: dto.title,
+        description: dto.description,
+        level: dto.level,
         slug,
         instructorId,
+        ...(dto.category !== undefined ? { category: dto.category } : {}),
+        ...(dto.price !== undefined ? { price: dto.price } : {}),
+        ...(dto.thumbnailUrl !== undefined ? { thumbnailUrl: dto.thumbnailUrl } : {}),
+        ...(dto.tags !== undefined ? { tags: dto.tags } : {}),
         currency: dto.currency ?? 'XOF',
         isPublished: false,
         isFeatured: false,
@@ -113,7 +118,18 @@ export class CoursesService {
   async getMyEnrollments(userId: string) {
     return this.prisma.enrollment.findMany({
       where: { userId },
-      include: { course: { select: { title: true, slug: true, thumbnailUrl: true, category: true } } },
+      include: {
+        course: {
+          select: {
+            id: true,
+            title: true,
+            slug: true,
+            thumbnailUrl: true,
+            category: true,
+            level: true,
+          },
+        },
+      },
       orderBy: { updatedAt: 'desc' },
     });
   }
