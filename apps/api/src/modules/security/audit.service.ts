@@ -23,9 +23,9 @@ export class AuditService {
     try {
       await this.prisma.auditLog.create({
         data: {
-          actorId: event.actorId,
-          actorIp: event.actorIp,
-          actorRole: event.actorRole,
+          ...(event.actorId !== undefined ? { actorId: event.actorId } : {}),
+          ...(event.actorIp !== undefined ? { actorIp: event.actorIp } : {}),
+          ...(event.actorRole !== undefined ? { actorRole: event.actorRole } : {}),
           action: event.action,
           resource: event.resource,
           ...(event.resourceId !== undefined ? { resourceId: event.resourceId } : {}),
