@@ -2,6 +2,7 @@
 import type React from 'react';
 
 import { motion } from 'framer-motion';
+import type { Route } from 'next';
 import Link from 'next/link';
 import { ArrowRight } from 'lucide-react';
 
@@ -9,7 +10,7 @@ interface Module {
   icon: string;
   title: string;
   description: string;
-  href: string;
+  href: Route | string;
   color: string;
   badge?: string;
 }
@@ -26,14 +27,14 @@ const MODULES: Module[] = [
   {
     icon: '🛋️',
     title: 'Location Courte Durée',
-    description: 'Appartements meublés et maisons pour touristes et voyageurs d\'affaires.',
+    description: "Appartements meublés et maisons pour touristes et voyageurs d'affaires.",
     href: '/recherche?but=SHORT_TERM_RENT',
     color: 'bg-sky/5 hover:bg-sky/10',
   },
   {
     icon: '🏨',
     title: 'Hôtels',
-    description: 'Réservez les meilleurs hôtels et résidences dans toute l\'Afrique de l\'Ouest.',
+    description: "Réservez les meilleurs hôtels et résidences dans toute l'Afrique de l'Ouest.",
     href: '/hotels',
     color: 'bg-gold/5 hover:bg-gold/10',
     badge: 'Nouveau',
@@ -41,14 +42,15 @@ const MODULES: Module[] = [
   {
     icon: '🔨',
     title: 'Artisans',
-    description: 'Menuisiers, plombiers, électriciens — trouvez l\'expert qu\'il vous faut.',
+    description: "Menuisiers, plombiers, électriciens — trouvez l'expert qu'il vous faut.",
     href: '/artisans',
     color: 'bg-emerald/5 hover:bg-emerald/10',
   },
   {
     icon: '🎓',
     title: 'Formation',
-    description: 'Cours en ligne et présentiel sur l\'immobilier, la construction et l\'investissement.',
+    description:
+      "Cours en ligne et présentiel sur l'immobilier, la construction et l'investissement.",
     href: '/formation',
     color: 'bg-danger/5 hover:bg-danger/10',
   },
@@ -73,30 +75,34 @@ const itemVariants = {
 
 export function ModulesSection(): React.ReactElement {
   return (
-    <section aria-labelledby="modules-title" className="py-20 bg-charcoal-50">
+    <section aria-labelledby="modules-title" className="bg-charcoal-50 py-20">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         {/* Header */}
         <motion.div
-          className="text-center mb-14"
+          className="mb-14 text-center"
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.6 }}
         >
-          <p className="text-sm font-medium text-gold uppercase tracking-widest mb-3">
+          <p className="text-gold mb-3 text-sm font-medium uppercase tracking-widest">
             Tout en un seul endroit
           </p>
-          <h2 id="modules-title" className="font-serif text-3xl sm:text-4xl font-bold text-charcoal">
+          <h2
+            id="modules-title"
+            className="text-charcoal font-serif text-3xl font-bold sm:text-4xl"
+          >
             Une super-app pour l'immobilier africain
           </h2>
-          <p className="mt-4 text-charcoal-400 max-w-xl mx-auto">
-            De la recherche de propriété à la réservation d'artisans, tout l'écosystème immobilier réuni.
+          <p className="text-charcoal-400 mx-auto mt-4 max-w-xl">
+            De la recherche de propriété à la réservation d'artisans, tout l'écosystème immobilier
+            réuni.
           </p>
         </motion.div>
 
         {/* Grid */}
         <motion.div
-          className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5"
+          className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3"
           variants={containerVariants}
           initial="hidden"
           whileInView="visible"
@@ -104,32 +110,34 @@ export function ModulesSection(): React.ReactElement {
         >
           {MODULES.map((module) => (
             <motion.div key={module.title} variants={itemVariants}>
-              <Link href={module.href} className="group block h-full">
+              <Link href={module.href as Route} className="group block h-full">
                 <div
-                  className={`relative flex flex-col gap-3 p-6 rounded-xl border border-charcoal-100 h-full transition-all duration-300 ${module.color} hover:shadow-card-hover hover:-translate-y-1`}
+                  className={`border-charcoal-100 relative flex h-full flex-col gap-3 rounded-xl border p-6 transition-all duration-300 ${module.color} hover:shadow-card-hover hover:-translate-y-1`}
                 >
                   {/* Badge */}
                   {module.badge && (
-                    <span className="absolute top-4 right-4 rounded-pill bg-gold text-navy text-xs font-semibold px-2.5 py-0.5">
+                    <span className="rounded-pill bg-gold text-navy absolute right-4 top-4 px-2.5 py-0.5 text-xs font-semibold">
                       {module.badge}
                     </span>
                   )}
 
                   {/* Icon */}
-                  <span className="text-3xl" aria-hidden="true">{module.icon}</span>
+                  <span className="text-3xl" aria-hidden="true">
+                    {module.icon}
+                  </span>
 
                   {/* Content */}
                   <div>
-                    <h3 className="font-serif text-lg font-semibold text-charcoal mb-1">
+                    <h3 className="text-charcoal mb-1 font-serif text-lg font-semibold">
                       {module.title}
                     </h3>
-                    <p className="text-sm text-charcoal-400 leading-relaxed">
+                    <p className="text-charcoal-400 text-sm leading-relaxed">
                       {module.description}
                     </p>
                   </div>
 
                   {/* Arrow */}
-                  <div className="flex items-center gap-1 text-sm font-medium text-navy mt-auto">
+                  <div className="text-navy mt-auto flex items-center gap-1 text-sm font-medium">
                     Explorer
                     <ArrowRight
                       className="h-4 w-4 transition-transform group-hover:translate-x-1"
