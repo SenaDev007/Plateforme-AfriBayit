@@ -9,9 +9,10 @@ import { DisputesController } from './disputes.controller';
 import { PayoutService } from './payout.service';
 import { PayoutController } from './payout.controller';
 import { AuthModule } from '../auth/auth.module';
+import { NotificationsModule } from '../notifications/notifications.module';
 
 @Module({
-  imports: [AuthModule],
+  imports: [AuthModule, NotificationsModule],
   controllers: [TransactionsController, DisputesController, PayoutController],
   providers: [
     TransactionsService,

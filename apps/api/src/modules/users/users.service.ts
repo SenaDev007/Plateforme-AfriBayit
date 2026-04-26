@@ -1,6 +1,7 @@
 import { Injectable, Inject, NotFoundException } from '@nestjs/common';
 import type { PrismaClient, User, KycLevel } from '@afribayit/db';
 import { DocumentAIService } from './document-ai.service';
+import { WhatsAppService } from '../notifications/channels/whatsapp.service';
 
 interface UpdateProfileDto {
   firstName?: string;
@@ -16,6 +17,7 @@ export class UsersService {
   constructor(
     @Inject('PRISMA') private readonly prisma: PrismaClient,
     private readonly documentAI: DocumentAIService,
+    private readonly whatsappService: WhatsAppService,
   ) {}
 
   async findById(id: string): Promise<Omit<User, 'passwordHash' | 'twoFactorSecret'>> {
@@ -110,6 +112,22 @@ export class UsersService {
     if (status === 'APPROVED') {
       await this.updateUserKycLevel(document.userId);
     }
+
+    // Fire-and-forget WhatsApp notification
+    void (async () => {
+      const user = await this.prisma.user.findUnique({
+        where: { id: document.userId },
+        select: { firstName: true, phone: true },
+      });
+      if (user?.phone) {
+        void this.whatsappService.notifyKycStatus(user.phone, {
+          recipientName: user.firstName,
+          status,
+          documentType: document.type,
+          ...(note ? { reviewNote: note } : {}),
+        });
+      }
+    })();
 
     return document;
   }

@@ -1,6 +1,7 @@
 import { Injectable, Inject, Logger, NotFoundException } from '@nestjs/common';
 import type { PrismaClient } from '@afribayit/db';
 import { FedaPayService } from './payments/fedapay.service';
+import { WhatsAppService } from '../notifications/channels/whatsapp.service';
 
 /** Default Mobile Money operator per country code */
 const DEFAULT_OPERATOR: Record<string, string> = {
@@ -19,6 +20,7 @@ export class PayoutService {
   constructor(
     @Inject('PRISMA') private readonly prisma: PrismaClient,
     private readonly fedaPayService: FedaPayService,
+    private readonly whatsappService: WhatsAppService,
   ) {}
 
   /**
@@ -119,6 +121,16 @@ export class PayoutService {
       });
 
       this.logger.log(`Payout ${payoutId} completed — FedaPay ref: ${externalId}`);
+
+      if (phone) {
+        void this.whatsappService.notifyPayoutStatus(phone, {
+          recipientName: firstName,
+          amount: String(Math.round(Number(payout.amount))),
+          currency: payout.currency,
+          status: 'COMPLETED',
+          operator,
+        });
+      }
     } catch (err) {
       const reason = err instanceof Error ? err.message : 'Unknown error';
       await this.prisma.payout.update({
@@ -126,6 +138,16 @@ export class PayoutService {
         data: { status: 'FAILED', failureReason: reason },
       });
       this.logger.error(`Payout ${payoutId} failed: ${reason}`);
+
+      if (phone) {
+        void this.whatsappService.notifyPayoutStatus(phone, {
+          recipientName: firstName,
+          amount: String(Math.round(Number(payout.amount))),
+          currency: payout.currency,
+          status: 'FAILED',
+          failureReason: reason,
+        });
+      }
     }
   }
 

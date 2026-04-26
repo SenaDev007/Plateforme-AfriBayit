@@ -2,6 +2,7 @@ import { Injectable, Inject, Optional } from '@nestjs/common';
 import type { PrismaClient, NotificationType } from '@afribayit/db';
 import { EmailService } from './channels/email.service';
 import { SmsService } from './channels/sms.service';
+import { WhatsAppService } from './channels/whatsapp.service';
 import { NotificationsGateway } from '../../gateways/notifications.gateway';
 
 interface CreateNotificationDto {
@@ -12,8 +13,10 @@ interface CreateNotificationDto {
   data?: Record<string, unknown>;
   sendEmail?: boolean;
   sendSms?: boolean;
+  sendWhatsApp?: boolean;
   email?: string;
   phone?: string;
+  whatsappMessage?: string; // override body for WhatsApp (supports markdown)
 }
 
 @Injectable()
@@ -22,6 +25,7 @@ export class NotificationsService {
     @Inject('PRISMA') private readonly prisma: PrismaClient,
     private readonly emailService: EmailService,
     private readonly smsService: SmsService,
+    private readonly whatsappService: WhatsAppService,
     @Optional() private readonly gateway?: NotificationsGateway,
   ) {}
 
@@ -62,6 +66,13 @@ export class NotificationsService {
 
     if (dto.sendSms && dto.phone) {
       await this.smsService.send(dto.phone, `AfriBayit: ${dto.body}`);
+    }
+
+    if (dto.sendWhatsApp && dto.phone) {
+      await this.whatsappService.sendText(
+        dto.phone,
+        dto.whatsappMessage ?? `*AfriBayit*\n${dto.body}`,
+      );
     }
   }
 
