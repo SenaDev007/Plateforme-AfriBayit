@@ -122,8 +122,17 @@ export const api = {
       request<unknown>('/transactions', { method: 'POST', body, token }),
     findAll: (token: string) => request<unknown[]>('/transactions', { token }),
     findOne: (id: string, token: string) => request<unknown>(`/transactions/${id}`, { token }),
-    release: (id: string, token: string) =>
-      request<unknown>(`/transactions/${id}/release`, { method: 'POST', token }),
+    release: (id: string, token: string, totpCode?: string) =>
+      request<unknown>(`/transactions/${id}/release`, {
+        method: 'POST',
+        body: totpCode ? { totpCode } : {},
+        token,
+      }),
+    releaseRequirements: (id: string, token: string) =>
+      request<{ requires2FA: boolean; isLargeAmount: boolean; threshold: number }>(
+        `/transactions/${id}/release-requirements`,
+        { token },
+      ),
   },
 
   disputes: {

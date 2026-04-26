@@ -1,4 +1,10 @@
-import { Injectable, Inject, NotFoundException, ForbiddenException } from '@nestjs/common';
+import {
+  Injectable,
+  Inject,
+  NotFoundException,
+  ForbiddenException,
+  UnauthorizedException,
+} from '@nestjs/common';
 import type {
   PrismaClient,
   Transaction,
@@ -9,6 +15,9 @@ import type {
 import { EscrowService } from './escrow.service';
 import { FedaPayService } from './payments/fedapay.service';
 import { StripeService } from './payments/stripe.service';
+import { AuthService } from '../auth/auth.service';
+
+const LARGE_AMOUNT_THRESHOLD_XOF = 100_000;
 
 interface CreateTransactionDto {
   type: TransactionType;
@@ -29,6 +38,7 @@ export class TransactionsService {
     private readonly escrowService: EscrowService,
     private readonly fedapayService: FedaPayService,
     private readonly stripeService: StripeService,
+    private readonly authService: AuthService,
   ) {}
 
   /** Initiate a new transaction and create escrow account */
@@ -112,19 +122,57 @@ export class TransactionsService {
     return transaction;
   }
 
-  /** Buyer confirms goods received — release escrow */
-  async releaseEscrow(transactionId: string, buyerId: string): Promise<Transaction> {
+  /** Buyer confirms goods received — release escrow.
+   *  For amounts > 100 000 XOF, a valid TOTP code is required when 2FA is enabled. */
+  async releaseEscrow(
+    transactionId: string,
+    buyerId: string,
+    totpCode?: string,
+  ): Promise<Transaction> {
     const transaction = await this.prisma.transaction.findUniqueOrThrow({
       where: { id: transactionId },
     });
     if (transaction.buyerId !== buyerId)
       throw new ForbiddenException("Seul l'acheteur peut libérer les fonds.");
+
+    const isLargeAmount =
+      transaction.currency === 'XOF' && Number(transaction.amount) >= LARGE_AMOUNT_THRESHOLD_XOF;
+
+    if (isLargeAmount) {
+      const has2FA = await this.authService.is2FAEnabled(buyerId);
+      if (has2FA) {
+        if (!totpCode)
+          throw new UnauthorizedException(
+            'Un code 2FA est requis pour libérer des fonds supérieurs à 100 000 FCFA.',
+          );
+        const valid = await this.authService.verifyTotpCode(buyerId, totpCode);
+        if (!valid) throw new UnauthorizedException('Code 2FA invalide.');
+      }
+    }
+
     return this.escrowService.transition(
       transactionId,
       'RELEASED',
       buyerId,
       "Libération confirmée par l'acheteur",
     );
+  }
+
+  /** Return 2FA requirements for a release operation */
+  async getReleaseRequirements(transactionId: string, userId: string) {
+    const transaction = await this.prisma.transaction.findUnique({ where: { id: transactionId } });
+    if (!transaction) throw new NotFoundException('Transaction introuvable.');
+    if (transaction.buyerId !== userId) throw new ForbiddenException('Accès refusé.');
+
+    const isLargeAmount =
+      transaction.currency === 'XOF' && Number(transaction.amount) >= LARGE_AMOUNT_THRESHOLD_XOF;
+    const has2FA = isLargeAmount ? await this.authService.is2FAEnabled(userId) : false;
+
+    return {
+      requires2FA: isLargeAmount && has2FA,
+      isLargeAmount,
+      threshold: LARGE_AMOUNT_THRESHOLD_XOF,
+    };
   }
 
   /** Handle FedaPay webhook */

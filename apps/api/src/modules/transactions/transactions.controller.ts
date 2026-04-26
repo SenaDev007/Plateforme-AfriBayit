@@ -1,6 +1,14 @@
 import {
-  Controller, Post, Get, Param, Body, UseGuards, Version,
-  RawBodyRequest, Req, Headers,
+  Controller,
+  Post,
+  Get,
+  Param,
+  Body,
+  UseGuards,
+  Version,
+  RawBodyRequest,
+  Req,
+  Headers,
 } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
 import type { Request } from 'express';
@@ -19,10 +27,7 @@ export class TransactionsController {
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Initier une transaction avec escrow' })
-  create(
-    @CurrentUser() user: User,
-    @Body() body: Parameters<TransactionsService['create']>[0],
-  ) {
+  create(@CurrentUser() user: User, @Body() body: Parameters<TransactionsService['create']>[0]) {
     return this.transactionsService.create({ ...body, buyerId: user.id });
   }
 
@@ -39,7 +44,7 @@ export class TransactionsController {
   @Version('1')
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
-  @ApiOperation({ summary: 'Détail d\'une transaction' })
+  @ApiOperation({ summary: "Détail d'une transaction" })
   findOne(@Param('id') id: string, @CurrentUser() user: User) {
     return this.transactionsService.findOne(id, user.id);
   }
@@ -48,9 +53,20 @@ export class TransactionsController {
   @Version('1')
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
-  @ApiOperation({ summary: 'Libérer les fonds escrow (acheteur)' })
-  release(@Param('id') id: string, @CurrentUser() user: User) {
-    return this.transactionsService.releaseEscrow(id, user.id);
+  @ApiOperation({
+    summary: 'Libérer les fonds escrow (acheteur) — 2FA requis si montant > 100 000 FCFA',
+  })
+  release(@Param('id') id: string, @Body() body: { totpCode?: string }, @CurrentUser() user: User) {
+    return this.transactionsService.releaseEscrow(id, user.id, body.totpCode);
+  }
+
+  @Get(':id/release-requirements')
+  @Version('1')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Vérifier si 2FA requis pour libérer les fonds' })
+  async releaseRequirements(@Param('id') id: string, @CurrentUser() user: User) {
+    return this.transactionsService.getReleaseRequirements(id, user.id);
   }
 
   @Post('webhook/fedapay')

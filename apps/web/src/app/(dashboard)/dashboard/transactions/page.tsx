@@ -3,7 +3,7 @@
 import type React from 'react';
 import { useState, useEffect } from 'react';
 import { useSession } from 'next-auth/react';
-import { Loader2, ArrowDownRight, ArrowUpRight, AlertTriangle, X } from 'lucide-react';
+import { Loader2, ArrowDownRight, ArrowUpRight, AlertTriangle, X, ShieldCheck } from 'lucide-react';
 import { Badge, Button } from '@afribayit/ui';
 import { DashboardLayout } from '@/components/dashboard/DashboardLayout';
 import { api } from '@/lib/api';
@@ -179,6 +179,96 @@ function DisputeModal({ tx, token, onClose, onSuccess }: DisputeModalProps) {
   );
 }
 
+interface TwoFAModalProps {
+  txId: string;
+  token: string;
+  onClose: () => void;
+  onSuccess: () => void;
+}
+
+function TwoFAModal({ txId, token, onClose, onSuccess }: TwoFAModalProps) {
+  const [code, setCode] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (code.length !== 6) {
+      setError('Le code doit contenir 6 chiffres.');
+      return;
+    }
+    setLoading(true);
+    setError('');
+    try {
+      await api.transactions.release(txId, token, code);
+      onSuccess();
+      onClose();
+    } catch {
+      setError('Code invalide ou expiré. Réessayez.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+      <div className="w-full max-w-sm rounded-2xl bg-white shadow-2xl">
+        <div className="border-charcoal-100 flex items-center justify-between border-b px-6 py-4">
+          <div className="flex items-center gap-2">
+            <ShieldCheck className="text-navy h-5 w-5" />
+            <h2 className="text-charcoal font-serif text-lg font-bold">Vérification 2FA</h2>
+          </div>
+          <button
+            onClick={onClose}
+            className="text-charcoal-400 hover:text-charcoal transition-colors"
+          >
+            <X className="h-5 w-5" />
+          </button>
+        </div>
+
+        <form onSubmit={(e) => void handleSubmit(e)} className="flex flex-col gap-4 p-6">
+          <p className="text-charcoal-400 text-sm">
+            Cette transaction dépasse 100 000 FCFA. Saisissez le code de votre application
+            d'authentification pour confirmer la libération des fonds.
+          </p>
+
+          <div className="flex flex-col gap-1.5">
+            <label className="text-charcoal text-sm font-medium">Code TOTP (6 chiffres)</label>
+            <input
+              type="text"
+              inputMode="numeric"
+              pattern="[0-9]{6}"
+              maxLength={6}
+              value={code}
+              onChange={(e) => setCode(e.target.value.replace(/\D/g, ''))}
+              placeholder="000000"
+              className="border-charcoal-200 focus:border-navy focus:ring-navy/20 rounded-lg border px-4 py-3 text-center font-mono text-2xl tracking-widest focus:outline-none focus:ring-2"
+              autoFocus
+            />
+          </div>
+
+          {error && <p className="text-danger text-sm">{error}</p>}
+
+          <div className="flex gap-3 pt-2">
+            <Button
+              type="button"
+              variant="outline"
+              className="flex-1"
+              onClick={onClose}
+              disabled={loading}
+            >
+              Annuler
+            </Button>
+            <Button type="submit" className="flex-1" disabled={loading || code.length !== 6}>
+              {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Libérer les fonds'}
+            </Button>
+          </div>
+        </form>
+      </div>
+    </div>
+  );
+}
+
 export default function TransactionsPage(): React.ReactElement {
   const { data: session } = useSession();
   const token = (session?.accessToken as string | undefined) ?? null;
@@ -188,6 +278,7 @@ export default function TransactionsPage(): React.ReactElement {
   const [loading, setLoading] = useState(true);
   const [releasing, setReleasing] = useState<string | null>(null);
   const [disputeTx, setDisputeTx] = useState<ApiTransaction | null>(null);
+  const [twoFATx, setTwoFATx] = useState<string | null>(null);
 
   useEffect(() => {
     if (!token) {
@@ -205,6 +296,12 @@ export default function TransactionsPage(): React.ReactElement {
     if (!token) return;
     setReleasing(txId);
     try {
+      const { data } = await api.transactions.releaseRequirements(txId, token);
+      if (data.requires2FA) {
+        setReleasing(null);
+        setTwoFATx(txId);
+        return;
+      }
       await api.transactions.release(txId, token);
       setTransactions((prev) =>
         prev.map((tx) => (tx.id === txId ? { ...tx, status: 'RELEASED' } : tx)),
@@ -214,6 +311,12 @@ export default function TransactionsPage(): React.ReactElement {
     } finally {
       setReleasing(null);
     }
+  };
+
+  const handleReleaseSuccess = (txId: string) => {
+    setTransactions((prev) =>
+      prev.map((tx) => (tx.id === txId ? { ...tx, status: 'RELEASED' } : tx)),
+    );
   };
 
   const handleDisputeSuccess = (txId: string) => {
@@ -346,6 +449,15 @@ export default function TransactionsPage(): React.ReactElement {
           token={token}
           onClose={() => setDisputeTx(null)}
           onSuccess={() => handleDisputeSuccess(disputeTx.id)}
+        />
+      )}
+
+      {twoFATx && token && (
+        <TwoFAModal
+          txId={twoFATx}
+          token={token}
+          onClose={() => setTwoFATx(null)}
+          onSuccess={() => handleReleaseSuccess(twoFATx)}
         />
       )}
     </DashboardLayout>

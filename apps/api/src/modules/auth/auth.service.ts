@@ -243,6 +243,24 @@ export class AuthService {
     return this.prisma.user.findUnique({ where: { id, isActive: true } });
   }
 
+  /** Verify a TOTP code for a user without requiring 2FA to be enabled */
+  async verifyTotpCode(userId: string, code: string): Promise<boolean> {
+    const user = await this.prisma.user.findUnique({ where: { id: userId } });
+    if (!user?.twoFactorSecret) return false;
+    return speakeasy.totp.verify({
+      secret: user.twoFactorSecret,
+      encoding: 'base32',
+      token: code,
+      window: 1,
+    });
+  }
+
+  /** Check whether a user has 2FA enabled */
+  async is2FAEnabled(userId: string): Promise<boolean> {
+    const user = await this.prisma.user.findUnique({ where: { id: userId } });
+    return user?.twoFactorEnabled ?? false;
+  }
+
   private generateTokens(user: User): AuthTokens {
     const jti = randomUUID();
     const payload: JwtPayload = { sub: user.id, email: user.email, role: user.role, jti };
