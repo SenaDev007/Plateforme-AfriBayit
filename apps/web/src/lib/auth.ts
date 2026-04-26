@@ -12,6 +12,10 @@ const credentialsSchema = z.object({
   totpCode: z.string().optional(),
 });
 
+const magicLinkSchema = z.object({
+  token: z.string().min(1),
+});
+
 export const authConfig: NextAuthConfig = {
   providers: [
     Google({
@@ -39,6 +43,30 @@ export const authConfig: NextAuthConfig = {
             password,
             ...(totpCode !== undefined ? { totpCode } : {}),
           });
+          const user = data.user as { id: string; email: string; firstName: string; role: string };
+          return {
+            id: user.id,
+            email: user.email,
+            name: user.firstName,
+            role: user.role,
+            accessToken: data.accessToken,
+          };
+        } catch {
+          return null;
+        }
+      },
+    }),
+    Credentials({
+      id: 'magic-link',
+      credentials: {
+        token: { label: 'Magic Token', type: 'text' },
+      },
+      async authorize(credentials) {
+        const parsed = magicLinkSchema.safeParse(credentials);
+        if (!parsed.success) return null;
+
+        try {
+          const { data } = await api.auth.verifyMagicLink(parsed.data.token);
           const user = data.user as { id: string; email: string; firstName: string; role: string };
           return {
             id: user.id,

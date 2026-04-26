@@ -32,6 +32,8 @@ export interface AuthTokens {
 
 const RESET_PREFIX = 'auth:reset:';
 const VERIFY_PREFIX = 'auth:verify:';
+const MAGIC_PREFIX = 'auth:magic:';
+const MAGIC_TTL_MS = 15 * 60 * 1000; // 15 min
 
 @Injectable()
 export class AuthService {
@@ -205,6 +207,53 @@ export class AuthService {
       data: { emailVerified: new Date() },
     });
     await this.cache.del(`${VERIFY_PREFIX}${token}`);
+  }
+
+  async sendMagicLink(email: string): Promise<void> {
+    const user = await this.prisma.user.findUnique({ where: { email } });
+    if (!user) return; // Silent fail — don't reveal if email exists
+
+    const token = randomBytes(32).toString('hex');
+    await this.cache.set(`${MAGIC_PREFIX}${token}`, user.id, MAGIC_TTL_MS);
+
+    const magicUrl = `${process.env['FRONTEND_URL'] ?? 'https://afribayit.com'}/connexion/lien-magique?token=${token}`;
+    await this.emailService.send({
+      to: email,
+      subject: 'Votre lien de connexion AfriBayit',
+      html: `
+        <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto;">
+          <div style="background: #003087; padding: 24px; text-align: center;">
+            <h1 style="color: white; margin: 0; font-size: 28px;">Afri<span style="color: #D4AF37;">Bayit</span></h1>
+          </div>
+          <div style="padding: 32px;">
+            <p>Bonjour ${user.firstName},</p>
+            <p>Cliquez sur le bouton ci-dessous pour vous connecter instantanément à votre compte AfriBayit.</p>
+            <p>Ce lien est valable <strong>15 minutes</strong> et ne peut être utilisé qu'une seule fois.</p>
+            <a href="${magicUrl}" style="background: #003087; color: white; padding: 12px 24px; border-radius: 24px; text-decoration: none; display: inline-block; margin: 16px 0;">
+              Se connecter maintenant
+            </a>
+            <p style="color: #666; font-size: 14px;">Si vous n'avez pas fait cette demande, ignorez cet email. Votre compte reste sécurisé.</p>
+          </div>
+        </div>
+      `,
+    });
+  }
+
+  async verifyMagicLink(token: string): Promise<AuthTokens> {
+    const userId = await this.cache.get<string>(`${MAGIC_PREFIX}${token}`);
+    if (!userId) throw new BadRequestException('Lien de connexion invalide ou expiré.');
+
+    await this.cache.del(`${MAGIC_PREFIX}${token}`);
+
+    const user = await this.prisma.user.findUniqueOrThrow({ where: { id: userId } });
+    if (user.isBanned) throw new UnauthorizedException('Compte suspendu. Contactez le support.');
+
+    // Mark email as verified if not already done
+    if (!user.emailVerified) {
+      await this.prisma.user.update({ where: { id: userId }, data: { emailVerified: new Date() } });
+    }
+
+    return this.generateTokens(user);
   }
 
   async setup2FA(userId: string): Promise<{ secret: string; otpauthUrl: string }> {

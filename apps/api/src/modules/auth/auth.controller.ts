@@ -162,6 +162,24 @@ export class AuthController {
     return { message: 'Email de vérification renvoyé.' };
   }
 
+  @Post('magic-link/send')
+  @Version('1')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Envoyer un lien de connexion magique par email' })
+  @Throttle({ default: { limit: 3, ttl: 60_000 } })
+  async sendMagicLink(@Body() dto: ForgotPasswordDto) {
+    await this.authService.sendMagicLink(dto.email);
+    return { message: 'Si cet email existe, un lien de connexion a été envoyé.' };
+  }
+
+  @Post('magic-link/verify')
+  @Version('1')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Vérifier un lien magique et obtenir des tokens' })
+  async verifyMagicLink(@Body() body: { token: string }) {
+    return this.authService.verifyMagicLink(body.token);
+  }
+
   @Post('2fa/setup')
   @Version('1')
   @UseGuards(JwtAuthGuard)

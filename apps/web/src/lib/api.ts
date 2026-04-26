@@ -96,6 +96,16 @@ export const api = {
         body: { oldPassword, newPassword },
         token,
       }),
+    sendMagicLink: (email: string) =>
+      request<{ message: string }>('/auth/magic-link/send', {
+        method: 'POST',
+        body: { email },
+      }),
+    verifyMagicLink: (token: string) =>
+      request<{ accessToken: string; refreshToken: string; user: unknown }>(
+        '/auth/magic-link/verify',
+        { method: 'POST', body: { token } },
+      ),
   },
 
   properties: {
