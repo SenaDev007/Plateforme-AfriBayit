@@ -250,6 +250,19 @@ export const api = {
       }),
     create: (body: unknown, token: string) =>
       request<unknown>('/courses', { method: 'POST', body, token }),
+    getQuiz: (courseId: string, token: string) =>
+      request<unknown>(`/courses/${courseId}/quiz`, { token }),
+    submitQuizAttempt: (courseId: string, answers: number[], token: string) =>
+      request<{
+        score: number;
+        passed: boolean;
+        correct: number;
+        total: number;
+        passingScore: number;
+        certificateId: string | null;
+      }>(`/courses/${courseId}/quiz/attempt`, { method: 'POST', body: { answers }, token }),
+    getMyCertificates: (token: string) => request<unknown[]>('/courses/certificates/me', { token }),
+    getCertificate: (id: string) => request<unknown>(`/courses/certificates/${id}`),
   },
 
   messages: {

@@ -194,6 +194,8 @@ model User {
   conversationsAsB    Conversation[]    @relation("ConversationB")
   sentMessages        DirectMessage[]
   payouts             Payout[]        @relation("UserPayouts")
+  quizAttempts        QuizAttempt[]
+  certificates        Certificate[]
 
   @@index([email])
   @@index([phone])
@@ -634,9 +636,11 @@ model Course {
   createdAt     DateTime    @default(now())
   updatedAt     DateTime    @updatedAt
 
-  instructor  User         @relation("InstructorCourses", fields: [instructorId], references: [id])
-  enrollments Enrollment[]
-  lessons     Lesson[]
+  instructor   User          @relation("InstructorCourses", fields: [instructorId], references: [id])
+  enrollments  Enrollment[]
+  lessons      Lesson[]
+  quiz         Quiz?
+  certificates Certificate[]
 
   @@map("courses")
 }
@@ -673,6 +677,71 @@ model Enrollment {
 
   @@unique([userId, courseId])
   @@map("enrollments")
+}
+
+// ─── QUIZ & CERTIFICATES ──────────────────────────────────────────────────────
+
+model Quiz {
+  id           String   @id @default(cuid())
+  courseId     String   @unique
+  title        String
+  passingScore Int      @default(70) // percentage 0-100
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  course    Course         @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  questions QuizQuestion[]
+  attempts  QuizAttempt[]
+
+  @@map("quizzes")
+}
+
+model QuizQuestion {
+  id      String @id @default(cuid())
+  quizId  String
+  text    String
+  options Json   // string[]
+  answer  Int    // index of correct option (0-based) — never sent to client
+  order   Int    @default(0)
+
+  quiz Quiz @relation(fields: [quizId], references: [id], onDelete: Cascade)
+
+  @@index([quizId])
+  @@map("quiz_questions")
+}
+
+model QuizAttempt {
+  id        String   @id @default(cuid())
+  quizId    String
+  userId    String
+  answers   Json     // number[] — user's submitted answers
+  score     Int      // 0-100 percentage
+  passed    Boolean
+  createdAt DateTime @default(now())
+
+  quiz        Quiz         @relation(fields: [quizId], references: [id], onDelete: Cascade)
+  user        User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  certificate Certificate?
+
+  @@index([userId])
+  @@index([quizId])
+  @@map("quiz_attempts")
+}
+
+model Certificate {
+  id        String   @id @default(cuid())
+  userId    String
+  courseId  String
+  attemptId String   @unique
+  score     Int
+  issuedAt  DateTime @default(now())
+
+  user    User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  course  Course      @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  attempt QuizAttempt @relation(fields: [attemptId], references: [id])
+
+  @@unique([userId, courseId])
+  @@map("certificates")
 }
 
 // ─── COMMUNITY ────────────────────────────────────────────────────────────────

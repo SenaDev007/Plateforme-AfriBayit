@@ -5,7 +5,7 @@ import { useState, useEffect } from 'react';
 import { useSession } from 'next-auth/react';
 import Link from 'next/link';
 import type { Route } from 'next';
-import { BookOpen, Loader2, GraduationCap } from 'lucide-react';
+import { BookOpen, Loader2, GraduationCap, Award, ClipboardList } from 'lucide-react';
 import { Badge } from '@afribayit/ui';
 import { DashboardLayout } from '@/components/dashboard/DashboardLayout';
 import { api } from '@/lib/api';
@@ -23,6 +23,7 @@ interface EnrolledCourse {
     category: string | null;
     level: 'BEGINNER' | 'INTERMEDIATE' | 'ADVANCED';
   };
+  certificateId?: string | null;
 }
 
 const LEVEL_LABELS: Record<string, string> = {
@@ -59,14 +60,23 @@ export default function FormationsDashboardPage(): React.ReactElement {
   return (
     <DashboardLayout>
       <div className="flex flex-col gap-6">
-        <div className="flex items-center justify-between">
+        <div className="flex flex-wrap items-center justify-between gap-3">
           <h1 className="text-charcoal font-serif text-2xl font-bold">Mes formations</h1>
-          <Link
-            href="/formation"
-            className="bg-navy hover:bg-navy/90 rounded-lg px-4 py-2 text-sm font-medium text-white transition-colors"
-          >
-            Découvrir les formations
-          </Link>
+          <div className="flex gap-2">
+            <Link
+              href={'/dashboard/formations/certificats' as Route}
+              className="border-charcoal-200 text-charcoal hover:bg-charcoal-50 inline-flex items-center gap-1.5 rounded-lg border px-4 py-2 text-sm font-medium transition-colors"
+            >
+              <Award className="h-4 w-4 text-yellow-500" />
+              Mes certificats
+            </Link>
+            <Link
+              href="/formation"
+              className="bg-navy hover:bg-navy/90 rounded-lg px-4 py-2 text-sm font-medium text-white transition-colors"
+            >
+              Découvrir les formations
+            </Link>
+          </div>
         </div>
 
         {loading ? (
@@ -137,6 +147,31 @@ export default function FormationsDashboardPage(): React.ReactElement {
                         />
                       </div>
                     </div>
+
+                    {/* Quiz / certificate action */}
+                    <Link
+                      href={
+                        enrollment.certificateId
+                          ? (`/dashboard/formations/certificats/${enrollment.certificateId}` as Route)
+                          : (`/dashboard/formations/quiz/${c.id}` as Route)
+                      }
+                      onClick={(e) => e.stopPropagation()}
+                      className={`mt-2 flex w-full items-center justify-center gap-1.5 rounded-lg py-1.5 text-xs font-semibold transition-colors ${
+                        enrollment.certificateId
+                          ? 'bg-yellow-50 text-yellow-700 hover:bg-yellow-100'
+                          : 'bg-navy/5 text-navy hover:bg-navy/10'
+                      }`}
+                    >
+                      {enrollment.certificateId ? (
+                        <>
+                          <Award className="h-3.5 w-3.5" /> Voir le certificat
+                        </>
+                      ) : (
+                        <>
+                          <ClipboardList className="h-3.5 w-3.5" /> Passer l'évaluation
+                        </>
+                      )}
+                    </Link>
                   </div>
                 </Link>
               );

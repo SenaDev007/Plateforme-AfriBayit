@@ -1,16 +1,46 @@
 import {
-  Controller, Get, Post, Patch, Param, Body, Query,
-  UseGuards, ParseIntPipe, DefaultValuePipe,
+  Controller,
+  Get,
+  Post,
+  Patch,
+  Param,
+  Body,
+  Query,
+  UseGuards,
+  ParseIntPipe,
+  DefaultValuePipe,
 } from '@nestjs/common';
 import { ApiTags, ApiBearerAuth, ApiOperation } from '@nestjs/swagger';
 import { CoursesService } from './courses.service';
+import { QuizService } from './quiz.service';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
 import { CurrentUser } from '../../common/decorators/current-user.decorator';
 
 @ApiTags('Courses')
 @Controller('courses')
 export class CoursesController {
-  constructor(private readonly coursesService: CoursesService) {}
+  constructor(
+    private readonly coursesService: CoursesService,
+    private readonly quizService: QuizService,
+  ) {}
+
+  // ── Certificates (literal routes BEFORE param routes) ─────────────────────
+
+  @Get('certificates/me')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Mes certificats' })
+  getMyCertificates(@CurrentUser() user: { id: string }) {
+    return this.quizService.getMyCertificates(user.id);
+  }
+
+  @Get('certificates/:id')
+  @ApiOperation({ summary: "Détail d'un certificat (public)" })
+  getCertificate(@Param('id') id: string) {
+    return this.quizService.getCertificate(id);
+  }
+
+  // ── Courses ────────────────────────────────────────────────────────────────
 
   @Get()
   @ApiOperation({ summary: 'Liste des formations disponibles' })
@@ -32,7 +62,7 @@ export class CoursesController {
   }
 
   @Get(':slug')
-  @ApiOperation({ summary: 'Détail d\'une formation par slug' })
+  @ApiOperation({ summary: "Détail d'une formation par slug" })
   findBySlug(@Param('slug') slug: string) {
     return this.coursesService.findBySlug(slug);
   }
@@ -51,7 +81,7 @@ export class CoursesController {
   @Post(':id/enroll')
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
-  @ApiOperation({ summary: 'S\'inscrire à une formation' })
+  @ApiOperation({ summary: "S'inscrire à une formation" })
   enroll(@Param('id') id: string, @CurrentUser() user: { id: string }) {
     return this.coursesService.enroll(id, user.id);
   }
@@ -77,5 +107,39 @@ export class CoursesController {
     @CurrentUser() user: { id: string },
   ) {
     return this.coursesService.addLesson(body, user.id);
+  }
+
+  // ── Quiz ───────────────────────────────────────────────────────────────────
+
+  @Post(':courseId/quiz')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: "Créer ou mettre à jour le quiz d'une formation (instructeur)" })
+  createQuiz(
+    @Param('courseId') courseId: string,
+    @Body() body: Parameters<typeof this.quizService.createQuiz>[2],
+    @CurrentUser() user: { id: string },
+  ) {
+    return this.quizService.createQuiz(courseId, user.id, body);
+  }
+
+  @Get(':courseId/quiz')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: "Récupérer le quiz d'une formation" })
+  getQuiz(@Param('courseId') courseId: string, @CurrentUser() user: { id: string }) {
+    return this.quizService.getQuiz(courseId, user.id);
+  }
+
+  @Post(':courseId/quiz/attempt')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Soumettre une tentative de quiz' })
+  submitAttempt(
+    @Param('courseId') courseId: string,
+    @Body('answers') answers: number[],
+    @CurrentUser() user: { id: string },
+  ) {
+    return this.quizService.submitAttempt(courseId, user.id, answers);
   }
 }
