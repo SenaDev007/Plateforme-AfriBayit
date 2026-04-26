@@ -17,11 +17,30 @@ import { KycReviewModal } from '@/components/admin/KycReviewModal';
 import { Eye, Clock } from 'lucide-react';
 import { toast } from 'sonner';
 
+interface AiAnalysis {
+  status: 'VALID' | 'SUSPICIOUS' | 'INVALID' | 'ERROR';
+  score: number;
+  recommendation: 'APPROVE' | 'MANUAL_REVIEW' | 'REJECT';
+  documentType?: string;
+  extractedData?: {
+    fullName?: string | null;
+    documentNumber?: string | null;
+    expiryDate?: string | null;
+    nationality?: string | null;
+    dateOfBirth?: string | null;
+  };
+  fraudIndicators?: string[];
+  summary?: string;
+}
+
 interface PendingKyc {
   id: string;
   type: string;
   fileUrl: string;
   createdAt: string;
+  aiStatus?: string | null;
+  aiScore?: number | null;
+  aiAnalysis?: AiAnalysis | null;
   user: {
     firstName: string;
     lastName: string;
@@ -73,6 +92,7 @@ export default function KycPage() {
             <TableRow>
               <TableHead>Utilisateur</TableHead>
               <TableHead>Document</TableHead>
+              <TableHead>Analyse IA</TableHead>
               <TableHead>Date de soumission</TableHead>
               <TableHead className="text-right">Action</TableHead>
             </TableRow>
@@ -80,7 +100,7 @@ export default function KycPage() {
           <TableBody>
             {pendingDocs.length === 0 && !isLoading ? (
               <TableRow>
-                <TableCell colSpan={4} className="text-muted-foreground py-10 text-center">
+                <TableCell colSpan={5} className="text-muted-foreground py-10 text-center">
                   Aucune demande KYC en attente.
                 </TableCell>
               </TableRow>
@@ -95,6 +115,25 @@ export default function KycPage() {
                   </TableCell>
                   <TableCell>
                     <Badge variant="secondary">{doc.type}</Badge>
+                  </TableCell>
+                  <TableCell>
+                    {doc.aiStatus === 'VALID' && (
+                      <Badge variant="default" className="bg-green-600">
+                        Valide {doc.aiScore}/100
+                      </Badge>
+                    )}
+                    {doc.aiStatus === 'SUSPICIOUS' && (
+                      <Badge variant="secondary" className="border-amber-400 text-amber-700">
+                        Suspect {doc.aiScore}/100
+                      </Badge>
+                    )}
+                    {doc.aiStatus === 'INVALID' && (
+                      <Badge variant="destructive">Invalide {doc.aiScore}/100</Badge>
+                    )}
+                    {doc.aiStatus === 'ERROR' && (
+                      <span className="text-xs text-slate-400">Erreur IA</span>
+                    )}
+                    {!doc.aiStatus && <span className="text-xs text-slate-400">En cours…</span>}
                   </TableCell>
                   <TableCell className="text-sm">
                     {new Date(doc.createdAt).toLocaleDateString('fr-FR')}

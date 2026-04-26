@@ -1,5 +1,6 @@
 import { Injectable, Inject, NotFoundException } from '@nestjs/common';
 import type { PrismaClient, User, KycLevel } from '@afribayit/db';
+import { DocumentAIService } from './document-ai.service';
 
 interface UpdateProfileDto {
   firstName?: string;
@@ -12,7 +13,10 @@ interface UpdateProfileDto {
 
 @Injectable()
 export class UsersService {
-  constructor(@Inject('PRISMA') private readonly prisma: PrismaClient) {}
+  constructor(
+    @Inject('PRISMA') private readonly prisma: PrismaClient,
+    private readonly documentAI: DocumentAIService,
+  ) {}
 
   async findById(id: string): Promise<Omit<User, 'passwordHash' | 'twoFactorSecret'>> {
     const user = await this.prisma.user.findUnique({
@@ -51,7 +55,7 @@ export class UsersService {
       level: KycLevel;
     },
   ): Promise<void> {
-    await this.prisma.kycDocument.create({
+    const doc = await this.prisma.kycDocument.create({
       data: {
         userId,
         type: params.type,
@@ -60,6 +64,11 @@ export class UsersService {
         level: params.level,
         status: 'PENDING',
       },
+    });
+
+    this.documentAI.analyzeKycDocument(doc.id).catch((err: unknown) => {
+      const msg = err instanceof Error ? err.message : String(err);
+      console.error(`DocumentAI fire-and-forget error for doc ${doc.id}: ${msg}`);
     });
   }
 
