@@ -135,6 +135,13 @@ export const api = {
       ),
   },
 
+  payouts: {
+    findAll: (token: string) => request<unknown[]>('/payouts', { token }),
+    findMine: (token: string) => request<unknown[]>('/payouts/me', { token }),
+    retry: (id: string, body: { phone?: string; operator?: string }, token: string) =>
+      request<unknown>(`/payouts/${id}/retry`, { method: 'POST', body, token }),
+  },
+
   disputes: {
     open: (transactionId: string, body: { reason: string; description?: string }, token: string) =>
       request<unknown>(`/disputes/transactions/${transactionId}`, { method: 'POST', body, token }),

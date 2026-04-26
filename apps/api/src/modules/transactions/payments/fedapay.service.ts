@@ -24,9 +24,10 @@ export class FedaPayService {
   private readonly secretKey: string;
 
   constructor(private readonly config: ConfigService) {
-    this.baseUrl = config.get<string>('NODE_ENV') === 'production'
-      ? 'https://api.fedapay.com/v1'
-      : 'https://sandbox-api.fedapay.com/v1';
+    this.baseUrl =
+      config.get<string>('NODE_ENV') === 'production'
+        ? 'https://api.fedapay.com/v1'
+        : 'https://sandbox-api.fedapay.com/v1';
     this.secretKey = config.getOrThrow<string>('FEDAPAY_SECRET_KEY');
   }
 
@@ -72,7 +73,46 @@ export class FedaPayService {
       };
     } catch (error) {
       this.logger.error('FedaPay payment initiation failed', error);
-      throw new BadRequestException('Impossible d\'initier le paiement Mobile Money.');
+      throw new BadRequestException("Impossible d'initier le paiement Mobile Money.");
+    }
+  }
+
+  /** Send funds to a recipient via FedaPay Payout API */
+  async initiatePayout(params: {
+    amount: number;
+    currency: string;
+    phone: string;
+    operator: string;
+    firstName: string;
+    lastName: string;
+    reference: string;
+  }): Promise<{ externalId: string }> {
+    try {
+      const response = await axios.post<{ v1: { payout: { id: number } } }>(
+        `${this.baseUrl}/payouts`,
+        {
+          amount: params.amount,
+          currency: { iso: params.currency },
+          mode: params.operator,
+          beneficiary: {
+            first_name: params.firstName,
+            last_name: params.lastName,
+            phone_number: { number: params.phone, country: 'BJ' },
+          },
+          metadata: { reference: params.reference },
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${this.secretKey}`,
+            'Content-Type': 'application/json',
+          },
+        },
+      );
+
+      return { externalId: String(response.data.v1.payout.id) };
+    } catch (error) {
+      this.logger.error('FedaPay payout initiation failed', error);
+      throw error;
     }
   }
 

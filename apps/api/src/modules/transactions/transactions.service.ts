@@ -16,6 +16,7 @@ import { EscrowService } from './escrow.service';
 import { FedaPayService } from './payments/fedapay.service';
 import { StripeService } from './payments/stripe.service';
 import { AuthService } from '../auth/auth.service';
+import { PayoutService } from './payout.service';
 
 const LARGE_AMOUNT_THRESHOLD_XOF = 100_000;
 
@@ -39,6 +40,7 @@ export class TransactionsService {
     private readonly fedapayService: FedaPayService,
     private readonly stripeService: StripeService,
     private readonly authService: AuthService,
+    private readonly payoutService: PayoutService,
   ) {}
 
   /** Initiate a new transaction and create escrow account */
@@ -150,12 +152,20 @@ export class TransactionsService {
       }
     }
 
-    return this.escrowService.transition(
+    const released = await this.escrowService.transition(
       transactionId,
       'RELEASED',
       buyerId,
       "Libération confirmée par l'acheteur",
     );
+
+    // Fire-and-forget payout — errors are logged but don't fail the release
+    this.payoutService.createAndTrigger(transactionId).catch((err: unknown) => {
+      const msg = err instanceof Error ? err.message : String(err);
+      console.error(`[Payout] auto-trigger failed for ${transactionId}: ${msg}`);
+    });
+
+    return released;
   }
 
   /** Return 2FA requirements for a release operation */

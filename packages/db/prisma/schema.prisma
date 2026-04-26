@@ -193,6 +193,7 @@ model User {
   conversationsAsA    Conversation[]    @relation("ConversationA")
   conversationsAsB    Conversation[]    @relation("ConversationB")
   sentMessages        DirectMessage[]
+  payouts             Payout[]        @relation("UserPayouts")
 
   @@index([email])
   @@index([phone])
@@ -501,6 +502,7 @@ model Transaction {
   ledgerEntries  LedgerEntry[]
   payments       Payment[]
   dispute        Dispute?
+  payout         Payout?
 
   @@index([buyerId])
   @@index([sellerId])
@@ -575,6 +577,32 @@ model Dispute {
 
   @@index([status])
   @@map("disputes")
+}
+
+// ─── PAYOUTS ──────────────────────────────────────────────────────────────────
+
+model Payout {
+  id            String    @id @default(cuid())
+  transactionId String    @unique
+  sellerId      String
+  amount        Decimal   @db.Decimal(15, 2)
+  currency      Currency  @default(XOF)
+  phone         String?
+  operator      String?   // mtn_bj | moov_bj | mtn_ci | orange_ci | orange_bf | moov_tg
+  status        String    @default("PENDING") // PENDING | INITIATED | COMPLETED | FAILED
+  providerRef   String?   // FedaPay payout external_id
+  failureReason String?   @db.Text
+  initiatedAt   DateTime?
+  completedAt   DateTime?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  transaction Transaction @relation(fields: [transactionId], references: [id])
+  seller      User        @relation("UserPayouts", fields: [sellerId], references: [id])
+
+  @@index([sellerId])
+  @@index([status])
+  @@map("payouts")
 }
 
 // ─── COURSES ──────────────────────────────────────────────────────────────────
