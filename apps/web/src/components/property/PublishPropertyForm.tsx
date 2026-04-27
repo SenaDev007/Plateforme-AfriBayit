@@ -1,8 +1,9 @@
 'use client';
 import type React from 'react';
 
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { useRouter } from 'next/navigation';
+import { useSession } from 'next-auth/react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -15,9 +16,13 @@ import {
   MapPin,
   Home,
   DollarSign,
+  X,
+  Loader2,
 } from 'lucide-react';
 import { Input, Button, cn } from '@afribayit/ui';
+import { api } from '@/lib/api';
 import toast from 'react-hot-toast';
+import type { Route } from 'next';
 
 const PROPERTY_TYPES = [
   { value: 'HOUSE', label: 'Maison', emoji: '🏠' },
@@ -107,12 +112,23 @@ const STEPS = [
   { label: 'Prix & publication', icon: DollarSign },
 ];
 
+interface UploadedPhoto {
+  preview: string;
+  publicUrl: string;
+  fileKey: string;
+  uploading: boolean;
+}
+
 export function PublishPropertyForm(): React.ReactElement {
   const router = useRouter();
+  const { data: session } = useSession();
+  const token = (session?.accessToken as string | undefined) ?? null;
   const [step, setStep] = useState(0);
   const [formData, setFormData] = useState<Partial<FormData>>({});
   const [selectedFeatures, setSelectedFeatures] = useState<string[]>([]);
+  const [photos, setPhotos] = useState<UploadedPhoto[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const form1 = useForm<Step1Data>({
     resolver: zodResolver(step1Schema),
@@ -137,6 +153,41 @@ export function PublishPropertyForm(): React.ReactElement {
   const selectedCountry = form3.watch('country');
   const cities = COUNTRIES.find((c) => c.value === selectedCountry)?.cities ?? [];
 
+  const handlePhotoSelect = async (files: FileList | null) => {
+    if (!files || !token) return;
+    const allowed = Array.from(files).slice(0, 10 - photos.length);
+
+    for (const file of allowed) {
+      const preview = URL.createObjectURL(file);
+      const placeholder: UploadedPhoto = { preview, publicUrl: '', fileKey: '', uploading: true };
+      setPhotos((prev) => [...prev, placeholder]);
+
+      try {
+        const { data: presign } = await api.properties.presignUpload(file.type, token);
+        await fetch(presign.uploadUrl, {
+          method: 'PUT',
+          body: file,
+          headers: { 'Content-Type': file.type },
+        });
+        setPhotos((prev) =>
+          prev.map((p) =>
+            p.preview === preview
+              ? {
+                  preview,
+                  publicUrl: presign.publicUrl,
+                  fileKey: presign.fileKey,
+                  uploading: false,
+                }
+              : p,
+          ),
+        );
+      } catch {
+        setPhotos((prev) => prev.filter((p) => p.preview !== preview));
+        toast.error(`Impossible d'uploader ${file.name}`);
+      }
+    }
+  };
+
   const handleStep1 = (data: Step1Data): void => {
     setFormData((prev) => ({ ...prev, ...data }));
     setStep(1);
@@ -153,13 +204,35 @@ export function PublishPropertyForm(): React.ReactElement {
   };
 
   const handleStep4 = async (data: Step4Data): Promise<void> => {
+    if (!token) {
+      toast.error('Session expirée. Reconnectez-vous.');
+      return;
+    }
+    const pendingPhotos = photos.some((p) => p.uploading);
+    if (pendingPhotos) {
+      toast.error("Photos encore en cours d'upload. Patientez.");
+      return;
+    }
+
     const final = { ...formData, ...data, features: selectedFeatures };
     setIsSubmitting(true);
     try {
-      // TODO: await api.properties.create(final, token)
-      await new Promise((resolve) => setTimeout(resolve, 1500));
+      const { data: created } = await api.properties.create(final, token);
+      const property = created as { slug: string };
+
+      // Associate uploaded photos with the property
+      const readyPhotos = photos.filter((p) => p.publicUrl);
+      for (let i = 0; i < readyPhotos.length; i++) {
+        const photo = readyPhotos[i]!;
+        await api.properties.addImage(
+          property.slug,
+          { url: photo.publicUrl, fileKey: photo.fileKey, isPrimary: i === 0 },
+          token,
+        );
+      }
+
       toast.success('Annonce créée avec succès !');
-      router.push('/dashboard/annonces');
+      router.push('/dashboard/annonces' as Route);
     } catch {
       toast.error('Erreur lors de la création. Réessayez.');
     } finally {
@@ -418,18 +491,72 @@ export function PublishPropertyForm(): React.ReactElement {
               </div>
             </fieldset>
 
-            {/* Photo upload placeholder */}
+            {/* Photo upload */}
             <div>
-              <p className="text-charcoal mb-2 text-sm font-medium">Photos</p>
-              <div className="border-charcoal-200 hover:border-navy/40 cursor-pointer rounded-xl border-2 border-dashed p-8 text-center transition-colors">
-                <Upload className="text-charcoal-300 mx-auto mb-2 h-8 w-8" aria-hidden="true" />
-                <p className="text-charcoal-400 text-sm">
-                  Glissez vos photos ici ou cliquez pour parcourir
-                </p>
-                <p className="text-charcoal-300 mt-1 text-xs">
-                  JPG, PNG — max 10 Mo par photo — 10 photos max
-                </p>
-              </div>
+              <p className="text-charcoal mb-2 text-sm font-medium">
+                Photos <span className="text-charcoal-400 font-normal">({photos.length}/10)</span>
+              </p>
+
+              {/* Grid of uploaded photos */}
+              {photos.length > 0 && (
+                <div className="mb-3 grid grid-cols-3 gap-2 sm:grid-cols-5">
+                  {photos.map((photo, i) => (
+                    <div
+                      key={photo.preview}
+                      className="bg-charcoal-100 relative aspect-square overflow-hidden rounded-lg"
+                    >
+                      <img
+                        src={photo.preview}
+                        alt={`Photo ${i + 1}`}
+                        className="h-full w-full object-cover"
+                      />
+                      {photo.uploading ? (
+                        <div className="absolute inset-0 flex items-center justify-center bg-black/40">
+                          <Loader2 className="h-5 w-5 animate-spin text-white" />
+                        </div>
+                      ) : (
+                        <button
+                          type="button"
+                          onClick={() => setPhotos((prev) => prev.filter((_, j) => j !== i))}
+                          className="absolute right-1 top-1 rounded-full bg-black/60 p-0.5 text-white hover:bg-black/80"
+                          aria-label="Supprimer la photo"
+                        >
+                          <X className="h-3 w-3" />
+                        </button>
+                      )}
+                      {i === 0 && !photo.uploading && (
+                        <span className="bg-navy/80 absolute bottom-1 left-1 rounded px-1 text-xs text-white">
+                          Principale
+                        </span>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              {photos.length < 10 && (
+                <>
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    accept="image/jpeg,image/png,image/webp"
+                    multiple
+                    className="sr-only"
+                    onChange={(e) => void handlePhotoSelect(e.target.files)}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => fileInputRef.current?.click()}
+                    className="border-charcoal-200 hover:border-navy/40 flex w-full cursor-pointer flex-col items-center gap-2 rounded-xl border-2 border-dashed p-6 text-center transition-colors"
+                  >
+                    <Upload className="text-charcoal-300 h-7 w-7" aria-hidden="true" />
+                    <p className="text-charcoal-400 text-sm">Cliquez pour ajouter des photos</p>
+                    <p className="text-charcoal-300 text-xs">
+                      JPG, PNG, WebP — max 10 Mo — 10 photos
+                    </p>
+                  </button>
+                </>
+              )}
             </div>
 
             <div className="flex gap-3">

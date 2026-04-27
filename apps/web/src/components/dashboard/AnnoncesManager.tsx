@@ -2,14 +2,45 @@
 import type React from 'react';
 import type { Route } from 'next';
 
-import { useState } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
+import { useSession } from 'next-auth/react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
-  Plus, Eye, Pencil, Trash2, CheckCircle2, Clock, Archive,
-  MoreVertical, TrendingUp, Building2, AlertCircle
+  Plus,
+  Eye,
+  Pencil,
+  Trash2,
+  CheckCircle2,
+  Clock,
+  Archive,
+  MoreVertical,
+  TrendingUp,
+  Building2,
+  AlertCircle,
+  Loader2,
 } from 'lucide-react';
 import { Badge, Button, cn } from '@afribayit/ui';
+import { api } from '@/lib/api';
+import toast from 'react-hot-toast';
+
+interface ApiProperty {
+  id: string;
+  slug: string;
+  title: string;
+  type: string;
+  purpose: string;
+  price: string | number;
+  currency: string;
+  city: string;
+  country: string;
+  status: string;
+  viewCount: number;
+  images: Array<{ url: string; isPrimary: boolean }>;
+  _count?: { favorites: number };
+  updatedAt: string;
+  createdAt: string;
+}
 
 interface Annonce {
   id: string;
@@ -24,62 +55,37 @@ interface Annonce {
   status: 'DRAFT' | 'PUBLISHED' | 'ARCHIVED' | 'PENDING_REVIEW';
   views: number;
   favorites: number;
-  imageUrl?: string;
+  imageUrl?: string | undefined;
   createdAt: string;
   updatedAt: string;
 }
 
-const MOCK_ANNONCES: Annonce[] = [
-  {
-    id: '1',
-    slug: 'villa-prestige-cotonou',
-    title: 'Villa Prestige 4 chambres',
-    type: 'VILLA',
-    purpose: 'SALE',
-    price: 85000000,
-    currency: 'XOF',
-    city: 'Cotonou',
-    country: 'Bénin',
-    status: 'PUBLISHED',
-    views: 342,
-    favorites: 18,
-    imageUrl: 'https://images.unsplash.com/photo-1613977257363-707ba9348227?w=400&q=70',
-    createdAt: '2026-01-15',
-    updatedAt: '2026-04-01',
-  },
-  {
-    id: '2',
-    slug: 'appartement-t3-port-bouet',
-    title: 'Appartement T3 meublé',
-    type: 'APARTMENT',
-    purpose: 'RENT',
-    price: 280000,
-    currency: 'XOF',
-    city: 'Abidjan',
-    country: 'Côte d\'Ivoire',
-    status: 'DRAFT',
-    views: 0,
-    favorites: 0,
-    createdAt: '2026-04-10',
-    updatedAt: '2026-04-18',
-  },
-  {
-    id: '3',
-    slug: 'terrain-500m2-ouagadougou',
-    title: 'Terrain 500m² viabilisé',
-    type: 'LAND',
-    purpose: 'SALE',
-    price: 12000000,
-    currency: 'XOF',
-    city: 'Ouagadougou',
-    country: 'Burkina Faso',
-    status: 'PENDING_REVIEW',
-    views: 89,
-    favorites: 5,
-    createdAt: '2026-03-20',
-    updatedAt: '2026-04-05',
-  },
-];
+function mapStatus(s: string): Annonce['status'] {
+  if (s === 'ACTIVE') return 'PUBLISHED';
+  if (s === 'ARCHIVED') return 'ARCHIVED';
+  if (s === 'PENDING_REVIEW') return 'PENDING_REVIEW';
+  return 'DRAFT';
+}
+
+function fromApi(p: ApiProperty): Annonce {
+  return {
+    id: p.id,
+    slug: p.slug,
+    title: p.title,
+    type: p.type,
+    purpose: p.purpose,
+    price: Number(p.price),
+    currency: p.currency,
+    city: p.city,
+    country: p.country,
+    status: mapStatus(p.status),
+    views: p.viewCount,
+    favorites: p._count?.favorites ?? 0,
+    imageUrl: p.images?.[0]?.url,
+    createdAt: p.createdAt,
+    updatedAt: p.updatedAt,
+  };
+}
 
 function formatPrice(amount: number, currency: string): string {
   if (currency === 'XOF') {
@@ -103,9 +109,37 @@ const PURPOSE_LABEL: Record<string, string> = {
   INVESTMENT: 'Investissement',
 };
 
-function AnnonceCard({ annonce, onDelete }: { annonce: Annonce; onDelete: (id: string) => void }): React.ReactElement {
+interface AnnonceCardProps {
+  annonce: Annonce;
+  onPublish: (slug: string) => Promise<void>;
+  onDelete: (slug: string) => Promise<void>;
+}
+
+function AnnonceCard({ annonce, onPublish, onDelete }: AnnonceCardProps): React.ReactElement {
   const [menuOpen, setMenuOpen] = useState(false);
+  const [publishing, setPublishing] = useState(false);
+  const [deleting, setDeleting] = useState(false);
   const config = STATUS_CONFIG[annonce.status];
+
+  const handlePublish = async () => {
+    setPublishing(true);
+    try {
+      await onPublish(annonce.slug);
+    } finally {
+      setPublishing(false);
+    }
+  };
+
+  const handleDelete = async () => {
+    if (!confirm(`Archiver "${annonce.title}" ? Cette action est réversible via le support.`))
+      return;
+    setDeleting(true);
+    try {
+      await onDelete(annonce.slug);
+    } finally {
+      setDeleting(false);
+    }
+  };
 
   return (
     <motion.div
@@ -113,35 +147,38 @@ function AnnonceCard({ annonce, onDelete }: { annonce: Annonce; onDelete: (id: s
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, scale: 0.95 }}
-      className="bg-white rounded-xl border border-charcoal-100 overflow-hidden flex flex-col sm:flex-row"
+      className="border-charcoal-100 flex flex-col overflow-hidden rounded-xl border bg-white sm:flex-row"
     >
       {/* Thumbnail */}
-      <div className="relative h-40 sm:h-auto sm:w-40 flex-shrink-0 bg-charcoal-100">
+      <div className="bg-charcoal-100 relative h-40 flex-shrink-0 sm:h-auto sm:w-40">
         {annonce.imageUrl ? (
           <img src={annonce.imageUrl} alt={annonce.title} className="h-full w-full object-cover" />
         ) : (
-          <div className="h-full w-full flex items-center justify-center">
-            <Building2 className="h-8 w-8 text-charcoal-300" aria-hidden="true" />
+          <div className="flex h-full w-full items-center justify-center">
+            <Building2 className="text-charcoal-300 h-8 w-8" aria-hidden="true" />
           </div>
         )}
-        <Badge variant={config.variant} className="absolute top-2 left-2 text-xs">
+        <Badge variant={config.variant} className="absolute left-2 top-2 text-xs">
           {config.label}
         </Badge>
       </div>
 
       {/* Content */}
-      <div className="flex-1 p-4 flex flex-col gap-2 min-w-0">
+      <div className="flex min-w-0 flex-1 flex-col gap-2 p-4">
         <div className="flex items-start justify-between gap-2">
           <div>
-            <p className="font-semibold text-charcoal leading-tight line-clamp-1">{annonce.title}</p>
-            <p className="text-xs text-charcoal-400 mt-0.5">
-              {annonce.city}, {annonce.country} · {PURPOSE_LABEL[annonce.purpose] ?? annonce.purpose}
+            <p className="text-charcoal line-clamp-1 font-semibold leading-tight">
+              {annonce.title}
+            </p>
+            <p className="text-charcoal-400 mt-0.5 text-xs">
+              {annonce.city}, {annonce.country} ·{' '}
+              {PURPOSE_LABEL[annonce.purpose] ?? annonce.purpose}
             </p>
           </div>
           <div className="relative flex-shrink-0">
             <button
               onClick={() => setMenuOpen((v) => !v)}
-              className="p-1.5 rounded-lg text-charcoal-400 hover:bg-charcoal-50"
+              className="text-charcoal-400 hover:bg-charcoal-50 rounded-lg p-1.5"
               aria-label="Options"
               aria-expanded={menuOpen}
             >
@@ -153,28 +190,37 @@ function AnnonceCard({ annonce, onDelete }: { annonce: Annonce; onDelete: (id: s
                   initial={{ opacity: 0, scale: 0.95, y: -4 }}
                   animate={{ opacity: 1, scale: 1, y: 0 }}
                   exit={{ opacity: 0, scale: 0.95 }}
-                  className="absolute right-0 top-8 z-10 w-44 rounded-lg border border-charcoal-100 bg-white shadow-lg py-1"
+                  className="border-charcoal-100 absolute right-0 top-8 z-10 w-44 rounded-lg border bg-white py-1 shadow-lg"
                   onMouseLeave={() => setMenuOpen(false)}
                 >
                   {annonce.status === 'PUBLISHED' && (
                     <Link
                       href={`/proprietes/${annonce.slug}` as Route}
-                      className="flex items-center gap-2 px-3 py-2 text-sm text-charcoal hover:bg-charcoal-50"
+                      className="text-charcoal hover:bg-charcoal-50 flex items-center gap-2 px-3 py-2 text-sm"
                     >
                       <Eye className="h-4 w-4" /> Voir l'annonce
                     </Link>
                   )}
                   <Link
                     href={`/dashboard/annonces/${annonce.slug}/modifier` as Route}
-                    className="flex items-center gap-2 px-3 py-2 text-sm text-charcoal hover:bg-charcoal-50"
+                    className="text-charcoal hover:bg-charcoal-50 flex items-center gap-2 px-3 py-2 text-sm"
                   >
                     <Pencil className="h-4 w-4" /> Modifier
                   </Link>
                   <button
-                    onClick={() => { onDelete(annonce.id); setMenuOpen(false); }}
-                    className="flex items-center gap-2 px-3 py-2 text-sm text-danger hover:bg-danger/5 w-full"
+                    onClick={() => {
+                      void handleDelete();
+                      setMenuOpen(false);
+                    }}
+                    disabled={deleting}
+                    className="text-danger hover:bg-danger/5 flex w-full items-center gap-2 px-3 py-2 text-sm disabled:opacity-50"
                   >
-                    <Trash2 className="h-4 w-4" /> Supprimer
+                    {deleting ? (
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                    ) : (
+                      <Trash2 className="h-4 w-4" />
+                    )}
+                    Archiver
                   </button>
                 </motion.div>
               )}
@@ -182,10 +228,12 @@ function AnnonceCard({ annonce, onDelete }: { annonce: Annonce; onDelete: (id: s
           </div>
         </div>
 
-        <p className="font-mono font-bold text-navy">{formatPrice(annonce.price, annonce.currency)}</p>
+        <p className="text-navy font-mono font-bold">
+          {formatPrice(annonce.price, annonce.currency)}
+        </p>
 
         {/* Stats */}
-        <div className="flex items-center gap-4 text-xs text-charcoal-400 mt-auto">
+        <div className="text-charcoal-400 mt-auto flex items-center gap-4 text-xs">
           <span className="flex items-center gap-1">
             <Eye className="h-3 w-3" aria-hidden="true" />
             {annonce.views} vues
@@ -194,7 +242,9 @@ function AnnonceCard({ annonce, onDelete }: { annonce: Annonce; onDelete: (id: s
             <TrendingUp className="h-3 w-3" aria-hidden="true" />
             {annonce.favorites} favoris
           </span>
-          <span className="ml-auto">Mis à jour le {new Date(annonce.updatedAt).toLocaleDateString('fr-FR')}</span>
+          <span className="ml-auto">
+            Mis à jour le {new Date(annonce.updatedAt).toLocaleDateString('fr-FR')}
+          </span>
         </div>
 
         {/* Actions */}
@@ -205,8 +255,18 @@ function AnnonceCard({ annonce, onDelete }: { annonce: Annonce; onDelete: (id: s
             </Button>
           </Link>
           {annonce.status === 'DRAFT' && (
-            <Button size="sm" className="gap-1.5">
-              <CheckCircle2 className="h-3.5 w-3.5" aria-hidden="true" /> Publier
+            <Button
+              size="sm"
+              className="gap-1.5"
+              onClick={() => void handlePublish()}
+              disabled={publishing}
+            >
+              {publishing ? (
+                <Loader2 className="h-3.5 w-3.5 animate-spin" />
+              ) : (
+                <CheckCircle2 className="h-3.5 w-3.5" aria-hidden="true" />
+              )}
+              Publier
             </Button>
           )}
         </div>
@@ -216,22 +276,68 @@ function AnnonceCard({ annonce, onDelete }: { annonce: Annonce; onDelete: (id: s
 }
 
 export function AnnoncesManager(): React.ReactElement {
-  const [annonces, setAnnonces] = useState<Annonce[]>(MOCK_ANNONCES);
+  const { data: session } = useSession();
+  const token = (session?.accessToken as string | undefined) ?? null;
+
+  const [annonces, setAnnonces] = useState<Annonce[]>([]);
+  const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState<string>('all');
 
-  const filtered = filter === 'all'
-    ? annonces
-    : annonces.filter((a) => a.status === filter);
+  const load = useCallback(async () => {
+    if (!token) {
+      setLoading(false);
+      return;
+    }
+    try {
+      const res = await api.properties.findMine(token);
+      setAnnonces((res.data as ApiProperty[]).map(fromApi));
+    } catch {
+      toast.error('Impossible de charger vos annonces.');
+    } finally {
+      setLoading(false);
+    }
+  }, [token]);
 
-  const handleDelete = (id: string): void => {
-    setAnnonces((prev) => prev.filter((a) => a.id !== id));
+  useEffect(() => {
+    void load();
+  }, [load]);
+
+  const handlePublish = async (slug: string) => {
+    if (!token) return;
+    try {
+      await api.properties.publish(slug, token);
+      setAnnonces((prev) => prev.map((a) => (a.slug === slug ? { ...a, status: 'PUBLISHED' } : a)));
+      toast.success('Annonce publiée avec succès !');
+    } catch {
+      toast.error('Impossible de publier. Réessayez.');
+    }
   };
 
+  const handleDelete = async (slug: string) => {
+    if (!token) return;
+    try {
+      await api.properties.remove(slug, token);
+      setAnnonces((prev) => prev.filter((a) => a.slug !== slug));
+      toast.success('Annonce archivée.');
+    } catch {
+      toast.error("Impossible d'archiver. Réessayez.");
+    }
+  };
+
+  const visible = annonces.filter((a) => a.status !== 'ARCHIVED');
+  const filtered = filter === 'all' ? visible : visible.filter((a) => a.status === filter);
+
   const tabs = [
-    { value: 'all', label: `Toutes (${annonces.length})` },
-    { value: 'PUBLISHED', label: `Publiées (${annonces.filter((a) => a.status === 'PUBLISHED').length})` },
-    { value: 'DRAFT', label: `Brouillons (${annonces.filter((a) => a.status === 'DRAFT').length})` },
-    { value: 'PENDING_REVIEW', label: `En révision (${annonces.filter((a) => a.status === 'PENDING_REVIEW').length})` },
+    { value: 'all', label: `Toutes (${visible.length})` },
+    {
+      value: 'PUBLISHED',
+      label: `Publiées (${visible.filter((a) => a.status === 'PUBLISHED').length})`,
+    },
+    { value: 'DRAFT', label: `Brouillons (${visible.filter((a) => a.status === 'DRAFT').length})` },
+    {
+      value: 'PENDING_REVIEW',
+      label: `En révision (${visible.filter((a) => a.status === 'PENDING_REVIEW').length})`,
+    },
   ];
 
   return (
@@ -239,10 +345,12 @@ export function AnnoncesManager(): React.ReactElement {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="font-serif text-2xl font-bold text-charcoal">Mes annonces</h1>
-          <p className="text-sm text-charcoal-400 mt-0.5">Gérez vos propriétés publiées et brouillons</p>
+          <h1 className="text-charcoal font-serif text-2xl font-bold">Mes annonces</h1>
+          <p className="text-charcoal-400 mt-0.5 text-sm">
+            Gérez vos propriétés publiées et brouillons
+          </p>
         </div>
-        <Link href="/dashboard/annonces/nouvelle">
+        <Link href={'/dashboard/annonces/nouvelle' as Route}>
           <Button className="gap-2">
             <Plus className="h-4 w-4" aria-hidden="true" />
             Nouvelle annonce
@@ -250,64 +358,91 @@ export function AnnoncesManager(): React.ReactElement {
         </Link>
       </div>
 
-      {/* Stats cards */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-        {[
-          { label: 'Total annonces', value: annonces.length, color: 'text-navy' },
-          { label: 'Publiées', value: annonces.filter((a) => a.status === 'PUBLISHED').length, color: 'text-emerald' },
-          { label: 'Vues totales', value: annonces.reduce((s, a) => s + a.views, 0), color: 'text-sky' },
-          { label: 'Favoris totaux', value: annonces.reduce((s, a) => s + a.favorites, 0), color: 'text-gold' },
-        ].map(({ label, value, color }) => (
-          <div key={label} className="bg-white rounded-xl border border-charcoal-100 p-4">
-            <p className={cn('font-mono text-2xl font-bold', color)}>{value}</p>
-            <p className="text-xs text-charcoal-400 mt-0.5">{label}</p>
-          </div>
-        ))}
-      </div>
-
-      {/* Filter tabs */}
-      <div className="flex gap-1 border-b border-charcoal-100 overflow-x-auto">
-        {tabs.map((tab) => (
-          <button
-            key={tab.value}
-            onClick={() => setFilter(tab.value)}
-            className={cn(
-              'px-4 py-2.5 text-sm font-medium whitespace-nowrap border-b-2 transition-colors',
-              filter === tab.value
-                ? 'border-navy text-navy'
-                : 'border-transparent text-charcoal-400 hover:text-charcoal',
-            )}
-          >
-            {tab.label}
-          </button>
-        ))}
-      </div>
-
-      {/* List */}
-      <AnimatePresence mode="popLayout">
-        {filtered.length > 0 ? (
-          <div className="flex flex-col gap-4">
-            {filtered.map((annonce) => (
-              <AnnonceCard key={annonce.id} annonce={annonce} onDelete={handleDelete} />
+      {loading ? (
+        <div className="flex items-center justify-center py-20">
+          <Loader2 className="text-navy h-8 w-8 animate-spin" />
+        </div>
+      ) : (
+        <>
+          {/* Stats cards */}
+          <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
+            {[
+              { label: 'Total annonces', value: visible.length, color: 'text-navy' },
+              {
+                label: 'Publiées',
+                value: visible.filter((a) => a.status === 'PUBLISHED').length,
+                color: 'text-emerald',
+              },
+              {
+                label: 'Vues totales',
+                value: visible.reduce((s, a) => s + a.views, 0),
+                color: 'text-sky',
+              },
+              {
+                label: 'Favoris totaux',
+                value: visible.reduce((s, a) => s + a.favorites, 0),
+                color: 'text-gold',
+              },
+            ].map(({ label, value, color }) => (
+              <div key={label} className="border-charcoal-100 rounded-xl border bg-white p-4">
+                <p className={cn('font-mono text-2xl font-bold', color)}>{value}</p>
+                <p className="text-charcoal-400 mt-0.5 text-xs">{label}</p>
+              </div>
             ))}
           </div>
-        ) : (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            className="flex flex-col items-center justify-center py-20 gap-4"
-          >
-            <Building2 className="h-12 w-12 text-charcoal-200" aria-hidden="true" />
-            <p className="text-lg font-semibold text-charcoal">Aucune annonce</p>
-            <p className="text-sm text-charcoal-400">Créez votre première annonce immobilière.</p>
-            <Link href="/dashboard/annonces/nouvelle">
-              <Button className="gap-2 mt-2">
-                <Plus className="h-4 w-4" aria-hidden="true" /> Créer une annonce
-              </Button>
-            </Link>
-          </motion.div>
-        )}
-      </AnimatePresence>
+
+          {/* Filter tabs */}
+          <div className="border-charcoal-100 flex gap-1 overflow-x-auto border-b">
+            {tabs.map((tab) => (
+              <button
+                key={tab.value}
+                onClick={() => setFilter(tab.value)}
+                className={cn(
+                  'whitespace-nowrap border-b-2 px-4 py-2.5 text-sm font-medium transition-colors',
+                  filter === tab.value
+                    ? 'border-navy text-navy'
+                    : 'text-charcoal-400 hover:text-charcoal border-transparent',
+                )}
+              >
+                {tab.label}
+              </button>
+            ))}
+          </div>
+
+          {/* List */}
+          <AnimatePresence mode="popLayout">
+            {filtered.length > 0 ? (
+              <div className="flex flex-col gap-4">
+                {filtered.map((annonce) => (
+                  <AnnonceCard
+                    key={annonce.id}
+                    annonce={annonce}
+                    onPublish={handlePublish}
+                    onDelete={handleDelete}
+                  />
+                ))}
+              </div>
+            ) : (
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                className="flex flex-col items-center justify-center gap-4 py-20"
+              >
+                <Building2 className="text-charcoal-200 h-12 w-12" aria-hidden="true" />
+                <p className="text-charcoal text-lg font-semibold">Aucune annonce</p>
+                <p className="text-charcoal-400 text-sm">
+                  Créez votre première annonce immobilière.
+                </p>
+                <Link href={'/dashboard/annonces/nouvelle' as Route}>
+                  <Button className="mt-2 gap-2">
+                    <Plus className="h-4 w-4" aria-hidden="true" /> Créer une annonce
+                  </Button>
+                </Link>
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </>
+      )}
     </div>
   );
 }

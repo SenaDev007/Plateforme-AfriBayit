@@ -166,6 +166,60 @@ export class PropertiesService {
     return this.update(slug, ownerId, { status: 'ACTIVE' } as Parameters<typeof this.update>[2]);
   }
 
+  /** Get all properties owned by a user */
+  async findByOwner(ownerId: string): Promise<Property[]> {
+    return this.prisma.property.findMany({
+      where: { ownerId },
+      include: {
+        images: { where: { isPrimary: true }, take: 1 },
+        _count: { select: { favorites: true } },
+      },
+      orderBy: { updatedAt: 'desc' },
+    }) as unknown as Property[];
+  }
+
+  /** Soft-delete (archive) a property — owner only */
+  async remove(slug: string, ownerId: string): Promise<void> {
+    const property = await this.prisma.property.findUnique({ where: { slug } });
+    if (!property) throw new NotFoundException('Propriété introuvable.');
+    if (property.ownerId !== ownerId) throw new ForbiddenException('Accès refusé.');
+    await this.prisma.property.update({
+      where: { slug },
+      data: { status: 'ARCHIVED' },
+    });
+  }
+
+  /** Add a photo to a property after R2 upload */
+  async addImage(
+    slug: string,
+    ownerId: string,
+    params: { url: string; fileKey: string; alt?: string; isPrimary?: boolean },
+  ): Promise<void> {
+    const property = await this.prisma.property.findUnique({ where: { slug } });
+    if (!property) throw new NotFoundException('Propriété introuvable.');
+    if (property.ownerId !== ownerId) throw new ForbiddenException('Accès refusé.');
+
+    const count = await this.prisma.propertyImage.count({ where: { propertyId: property.id } });
+
+    if (params.isPrimary) {
+      await this.prisma.propertyImage.updateMany({
+        where: { propertyId: property.id },
+        data: { isPrimary: false },
+      });
+    }
+
+    await this.prisma.propertyImage.create({
+      data: {
+        propertyId: property.id,
+        url: params.url,
+        fileKey: params.fileKey,
+        ...(params.alt !== undefined ? { alt: params.alt } : {}),
+        isPrimary: params.isPrimary ?? count === 0,
+        order: count,
+      },
+    });
+  }
+
   private generateSlug(title: string, city: string): string {
     const base = `${title}-${city}`
       .toLowerCase()

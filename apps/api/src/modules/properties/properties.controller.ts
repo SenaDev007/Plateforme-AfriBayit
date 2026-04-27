@@ -3,11 +3,14 @@ import {
   Get,
   Post,
   Patch,
+  Delete,
   Param,
   Body,
   Query,
   UseGuards,
   Version,
+  HttpCode,
+  HttpStatus,
 } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
 import { PropertiesService } from './properties.service';
@@ -24,6 +27,15 @@ export class PropertiesController {
     private readonly propertiesService: PropertiesService,
     private readonly storageService: StorageService,
   ) {}
+
+  @Get('mine')
+  @Version('1')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Mes annonces (propriétaire)' })
+  findMine(@CurrentUser() user: User) {
+    return this.propertiesService.findByOwner(user.id);
+  }
 
   @Get()
   @Version('1')
@@ -80,6 +92,29 @@ export class PropertiesController {
   @ApiOperation({ summary: 'Publier une annonce' })
   publish(@Param('slug') slug: string, @CurrentUser() user: User) {
     return this.propertiesService.publish(slug, user.id);
+  }
+
+  @Delete(':slug')
+  @Version('1')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @HttpCode(HttpStatus.NO_CONTENT)
+  @ApiOperation({ summary: 'Archiver une annonce (propriétaire)' })
+  async remove(@Param('slug') slug: string, @CurrentUser() user: User) {
+    await this.propertiesService.remove(slug, user.id);
+  }
+
+  @Post(':slug/images')
+  @Version('1')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Ajouter une image à une propriété après upload R2' })
+  addImage(
+    @Param('slug') slug: string,
+    @CurrentUser() user: User,
+    @Body() body: { url: string; fileKey: string; alt?: string; isPrimary?: boolean },
+  ) {
+    return this.propertiesService.addImage(slug, user.id, body);
   }
 
   @Post('upload/presign')

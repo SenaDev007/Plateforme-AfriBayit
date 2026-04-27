@@ -125,6 +125,14 @@ export const api = {
         '/properties/upload/presign',
         { method: 'POST', body: { contentType }, token },
       ),
+    findMine: (token: string) => request<unknown[]>('/properties/mine', { token }),
+    remove: (slug: string, token: string) =>
+      request<void>(`/properties/${slug}`, { method: 'DELETE', token }),
+    addImage: (
+      slug: string,
+      body: { url: string; fileKey: string; alt?: string; isPrimary?: boolean },
+      token: string,
+    ) => request<void>(`/properties/${slug}/images`, { method: 'POST', body, token }),
   },
 
   transactions: {
