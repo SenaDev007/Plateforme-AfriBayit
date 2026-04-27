@@ -43,6 +43,12 @@ export class StripeService {
     }
   }
 
+  /** Retrieve client_secret for an existing PaymentIntent (for frontend re-render) */
+  async getClientSecret(paymentIntentId: string): Promise<string> {
+    const intent = await this.stripe.paymentIntents.retrieve(paymentIntentId);
+    return intent.client_secret ?? '';
+  }
+
   /** Construct and verify a Stripe webhook event */
   constructWebhookEvent(payload: Buffer, signature: string): Stripe.Event {
     return this.stripe.webhooks.constructEvent(payload, signature, this.webhookSecret);

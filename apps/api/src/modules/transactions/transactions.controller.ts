@@ -9,6 +9,7 @@ import {
   RawBodyRequest,
   Req,
   Headers,
+  BadRequestException,
 } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
 import type { Request } from 'express';
@@ -69,6 +70,19 @@ export class TransactionsController {
     return this.transactionsService.getReleaseRequirements(id, user.id);
   }
 
+  @Post('webhook/stripe')
+  @Version('1')
+  @ApiOperation({ summary: 'Stripe webhook — payment_intent events' })
+  async stripeWebhook(
+    @Req() req: RawBodyRequest<Request>,
+    @Headers('stripe-signature') signature: string,
+  ) {
+    const raw = req.rawBody;
+    if (!raw) throw new BadRequestException('Missing raw body');
+    await this.transactionsService.handleStripeWebhook(raw, signature);
+    return { received: true };
+  }
+
   @Post('webhook/fedapay')
   @Version('1')
   @ApiOperation({ summary: 'FedaPay webhook' })
@@ -78,5 +92,15 @@ export class TransactionsController {
   ) {
     await this.transactionsService.handleFedaPayWebhook(payload, signature);
     return { received: true };
+  }
+
+  @Get(':id/payment-intent')
+  @Version('1')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Récupérer le client_secret Stripe pour une transaction en attente' })
+  async getPaymentIntent(@Param('id') id: string, @CurrentUser() user: User) {
+    const clientSecret = await this.transactionsService.getStripeClientSecret(id, user.id);
+    return { clientSecret };
   }
 }

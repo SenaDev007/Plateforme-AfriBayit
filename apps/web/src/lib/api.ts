@@ -143,6 +143,8 @@ export const api = {
         `/transactions/${id}/release-requirements`,
         { token },
       ),
+    getPaymentIntent: (id: string, token: string) =>
+      request<{ clientSecret: string }>(`/transactions/${id}/payment-intent`, { token }),
   },
 
   payouts: {

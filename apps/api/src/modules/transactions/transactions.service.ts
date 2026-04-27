@@ -4,6 +4,7 @@ import {
   NotFoundException,
   ForbiddenException,
   UnauthorizedException,
+  Logger,
 } from '@nestjs/common';
 import type {
   PrismaClient,
@@ -34,6 +35,8 @@ interface CreateTransactionDto {
 
 @Injectable()
 export class TransactionsService {
+  private readonly logger = new Logger(TransactionsService.name);
+
   constructor(
     @Inject('PRISMA') private readonly prisma: PrismaClient,
     private readonly escrowService: EscrowService,
@@ -87,6 +90,25 @@ export class TransactionsService {
         description: `AfriBayit — Transaction ${transaction.reference}`,
         reference: transaction.reference,
       });
+
+      // Store intent ID for later retrieval + record in payments table
+      await this.prisma.$transaction([
+        this.prisma.transaction.update({
+          where: { id: transaction.id },
+          data: { metadata: { stripePaymentIntentId: result.paymentIntentId } },
+        }),
+        this.prisma.payment.create({
+          data: {
+            transactionId: transaction.id,
+            method: 'CARD_STRIPE',
+            amount: dto.amount,
+            currency: dto.currency as Currency,
+            providerRef: result.paymentIntentId,
+            providerStatus: 'pending',
+          },
+        }),
+      ]);
+
       return { transaction, clientSecret: result.clientSecret };
     }
 
@@ -183,6 +205,81 @@ export class TransactionsService {
       isLargeAmount,
       threshold: LARGE_AMOUNT_THRESHOLD_XOF,
     };
+  }
+
+  /** Return Stripe client_secret for a CARD_STRIPE transaction — buyer only */
+  async getStripeClientSecret(transactionId: string, buyerId: string): Promise<string> {
+    const transaction = await this.prisma.transaction.findUnique({
+      where: { id: transactionId },
+    });
+    if (!transaction) throw new NotFoundException('Transaction introuvable.');
+    if (transaction.buyerId !== buyerId) throw new ForbiddenException('Accès refusé.');
+
+    const meta = transaction.metadata as { stripePaymentIntentId?: string } | null;
+    const intentId = meta?.stripePaymentIntentId;
+    if (!intentId)
+      throw new NotFoundException('Aucun paiement Stripe associé à cette transaction.');
+
+    const secret = await this.stripeService.getClientSecret(intentId);
+    return secret;
+  }
+
+  /** Handle Stripe webhook — fund escrow on payment_intent.succeeded */
+  async handleStripeWebhook(rawBody: Buffer, signature: string): Promise<void> {
+    let event;
+    try {
+      event = this.stripeService.constructWebhookEvent(rawBody, signature);
+    } catch {
+      this.logger.warn('Stripe webhook signature verification failed');
+      return;
+    }
+
+    const intent = event.data.object as {
+      id: string;
+      metadata?: { reference?: string };
+      amount: number;
+      currency: string;
+    };
+    const reference = intent.metadata?.reference;
+    if (!reference) return;
+
+    const transaction = await this.prisma.transaction.findFirst({ where: { reference } });
+    if (!transaction) return;
+
+    if (event.type === 'payment_intent.succeeded') {
+      if (transaction.status !== 'INITIATED') return; // idempotency
+
+      await this.prisma.payment.updateMany({
+        where: { transactionId: transaction.id, providerRef: intent.id },
+        data: { providerStatus: 'succeeded' },
+      });
+
+      await this.escrowService.fundEscrow(transaction.id, transaction.amount);
+      await this.escrowService.transition(
+        transaction.id,
+        'FUNDED',
+        'SYSTEM',
+        'Stripe payment_intent.succeeded',
+      );
+      this.logger.log(`Escrow funded via Stripe for transaction ${transaction.reference}`);
+    }
+
+    if (event.type === 'payment_intent.payment_failed') {
+      if (!['INITIATED', 'FUNDED'].includes(transaction.status)) return;
+
+      await this.prisma.payment.updateMany({
+        where: { transactionId: transaction.id, providerRef: intent.id },
+        data: { providerStatus: 'failed' },
+      });
+
+      await this.escrowService.transition(
+        transaction.id,
+        'CANCELLED',
+        'SYSTEM',
+        'Stripe payment_intent.payment_failed',
+      );
+      this.logger.warn(`Transaction ${transaction.reference} cancelled — Stripe payment failed`);
+    }
   }
 
   /** Handle FedaPay webhook */

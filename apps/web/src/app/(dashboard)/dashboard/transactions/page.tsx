@@ -3,10 +3,20 @@
 import type React from 'react';
 import { useState, useEffect } from 'react';
 import { useSession } from 'next-auth/react';
-import { Loader2, ArrowDownRight, ArrowUpRight, AlertTriangle, X, ShieldCheck } from 'lucide-react';
+import {
+  Loader2,
+  ArrowDownRight,
+  ArrowUpRight,
+  AlertTriangle,
+  X,
+  ShieldCheck,
+  CreditCard,
+} from 'lucide-react';
 import { Badge, Button } from '@afribayit/ui';
 import { DashboardLayout } from '@/components/dashboard/DashboardLayout';
 import { api } from '@/lib/api';
+import Link from 'next/link';
+import type { Route } from 'next';
 
 interface TxUser {
   id: string;
@@ -370,6 +380,8 @@ export default function TransactionsPage(): React.ReactElement {
                   {transactions.map((tx) => {
                     const isBuyer = tx.buyerId === userId;
                     const counterpart = isBuyer ? tx.seller : tx.buyer;
+                    const canPay =
+                      isBuyer && tx.status === 'INITIATED' && tx.paymentMethod === 'CARD_STRIPE';
                     const canRelease = isBuyer && tx.status === 'FUNDED';
                     const canDispute =
                       isBuyer && ['FUNDED', 'VALIDATED', 'RELEASED'].includes(tx.status);
@@ -406,6 +418,14 @@ export default function TransactionsPage(): React.ReactElement {
                         </td>
                         <td className="px-4 py-3">
                           <div className="flex items-center gap-2">
+                            {canPay && (
+                              <Link href={`/dashboard/payer/${tx.id}` as Route}>
+                                <Button size="sm" className="bg-navy hover:bg-navy/90">
+                                  <CreditCard className="mr-1.5 h-3.5 w-3.5" />
+                                  Payer
+                                </Button>
+                              </Link>
+                            )}
                             {canRelease && (
                               <Button
                                 size="sm"
