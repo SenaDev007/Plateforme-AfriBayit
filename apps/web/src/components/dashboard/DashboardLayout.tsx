@@ -4,7 +4,8 @@ import type { Route } from 'next';
 
 import { useState } from 'react';
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
+import { signOut, useSession } from 'next-auth/react';
 import {
   LayoutDashboard,
   Heart,
@@ -21,7 +22,6 @@ import {
   ChevronRight,
 } from 'lucide-react';
 import { cn } from '@afribayit/ui';
-import { Badge } from '@afribayit/ui';
 import { useNotifications } from '@/hooks/useNotifications';
 
 const NAV_ITEMS: Array<{ label: string; href: Route; icon: React.ElementType }> = [
@@ -42,8 +42,21 @@ interface DashboardLayoutProps {
 
 export function DashboardLayout({ children }: DashboardLayoutProps): React.ReactElement {
   const pathname = usePathname();
+  const router = useRouter();
+  const { data: session } = useSession();
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const { unreadCount } = useNotifications();
+
+  const firstName = session?.user?.name ?? '';
+  const email = session?.user?.email ?? '';
+  const initials = firstName
+    ? firstName.slice(0, 2).toUpperCase()
+    : email.slice(0, 2).toUpperCase();
+
+  const handleSignOut = async () => {
+    await signOut({ redirect: false });
+    router.push('/connexion');
+  };
 
   return (
     <div className="bg-charcoal-50 flex min-h-screen">
@@ -76,15 +89,13 @@ export function DashboardLayout({ children }: DashboardLayoutProps): React.React
         <div className="border-charcoal-100 border-b px-5 py-4">
           <div className="flex items-center gap-3">
             <div className="bg-navy flex h-10 w-10 items-center justify-center rounded-full text-sm font-semibold text-white">
-              AK
+              {initials}
             </div>
             <div className="min-w-0 flex-1">
-              <p className="text-charcoal truncate text-sm font-medium">Aminata Koné</p>
-              <div className="flex items-center gap-1">
-                <Badge variant="success" className="py-0 text-[10px]">
-                  KYC ✓
-                </Badge>
-              </div>
+              <p className="text-charcoal truncate text-sm font-medium">
+                {firstName || email || 'Mon compte'}
+              </p>
+              {email && firstName && <p className="text-charcoal-400 truncate text-xs">{email}</p>}
             </div>
           </div>
         </div>
@@ -122,6 +133,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps): React.React
         {/* Logout */}
         <div className="border-charcoal-100 border-t p-3">
           <button
+            onClick={() => void handleSignOut()}
             className="text-charcoal-400 hover:bg-danger/5 hover:text-danger flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors"
             aria-label="Se déconnecter"
           >
