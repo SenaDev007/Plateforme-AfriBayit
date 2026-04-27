@@ -49,29 +49,6 @@ function toCardData(p: ApiProperty): PropertyCardData {
   };
 }
 
-const MOCK_RESULTS: PropertyCardData[] = Array.from({ length: 9 }, (_, i) => {
-  const v = i % 5;
-  return {
-    id: String(i + 1),
-    slug: `propriete-${i + 1}`,
-    title:
-      ['Villa Prestige', 'Appartement T3', 'Terrain 500m²', 'Duplex moderne', 'Studio meublé'][v] ??
-      'Propriété',
-    city: ['Cotonou', 'Abidjan', 'Ouagadougou', 'Lomé', 'Porto-Novo'][v] ?? 'Cotonou',
-    country: ['Bénin', "Côte d'Ivoire", 'Burkina Faso', 'Togo', 'Bénin'][v] ?? 'Bénin',
-    price: [85000000, 280000, 12000000, 45000000, 85000][v] ?? 1000000,
-    currency: 'XOF',
-    ...([4, 3, 0, 5, 1][v] ? { bedrooms: [4, 3, 0, 5, 1][v] } : {}),
-    ...([3, 2, 0, 3, 1][v] ? { bathrooms: [3, 2, 0, 3, 1][v] } : {}),
-    ...([350, 110, 500, 280, 45][v] ? { surface: [350, 110, 500, 280, 45][v] } : {}),
-    purpose: ['SALE', 'RENT', 'SALE', 'SALE', 'SHORT_TERM_RENT'][v] as PropertyCardData['purpose'],
-    type: ['VILLA', 'APARTMENT', 'LAND', 'DUPLEX', 'STUDIO'][v] ?? 'HOUSE',
-    imageUrl: `https://images.unsplash.com/photo-${'1613977257363-707ba9348227,1502672260266-1c1ef2d93688,1549517045-bc93de075e53,1600596542815-ffad4c1539a9,1522708323590-d24dbb6b0267'.split(',')[v]}?w=600&q=80`,
-    isVerified: i % 3 !== 0,
-    isFeatured: i % 4 === 0,
-  };
-});
-
 interface SearchResultsProps {
   searchParams: Record<string, string | undefined>;
 }
@@ -79,8 +56,8 @@ interface SearchResultsProps {
 export async function SearchResults({
   searchParams,
 }: SearchResultsProps): Promise<React.ReactElement> {
-  let results: PropertyCardData[] = MOCK_RESULTS;
-  let total = MOCK_RESULTS.length;
+  let results: PropertyCardData[] = [];
+  let total = 0;
 
   try {
     const params = new URLSearchParams();
@@ -104,13 +81,11 @@ export async function SearchResults({
 
     if (res.ok) {
       const data = (await res.json()) as { data: ApiProperty[]; total: number };
-      if (data.data && data.data.length > 0) {
-        results = data.data.map(toCardData);
-        total = data.total;
-      }
+      results = (data.data ?? []).map(toCardData);
+      total = data.total ?? results.length;
     }
   } catch {
-    // fall back to static data
+    // API unavailable — empty state shown
   }
 
   const view = searchParams['vue'] ?? 'grille';
