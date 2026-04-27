@@ -7,230 +7,294 @@ import { Badge, Button } from '@afribayit/ui';
 
 export const metadata: Metadata = {
   title: 'Communauté AfriBayit',
-  description: 'Échangez avec la communauté immobilière d\'Afrique de l\'Ouest — conseils, opportunités, actualités.',
+  description:
+    "Échangez avec la communauté immobilière d'Afrique de l'Ouest — conseils, opportunités, actualités.",
 };
 
-interface Post {
+interface ApiPost {
   id: string;
   slug: string;
   title: string;
-  excerpt: string;
-  category: string;
-  author: { name: string; avatar: string; city: string };
-  likes: number;
-  views: number;
-  replies: number;
-  isPinned: boolean;
-  isTrending: boolean;
-  createdAt: string;
+  content: string;
+  category: string | null;
   tags: string[];
+  views: number;
+  isPinned: boolean;
+  createdAt: string;
+  author: { id: string; firstName: string; lastName: string; city?: string | null };
+  _count: { likes: number; comments: number };
 }
 
-interface Group {
+interface ApiGroup {
   id: string;
   name: string;
-  description: string;
-  memberCount: number;
-  category: string;
-  emoji: string;
+  description: string | null;
+  category: string | null;
+  _count: { members: number };
 }
 
-const POSTS: Post[] = [
-  {
-    id: '1', slug: 'eviter-arnaques-immobilieres-cotonou',
-    title: 'Comment éviter les arnaques immobilières à Cotonou en 2026',
-    excerpt: 'J\'ai faillis me faire escroquer lors de l\'achat d\'un terrain à Calavi. Voici les 7 signaux d\'alarme que j\'aurais dû repérer plus tôt…',
-    category: 'Conseils', author: { name: 'Ayodélé K.', avatar: 'AK', city: 'Cotonou' },
-    likes: 284, views: 3421, replies: 67, isPinned: true, isTrending: true,
-    createdAt: '2026-04-15', tags: ['Arnaques', 'Sécurité', 'Cotonou', 'Acheteur'],
-  },
-  {
-    id: '2', slug: 'investissement-cocody-abidjan-2026',
-    title: 'Investir à Cocody Abidjan : analyse complète du marché 2026',
-    excerpt: 'Après 3 mois d\'études et 15 visites, voici mon analyse détaillée du marché immobilier de Cocody. Les prix ont évolué de +12% sur 12 mois…',
-    category: 'Analyse de marché', author: { name: 'Kwame A.', avatar: 'KA', city: 'Abidjan' },
-    likes: 156, views: 2187, replies: 43, isPinned: false, isTrending: true,
-    createdAt: '2026-04-12', tags: ['Abidjan', 'Cocody', 'Investissement', 'Analyse'],
-  },
-  {
-    id: '3', slug: 'titre-foncier-burkina-faso-guide',
-    title: 'Guide complet : obtenir son titre foncier au Burkina Faso',
-    excerpt: 'La procédure d\'obtention du titre foncier au Burkina est complexe mais pas impossible. Voici le parcours étape par étape avec les délais réels…',
-    category: 'Juridique', author: { name: 'Aminata S.', avatar: 'AS', city: 'Ouagadougou' },
-    likes: 198, views: 1890, replies: 38, isPinned: false, isTrending: false,
-    createdAt: '2026-04-08', tags: ['Titre foncier', 'Burkina', 'Juridique', 'Guide'],
-  },
-  {
-    id: '4', slug: 'negociation-prix-propriete-conseils',
-    title: 'Mes 5 techniques de négociation qui m\'ont économisé 8 millions FCFA',
-    excerpt: 'Acheteur depuis 4 ans en Afrique de l\'Ouest, j\'ai testé de nombreuses stratégies de négociation. Voici celles qui fonctionnent vraiment…',
-    category: 'Conseils', author: { name: 'Moussa D.', avatar: 'MD', city: 'Lomé' },
-    likes: 312, views: 4102, replies: 89, isPinned: false, isTrending: true,
-    createdAt: '2026-04-05', tags: ['Négociation', 'Conseils', 'Achat'],
-  },
-  {
-    id: '5', slug: 'financement-islamique-immobilier',
-    title: 'Financement islamique pour l\'immobilier : les options en Afrique de l\'Ouest',
-    excerpt: 'La finance islamique offre des alternatives halal au crédit immobilier classique. Tour d\'horizon des produits disponibles dans nos pays…',
-    category: 'Financement', author: { name: 'Ibrahim T.', avatar: 'IT', city: 'Abidjan' },
-    likes: 143, views: 1567, replies: 52, isPinned: false, isTrending: false,
-    createdAt: '2026-04-01', tags: ['Finance islamique', 'Financement', 'Halal'],
-  },
+const CATEGORIES = [
+  'Toutes',
+  'Conseils',
+  'Analyse de marché',
+  'Juridique',
+  'Financement',
+  'Témoignages',
 ];
 
-const GROUPS: Group[] = [
-  { id: '1', name: 'Investisseurs Bénin', description: 'Réseau des investisseurs immobiliers au Bénin', memberCount: 847, category: 'Pays', emoji: '🇧🇯' },
-  { id: '2', name: 'Primo-accédants Abidjan', description: 'Pour ceux qui achètent leur premier bien à Abidjan', memberCount: 1243, category: 'Thématique', emoji: '🏠' },
-  { id: '3', name: 'Diaspora & Immobilier Afrique', description: 'Investir depuis l\'étranger dans l\'immobilier africain', memberCount: 2156, category: 'Diaspora', emoji: '✈️' },
-  { id: '4', name: 'Promoteurs & Constructeurs', description: 'Communauté des professionnels de la construction', memberCount: 312, category: 'Pro', emoji: '🏗️' },
-];
+const API_URL = process.env['NEXT_PUBLIC_API_URL'] ?? 'http://localhost:4000';
 
-const CATEGORIES_POST = ['Toutes', 'Conseils', 'Analyse de marché', 'Juridique', 'Financement', 'Témoignages'];
+async function fetchPosts(category?: string): Promise<{ data: ApiPost[]; total: number }> {
+  try {
+    const params = new URLSearchParams({ limit: '10' });
+    if (category) params.set('category', category);
+    const res = await fetch(`${API_URL}/api/v1/community/posts?${params.toString()}`, {
+      next: { revalidate: 60 },
+    });
+    if (!res.ok) return { data: [], total: 0 };
+    return (await res.json()) as { data: ApiPost[]; total: number };
+  } catch {
+    return { data: [], total: 0 };
+  }
+}
 
-function PostCard({ post }: { post: Post }): React.ReactElement {
+async function fetchGroups(): Promise<ApiGroup[]> {
+  try {
+    const res = await fetch(`${API_URL}/api/v1/community/groups`, {
+      next: { revalidate: 120 },
+    });
+    if (!res.ok) return [];
+    return (await res.json()) as ApiGroup[];
+  } catch {
+    return [];
+  }
+}
+
+function getExcerpt(content: string): string {
+  const plain = content.replace(/\n+/g, ' ').trim();
+  return plain.length > 160 ? `${plain.slice(0, 160)}…` : plain;
+}
+
+function PostCard({ post }: { post: ApiPost }): React.ReactElement {
   return (
-    <article className="bg-white rounded-xl border border-charcoal-100 p-5 hover:shadow-md transition-shadow">
-      <div className="flex items-start gap-4">
-        <div className="flex-1 min-w-0">
-          <div className="flex flex-wrap items-center gap-2 mb-2">
-            <Badge variant="sky" className="text-xs">{post.category}</Badge>
-            {post.isPinned && (
-              <span className="flex items-center gap-0.5 text-xs text-charcoal-400 font-medium">
-                <Pin className="h-3 w-3" aria-hidden="true" /> Épinglé
-              </span>
-            )}
-            {post.isTrending && (
-              <span className="flex items-center gap-0.5 text-xs text-emerald-700 font-medium">
-                <TrendingUp className="h-3 w-3" aria-hidden="true" /> Tendance
-              </span>
-            )}
+    <article className="border-charcoal-100 rounded-xl border bg-white p-5 transition-shadow hover:shadow-md">
+      <div className="mb-2 flex flex-wrap items-center gap-2">
+        {post.category && (
+          <Badge variant="sky" className="text-xs">
+            {post.category}
+          </Badge>
+        )}
+        {post.isPinned && (
+          <span className="text-charcoal-400 flex items-center gap-0.5 text-xs font-medium">
+            <Pin className="h-3 w-3" aria-hidden="true" /> Épinglé
+          </span>
+        )}
+      </div>
+
+      <Link href={`/communaute/${post.slug}` as Route} className="group block">
+        <h3 className="text-charcoal group-hover:text-navy mb-1.5 font-semibold leading-snug transition-colors">
+          {post.title}
+        </h3>
+      </Link>
+
+      <p className="text-charcoal-400 mb-3 line-clamp-2 text-sm">{getExcerpt(post.content)}</p>
+
+      {post.tags.length > 0 && (
+        <div className="mb-3 flex flex-wrap gap-1">
+          {post.tags.slice(0, 3).map((tag) => (
+            <span key={tag} className="text-charcoal-400 text-xs">
+              #{tag}
+            </span>
+          ))}
+        </div>
+      )}
+
+      <div className="text-charcoal-400 flex items-center justify-between text-xs">
+        <div className="flex items-center gap-2">
+          <div
+            className="bg-navy flex h-6 w-6 items-center justify-center rounded-full text-[10px] font-semibold text-white"
+            aria-hidden="true"
+          >
+            {post.author.firstName[0]}
+            {post.author.lastName[0]}
           </div>
-
-          <Link href={`/communaute/${post.slug}` as Route} className="block group">
-            <h3 className="font-semibold text-charcoal leading-snug group-hover:text-navy transition-colors mb-1.5">
-              {post.title}
-            </h3>
-          </Link>
-
-          <p className="text-sm text-charcoal-400 line-clamp-2 mb-3">{post.excerpt}</p>
-
-          <div className="flex flex-wrap gap-1 mb-3">
-            {post.tags.slice(0, 3).map((tag) => (
-              <span key={tag} className="text-xs text-charcoal-400 hover:text-navy cursor-pointer">#{tag}</span>
-            ))}
-          </div>
-
-          <div className="flex items-center justify-between text-xs text-charcoal-400">
-            <div className="flex items-center gap-2">
-              <div className="flex h-6 w-6 items-center justify-center rounded-full bg-navy text-white text-[10px] font-semibold" aria-hidden="true">
-                {post.author.avatar}
-              </div>
-              <span className="font-medium text-charcoal">{post.author.name}</span>
-              <span>· {post.author.city}</span>
-              <span>· {new Date(post.createdAt).toLocaleDateString('fr-FR')}</span>
-            </div>
-            <div className="flex items-center gap-3">
-              <span className="flex items-center gap-1"><ThumbsUp className="h-3 w-3" aria-hidden="true" />{post.likes}</span>
-              <span className="flex items-center gap-1"><MessageSquare className="h-3 w-3" aria-hidden="true" />{post.replies}</span>
-              <span className="flex items-center gap-1"><Eye className="h-3 w-3" aria-hidden="true" />{post.views.toLocaleString()}</span>
-            </div>
-          </div>
+          <span className="text-charcoal font-medium">
+            {post.author.firstName} {post.author.lastName}
+          </span>
+          {post.author.city && <span>· {post.author.city}</span>}
+          <span>· {new Date(post.createdAt).toLocaleDateString('fr-FR')}</span>
+        </div>
+        <div className="flex items-center gap-3">
+          <span className="flex items-center gap-1">
+            <ThumbsUp className="h-3 w-3" aria-hidden="true" />
+            {post._count.likes}
+          </span>
+          <span className="flex items-center gap-1">
+            <MessageSquare className="h-3 w-3" aria-hidden="true" />
+            {post._count.comments}
+          </span>
+          <span className="flex items-center gap-1">
+            <Eye className="h-3 w-3" aria-hidden="true" />
+            {post.views.toLocaleString()}
+          </span>
         </div>
       </div>
     </article>
   );
 }
 
-export default function CommunautePage(): React.ReactElement {
+interface Props {
+  searchParams: Promise<Record<string, string | undefined>>;
+}
+
+export default async function CommunautePage({ searchParams }: Props): Promise<React.ReactElement> {
+  const sp = await searchParams;
+  const activeCategory = sp['cat'];
+
+  const [{ data: posts, total }, groups] = await Promise.all([
+    fetchPosts(activeCategory),
+    fetchGroups(),
+  ]);
+
   return (
-    <div className="min-h-screen bg-charcoal-50">
+    <div className="bg-charcoal-50 min-h-screen">
       {/* Hero */}
-      <section className="bg-gradient-to-br from-gold/80 to-navy py-16 px-4">
+      <section className="from-gold/80 to-navy bg-gradient-to-br px-4 py-16">
         <div className="mx-auto max-w-7xl text-center">
-          <p className="text-sm font-medium text-gold uppercase tracking-widest mb-3">Communauté</p>
-          <h1 className="font-serif text-3xl sm:text-5xl font-bold text-white mb-4">
-            L'intelligence collective de l'immobilier africain
+          <p className="text-gold mb-3 text-sm font-medium uppercase tracking-widest">Communauté</p>
+          <h1 className="mb-4 font-serif text-3xl font-bold text-white sm:text-5xl">
+            L&apos;intelligence collective de l&apos;immobilier africain
           </h1>
-          <p className="text-white/70 text-lg max-w-xl mx-auto mb-8">
-            Partagez, apprenez et connectez-vous avec des milliers d'investisseurs, agents et propriétaires.
+          <p className="mx-auto mb-8 max-w-xl text-lg text-white/70">
+            Partagez, apprenez et connectez-vous avec des milliers d&apos;investisseurs, agents et
+            propriétaires.
           </p>
-          <Button variant="gold" size="lg" className="gap-2">
-            <Plus className="h-4 w-4" aria-hidden="true" /> Créer un post
-          </Button>
+          <Link href={'/communaute/nouveau' as Route}>
+            <Button variant="gold" size="lg" className="gap-2">
+              <Plus className="h-4 w-4" aria-hidden="true" /> Créer un post
+            </Button>
+          </Link>
         </div>
       </section>
 
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-8">
-        <div className="flex flex-col lg:flex-row gap-6">
+      <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
+        <div className="flex flex-col gap-6 lg:flex-row">
           {/* Main feed */}
-          <main className="flex-1 min-w-0">
-            {/* Filter tabs */}
-            <div className="flex gap-1 border-b border-charcoal-100 mb-6 overflow-x-auto">
-              {CATEGORIES_POST.map((cat) => (
-                <button key={cat}
-                  className={`px-4 py-2.5 text-sm font-medium whitespace-nowrap border-b-2 transition-colors ${cat === 'Toutes' ? 'border-navy text-navy' : 'border-transparent text-charcoal-400 hover:text-charcoal'}`}>
-                  {cat}
-                </button>
-              ))}
+          <main className="min-w-0 flex-1">
+            {/* Category filter — URL-driven links */}
+            <div className="border-charcoal-100 mb-6 flex gap-1 overflow-x-auto border-b">
+              {CATEGORIES.map((cat) => {
+                const isActive = cat === 'Toutes' ? !activeCategory : activeCategory === cat;
+                const href =
+                  cat === 'Toutes' ? '/communaute' : `/communaute?cat=${encodeURIComponent(cat)}`;
+                return (
+                  <Link
+                    key={cat}
+                    href={href as Route}
+                    className={`whitespace-nowrap border-b-2 px-4 py-2.5 text-sm font-medium transition-colors ${
+                      isActive
+                        ? 'border-navy text-navy'
+                        : 'text-charcoal-400 hover:text-charcoal border-transparent'
+                    }`}
+                  >
+                    {cat}
+                  </Link>
+                );
+              })}
             </div>
 
-            <div className="flex flex-col gap-4">
-              {POSTS.map((post) => <PostCard key={post.id} post={post} />)}
-            </div>
-
-            <div className="mt-6 text-center">
-              <Button variant="ghost">Charger plus de posts</Button>
-            </div>
+            {posts.length > 0 ? (
+              <>
+                <div className="flex flex-col gap-4">
+                  {posts.map((post) => (
+                    <PostCard key={post.id} post={post} />
+                  ))}
+                </div>
+                {total > posts.length && (
+                  <div className="mt-6 text-center">
+                    <p className="text-charcoal-400 text-sm">
+                      {posts.length} / {total} posts affichés
+                    </p>
+                  </div>
+                )}
+              </>
+            ) : (
+              <div className="flex flex-col items-center gap-4 py-20 text-center">
+                <MessageSquare className="text-charcoal-200 h-12 w-12" aria-hidden="true" />
+                <p className="text-charcoal text-lg font-semibold">Aucun post pour le moment</p>
+                <p className="text-charcoal-400 text-sm">
+                  Soyez le premier à partager votre expérience.
+                </p>
+                <Link href={'/communaute/nouveau' as Route}>
+                  <Button className="mt-2 gap-2">
+                    <Plus className="h-4 w-4" aria-hidden="true" /> Créer un post
+                  </Button>
+                </Link>
+              </div>
+            )}
           </main>
 
           {/* Sidebar */}
-          <aside className="lg:w-80 flex-shrink-0 flex flex-col gap-6">
-            {/* Stats */}
-            <div className="bg-white rounded-xl border border-charcoal-100 p-5">
-              <h2 className="font-semibold text-charcoal mb-4">La communauté en chiffres</h2>
-              <div className="grid grid-cols-2 gap-4">
-                {[
-                  { value: '12 500', label: 'Membres' },
-                  { value: '3 400', label: 'Posts' },
-                  { value: '28 000', label: 'Commentaires' },
-                  { value: '4', label: 'Pays' },
-                ].map(({ value, label }) => (
-                  <div key={label} className="text-center">
-                    <p className="font-mono font-bold text-xl text-navy">{value}</p>
-                    <p className="text-xs text-charcoal-400">{label}</p>
-                  </div>
-                ))}
-              </div>
-            </div>
-
+          <aside className="flex flex-shrink-0 flex-col gap-6 lg:w-80">
             {/* Groups */}
-            <div className="bg-white rounded-xl border border-charcoal-100 p-5">
-              <div className="flex items-center justify-between mb-4">
-                <h2 className="font-semibold text-charcoal">Groupes actifs</h2>
-                <Link href="/communaute/groupes" className="text-xs text-navy hover:underline">Voir tous</Link>
-              </div>
-              <div className="flex flex-col gap-3">
-                {GROUPS.map((group) => (
-                  <div key={group.id} className="flex items-center gap-3 cursor-pointer hover:bg-charcoal-50 rounded-lg p-2 -mx-2 transition-colors">
-                    <div className="text-2xl" aria-hidden="true">{group.emoji}</div>
-                    <div className="flex-1 min-w-0">
-                      <p className="font-medium text-charcoal text-sm leading-tight">{group.name}</p>
-                      <p className="text-xs text-charcoal-400 flex items-center gap-1 mt-0.5">
-                        <Users className="h-3 w-3" aria-hidden="true" /> {group.memberCount.toLocaleString()} membres
-                      </p>
+            {groups.length > 0 && (
+              <div className="border-charcoal-100 rounded-xl border bg-white p-5">
+                <div className="mb-4 flex items-center justify-between">
+                  <h2 className="text-charcoal font-semibold">Groupes actifs</h2>
+                  <Link
+                    href={'/communaute/groupes' as Route}
+                    className="text-navy text-xs hover:underline"
+                  >
+                    Voir tous
+                  </Link>
+                </div>
+                <div className="flex flex-col gap-3">
+                  {groups.slice(0, 4).map((group) => (
+                    <div
+                      key={group.id}
+                      className="hover:bg-charcoal-50 -mx-2 flex items-center gap-3 rounded-lg p-2 transition-colors"
+                    >
+                      <div className="bg-navy/10 text-navy flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full text-xs font-bold">
+                        {group.name.slice(0, 2).toUpperCase()}
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <p className="text-charcoal truncate text-sm font-medium leading-tight">
+                          {group.name}
+                        </p>
+                        <p className="text-charcoal-400 mt-0.5 flex items-center gap-1 text-xs">
+                          <Users className="h-3 w-3" aria-hidden="true" />
+                          {group._count.members.toLocaleString('fr-FR')} membres
+                        </p>
+                      </div>
                     </div>
-                    <Button size="sm" variant="ghost" className="text-xs flex-shrink-0">Rejoindre</Button>
-                  </div>
-                ))}
+                  ))}
+                </div>
+                <Link href={'/communaute/groupes' as Route} className="mt-3 block">
+                  <Button variant="outline" size="sm" className="w-full">
+                    Voir tous les groupes
+                  </Button>
+                </Link>
               </div>
-            </div>
+            )}
 
             {/* Trending tags */}
-            <div className="bg-white rounded-xl border border-charcoal-100 p-5">
-              <h2 className="font-semibold text-charcoal mb-4">Tags tendance</h2>
+            <div className="border-charcoal-100 rounded-xl border bg-white p-5">
+              <h2 className="text-charcoal mb-4 font-semibold">Tags tendance</h2>
               <div className="flex flex-wrap gap-2">
-                {['#Investissement', '#Cotonou', '#Abidjan', '#TitreFoncier', '#Financement', '#Escrow', '#FCFA', '#Diaspora', '#Rénovation'].map((tag) => (
-                  <span key={tag} className="text-sm text-navy hover:underline cursor-pointer">{tag}</span>
+                {[
+                  '#Investissement',
+                  '#Cotonou',
+                  '#Abidjan',
+                  '#TitreFoncier',
+                  '#Financement',
+                  '#Escrow',
+                  '#FCFA',
+                  '#Diaspora',
+                  '#Rénovation',
+                ].map((tag) => (
+                  <span key={tag} className="text-navy cursor-pointer text-sm hover:underline">
+                    {tag}
+                  </span>
                 ))}
               </div>
             </div>

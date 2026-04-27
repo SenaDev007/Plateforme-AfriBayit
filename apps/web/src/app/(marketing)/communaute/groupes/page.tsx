@@ -19,72 +19,14 @@ interface ApiGroup {
   _count: { members: number; posts: number };
 }
 
-const FALLBACK_GROUPS = [
-  {
-    id: '1',
-    slug: 'investisseurs-benin',
-    name: 'Investisseurs Bénin',
-    description: "Opportunités d'investissement immobilier au Bénin.",
-    category: 'Investissement',
-    isPrivate: false,
-    _count: { members: 1240, posts: 89 },
-  },
-  {
-    id: '2',
-    slug: 'primo-accedants-ci',
-    name: 'Primo-accédants CI',
-    description: "Conseils pour les primo-accédants en Côte d'Ivoire.",
-    category: 'Achat',
-    isPrivate: false,
-    _count: { members: 890, posts: 134 },
-  },
-  {
-    id: '3',
-    slug: 'agents-west-africa',
-    name: 'Agents immobiliers West Africa',
-    description: "Réseau des professionnels de l'immobilier en Afrique de l'Ouest.",
-    category: 'Professionnel',
-    isPrivate: false,
-    _count: { members: 2100, posts: 312 },
-  },
-  {
-    id: '4',
-    slug: 'location-lome',
-    name: 'Location Lomé',
-    description: 'Offres et demandes de location à Lomé et alentours.',
-    category: 'Location',
-    isPrivate: false,
-    _count: { members: 430, posts: 67 },
-  },
-  {
-    id: '5',
-    slug: 'immobilier-burkina',
-    name: 'Immobilier Burkina',
-    description: 'Marché immobilier du Burkina Faso — analyses et opportunités.',
-    category: 'Investissement',
-    isPrivate: false,
-    _count: { members: 560, posts: 45 },
-  },
-  {
-    id: '6',
-    slug: 'diaspora-immo',
-    name: 'DiasporaImmo',
-    description: 'Pour les Africains de la diaspora qui souhaitent investir au pays.',
-    category: 'Diaspora',
-    isPrivate: false,
-    _count: { members: 3400, posts: 521 },
-  },
-];
-
 async function fetchGroups(): Promise<ApiGroup[]> {
   try {
     const apiUrl = process.env['NEXT_PUBLIC_API_URL'] ?? 'http://localhost:4000';
     const res = await fetch(`${apiUrl}/api/v1/community/groups`, { next: { revalidate: 120 } });
-    if (!res.ok) return FALLBACK_GROUPS;
-    const data = (await res.json()) as ApiGroup[];
-    return data.length > 0 ? data : FALLBACK_GROUPS;
+    if (!res.ok) return [];
+    return (await res.json()) as ApiGroup[];
   } catch {
-    return FALLBACK_GROUPS;
+    return [];
   }
 }
 
@@ -116,6 +58,14 @@ export default async function GroupesPage(): Promise<React.ReactElement> {
             + Créer un groupe
           </Link>
         </div>
+
+        {groups.length === 0 && (
+          <div className="flex flex-col items-center gap-4 py-20 text-center">
+            <Users className="text-charcoal-200 h-12 w-12" aria-hidden="true" />
+            <p className="text-charcoal text-lg font-semibold">Aucun groupe pour le moment</p>
+            <p className="text-charcoal-400 text-sm">Créez le premier groupe thématique.</p>
+          </div>
+        )}
 
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {groups.map((group) => (
