@@ -84,6 +84,10 @@ enum TransactionStatus {
   DISPUTED
   CANCELLED
   REFUNDED
+  NOTARY_ASSIGNED
+  NOTARY_IN_PROGRESS
+  DEED_SIGNED
+  ANDF_REGISTERED
 }
 
 enum PaymentMethod {
@@ -144,6 +148,20 @@ enum NotificationType {
   SYSTEM
 }
 
+enum NotificationChannel {
+  EMAIL
+  SMS
+  WHATSAPP
+  PUSH_IN_APP
+}
+
+enum NotificationCategory {
+  SYSTEM
+  TRANSACTION
+  MARKETING
+  SOCIAL
+}
+
 // ─── USERS ────────────────────────────────────────────────────────────────────
 
 model User {
@@ -196,6 +214,9 @@ model User {
   payouts             Payout[]        @relation("UserPayouts")
   quizAttempts        QuizAttempt[]
   certificates        Certificate[]
+  notaryProfile       Notary?
+  notificationPrefs   NotificationPreference[]
+  notaryReviews       NotaryReview[]
 
   @@index([email])
   @@index([phone])
@@ -267,6 +288,84 @@ model KycDocument {
 
   @@index([userId, status])
   @@map("kyc_documents")
+}
+
+// ─── NOTAIRES ─────────────────────────────────────────────────────────────────
+
+model Notary {
+  id            String    @id @default(cuid())
+  userId        String    @unique
+  chamberId     String?   // ID Chambre des Notaires
+  jurisdiction  Country   // Pays de compétence
+  city          String?
+  isAvailable   Boolean   @default(true)
+  specialization String?  // ex: "VENTE_IMMOBILIERE", "SUCCESSION"
+  rating        Float     @default(0)
+  reviewCount   Int       @default(0)
+  transactionsCount Int   @default(0)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  user         User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  assignments  NotaryAssignment[]
+  reviews      NotaryReview[]
+
+  @@index([jurisdiction, city])
+  @@index([isAvailable])
+  @@map("notaries")
+}
+
+model NotaryAssignment {
+  id            String            @id @default(cuid())
+  transactionId String            @unique
+  notaryId      String
+  assignedAt    DateTime          @default(now())
+  completedAt   DateTime?
+  deedHash      String?           // Hash SHA-256 de l'acte notarié
+  polygonTxHash String?           // Hash de transaction Polygon (ancrage on-chain)
+  status        String            @default("ASSIGNED") // ASSIGNED, IN_PROGRESS, SIGNED, REGISTERED
+  notes         String?           @db.Text
+  metadata      Json?
+
+  transaction   Transaction       @relation(fields: [transactionId], references: [id])
+  notary        Notary            @relation(fields: [notaryId], references: [id])
+
+  @@index([notaryId])
+  @@index([status])
+  @@map("notary_assignments")
+}
+
+model NotaryReview {
+  id          String   @id @default(cuid())
+  notaryId    String
+  userId      String
+  rating      Int      @db.SmallInt // 1-5
+  comment     String?  @db.Text
+  isVerified  Boolean  @default(false)
+  createdAt   DateTime @default(now())
+
+  notary  Notary  @relation(fields: [notaryId], references: [id], onDelete: Cascade)
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([notaryId])
+  @@map("notary_reviews")
+}
+
+// ─── NOTIFICATION PREFERENCES ────────────────────────────────────────────────
+
+model NotificationPreference {
+  id        String   @id @default(cuid())
+  userId    String
+  category  NotificationCategory @default(SYSTEM)
+  channel   NotificationChannel
+  isEnabled Boolean  @default(true)
+  updatedAt DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, category, channel])
+  @@index([userId])
+  @@map("notification_preferences")
 }
 
 // ─── PROPERTIES ───────────────────────────────────────────────────────────────
@@ -510,6 +609,7 @@ model Transaction {
   payments       Payment[]
   dispute        Dispute?
   payout         Payout?
+  notaryAssignment NotaryAssignment?
 
   @@index([buyerId])
   @@index([sellerId])

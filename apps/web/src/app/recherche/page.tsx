@@ -5,10 +5,12 @@ import { SearchResults } from '@/components/search/SearchResults';
 import { SearchFilters } from '@/components/search/SearchFilters';
 import { PropertyCardSkeleton } from '@afribayit/ui';
 import { SiteNavbar } from '@/components/landing/SiteNavbar';
+import { motion } from 'framer-motion';
 
 export const metadata: Metadata = {
   title: 'Recherche de propriétés',
-  description: 'Trouvez votre bien immobilier idéal en Afrique de l\'Ouest. Filtrez par ville, prix, surface et type.',
+  description:
+    "Trouvez votre bien immobilier idéal en Afrique de l'Ouest. Filtrez par ville, prix, surface et type.",
 };
 
 interface SearchPageProps {
@@ -29,7 +31,7 @@ interface SearchPageProps {
 
 function SearchSkeleton(): React.ReactElement {
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-5">
+    <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 xl:grid-cols-3">
       {Array.from({ length: 9 }).map((_, i) => (
         <PropertyCardSkeleton key={i} />
       ))}
@@ -37,25 +39,40 @@ function SearchSkeleton(): React.ReactElement {
   );
 }
 
-export default async function SearchPage({ searchParams }: SearchPageProps): Promise<React.ReactElement> {
+export default async function SearchPage({
+  searchParams,
+}: SearchPageProps): Promise<React.ReactElement> {
   const params = await searchParams;
 
   return (
-    <div className="min-h-screen bg-charcoal-50">
+    <div className="min-h-screen bg-[#FDFDFD]">
       <SiteNavbar />
 
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 pt-20">
-        <div className="flex flex-col lg:flex-row gap-6 py-8">
+      <header className="bg-navy pb-16 pt-32">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          <div className="flex flex-col gap-2">
+            <h1 className="font-serif text-3xl font-bold leading-tight text-white md:text-5xl">
+              Découvrez des <span className="text-gold italic">propriétés d'exception</span>
+            </h1>
+            <p className="max-w-xl text-sm font-light text-white/60 md:text-base">
+              Explorez notre catalogue rigoureusement sélectionné et vérifié à travers le Bénin, la
+              Côte d'Ivoire, le Burkina Faso et le Togo.
+            </p>
+          </div>
+        </div>
+      </header>
+
+      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <div className="flex flex-col gap-8 py-12 lg:flex-row">
           {/* Sidebar filters */}
-          <aside
-            className="w-full lg:w-72 flex-shrink-0"
-            aria-label="Filtres de recherche"
-          >
-            <SearchFilters initialParams={params} />
+          <aside className="w-full flex-shrink-0 lg:w-80" aria-label="Filtres de recherche">
+            <div className="sticky top-24">
+              <SearchFilters initialParams={params} />
+            </div>
           </aside>
 
           {/* Results */}
-          <main className="flex-1 min-w-0" id="main-content">
+          <main className="min-w-0 flex-1" id="main-content">
             <Suspense fallback={<SearchSkeleton />}>
               <SearchResults searchParams={params} />
             </Suspense>

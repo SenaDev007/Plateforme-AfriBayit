@@ -5,8 +5,8 @@ import { useRouter } from 'next/navigation';
 import { Navbar } from '@afribayit/ui';
 
 const NAV_LINKS = [
-  { label: 'Acheter', href: '/recherche?purpose=SALE' },
-  { label: 'Louer', href: '/recherche?purpose=RENT' },
+  { label: 'Acheter', href: '/recherche?but=SALE' },
+  { label: 'Louer', href: '/recherche?but=RENT' },
   { label: 'Hôtels', href: '/hotels' },
   { label: 'Artisans', href: '/artisans' },
   { label: 'Formation', href: '/formation' },
@@ -47,6 +47,7 @@ export function SiteNavbar(): React.ReactElement {
       onCountryChange={handleCountryChange}
       onLogin={handleLogin}
       onRegister={handleRegister}
+      transparentOnTop
     />
   );
 }

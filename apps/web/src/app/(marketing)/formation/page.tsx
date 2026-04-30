@@ -2,8 +2,10 @@ import type React from 'react';
 import type { Metadata } from 'next';
 import type { Route } from 'next';
 import Link from 'next/link';
-import { BookOpen, Clock, Users, Star, Play, Award } from 'lucide-react';
+import { BookOpen, Clock, Users, Star, Play, Award, ArrowRight } from 'lucide-react';
 import { Badge, Button } from '@afribayit/ui';
+import { motion } from 'framer-motion';
+import { cn } from '@afribayit/ui/src/lib/cn';
 
 const API_URL = process.env['NEXT_PUBLIC_API_URL'] ?? 'http://localhost:4000';
 
@@ -39,7 +41,7 @@ const COURSES: Course[] = [
     slug: 'investir-immobilier-afrique-debutant',
     title: "Investir dans l'immobilier africain : guide débutant",
     description:
-      "Apprenez les bases de l'investissement immobilier en Afrique de l'Ouest, les risques à éviter et les opportunités à saisir.",
+      "Apprenez les bases de l'investissement immobilier en Afrique de l'Ouest, les risques à éviter.",
     category: 'Investissement',
     level: 'BEGINNER',
     duration: '4h30',
@@ -52,15 +54,15 @@ const COURSES: Course[] = [
     isFree: true,
     isFeatured: true,
     instructor: { name: 'Dr. Aïssatou Diagne', title: 'Économiste & investisseur', avatar: 'AD' },
-    thumbnail: 'https://images.unsplash.com/photo-1560472355-536de3962603?w=600&q=80',
-    tags: ['Débutant', 'Investissement', 'Bénin', 'Afrique'],
+    thumbnail: 'https://images.unsplash.com/photo-1560472355-536de3962603?w=800&q=80',
+    tags: ['Débutant', 'Investissement'],
   },
   {
     id: '2',
     slug: 'negocier-financer-propriete',
     title: 'Négocier et financer votre propriété',
     description:
-      'Maîtrisez les techniques de négociation et les options de financement disponibles en Afrique francophone.',
+      'Maîtrisez les techniques de négociation et les options de financement disponibles.',
     category: 'Financement',
     level: 'INTERMEDIATE',
     duration: '6h15',
@@ -73,15 +75,15 @@ const COURSES: Course[] = [
     isFree: false,
     isFeatured: true,
     instructor: { name: 'Kofi Asante', title: 'Courtier immobilier senior', avatar: 'KA' },
-    thumbnail: 'https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?w=600&q=80',
-    tags: ['Financement', 'Négociation', 'Crédit immobilier'],
+    thumbnail: 'https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?w=800&q=80',
+    tags: ['Financement', 'Négociation'],
   },
   {
     id: '3',
     slug: 'gestion-locative-professionnelle',
     title: 'Gestion locative professionnelle',
     description:
-      'Gérez efficacement vos biens en location : sélection des locataires, contrats, entretien, fiscalité.',
+      'Gérez efficacement vos biens en location : sélection des locataires, contrats, fiscalité.',
     category: 'Gestion',
     level: 'INTERMEDIATE',
     duration: '5h00',
@@ -98,82 +100,8 @@ const COURSES: Course[] = [
       title: 'Gestionnaire immobilier certifiée',
       avatar: 'FO',
     },
-    thumbnail: 'https://images.unsplash.com/photo-1560520653-9e0e4c89eb11?w=600&q=80',
-    tags: ['Gestion locative', 'Propriétaire', 'Contrat'],
-  },
-  {
-    id: '4',
-    slug: 'droit-immobilier-afrique-ouest',
-    title: "Droit immobilier en Afrique de l'Ouest",
-    description:
-      "Comprenez le cadre juridique de la propriété immobilière au Bénin, Côte d'Ivoire, Burkina Faso et Togo.",
-    category: 'Juridique',
-    level: 'ADVANCED',
-    duration: '8h00',
-    lessonCount: 32,
-    enrolledCount: 389,
-    rating: 4.6,
-    reviewCount: 98,
-    price: 35000,
-    currency: 'XOF',
-    isFree: false,
-    isFeatured: false,
-    instructor: {
-      name: 'Me. Rodrigue Adéchi',
-      title: 'Avocat spécialisé immobilier',
-      avatar: 'RA',
-    },
-    thumbnail: 'https://images.unsplash.com/photo-1589829545856-d10d557cf95f?w=600&q=80',
-    tags: ['Droit', 'Juridique', 'Titre foncier', 'Notaire'],
-  },
-  {
-    id: '5',
-    slug: 'promotion-immobiliere-bases',
-    title: 'Promotion immobilière : les bases',
-    description: "Lancez votre premier projet immobilier : de l'étude de marché aux clés en mains.",
-    category: 'Promotion',
-    level: 'ADVANCED',
-    duration: '10h30',
-    lessonCount: 42,
-    enrolledCount: 234,
-    rating: 4.8,
-    reviewCount: 67,
-    price: 50000,
-    currency: 'XOF',
-    isFree: false,
-    isFeatured: true,
-    instructor: {
-      name: 'Ibrahima Seck',
-      title: "Promoteur immobilier — 20 ans d'exp.",
-      avatar: 'IS',
-    },
-    thumbnail: 'https://images.unsplash.com/photo-1503387762-592deb58ef4e?w=600&q=80',
-    tags: ['Promotion', 'Développement', 'Construction'],
-  },
-  {
-    id: '6',
-    slug: 'photographie-immobiliere',
-    title: 'Photographie immobilière : valorisez vos biens',
-    description:
-      "Techniques photographiques pour présenter vos propriétés de manière professionnelle et attirer plus d'acheteurs.",
-    category: 'Marketing',
-    level: 'BEGINNER',
-    duration: '2h30',
-    lessonCount: 10,
-    enrolledCount: 1089,
-    rating: 4.5,
-    reviewCount: 221,
-    price: 0,
-    currency: 'XOF',
-    isFree: true,
-    isFeatured: false,
-    instructor: {
-      name: 'Amara Touré',
-      title: 'Photographe immobilier professionnel',
-      avatar: 'AT',
-    },
-    thumbnail: 'https://images.unsplash.com/photo-1542744173-8e7e53415bb0?w=600&q=80',
-    tags: ['Photographie', 'Marketing', 'Annonce'],
+    thumbnail: 'https://images.unsplash.com/photo-1560520653-9e0e4c89eb11?w=800&q=80',
+    tags: ['Gestion locative'],
   },
 ];
 
@@ -183,155 +111,81 @@ const LEVEL_CONFIG = {
   ADVANCED: { label: 'Avancé', variant: 'gold' as const },
 };
 
-const CATEGORIES = [
-  'Tous',
-  'Investissement',
-  'Financement',
-  'Gestion',
-  'Juridique',
-  'Promotion',
-  'Marketing',
-];
-
-interface ApiCourse {
-  id: string;
-  slug: string;
-  title: string;
-  description: string;
-  category: string | null;
-  level: 'BEGINNER' | 'INTERMEDIATE' | 'ADVANCED';
-  duration: number | null;
-  price: string | null;
-  currency: string;
-  isFree: boolean;
-  isFeatured: boolean;
-  thumbnailUrl: string | null;
-  tags: string[];
-  rating: number;
-  reviewCount: number;
-  enrolledCount: number;
-  _count: { enrollments: number; lessons: number };
-}
-
-function apiToCourse(c: ApiCourse): Course {
-  const minutes = c.duration ?? 0;
-  const h = Math.floor(minutes / 60);
-  const m = minutes % 60;
-  const duration = h > 0 ? `${h}h${m > 0 ? String(m).padStart(2, '0') : ''}` : `${m} min`;
-  return {
-    id: c.id,
-    slug: c.slug,
-    title: c.title,
-    description: c.description,
-    category: c.category ?? 'Général',
-    level: c.level,
-    duration,
-    lessonCount: c._count.lessons,
-    enrolledCount: c.enrolledCount,
-    rating: c.rating,
-    reviewCount: c.reviewCount,
-    price: c.price ? parseFloat(c.price) : 0,
-    currency: c.currency,
-    isFree: c.isFree,
-    isFeatured: c.isFeatured,
-    instructor: { name: 'AfriBayit', title: 'Expert immobilier', avatar: 'AB' },
-    thumbnail:
-      c.thumbnailUrl ?? 'https://images.unsplash.com/photo-1560472355-536de3962603?w=600&q=80',
-    tags: c.tags,
-  };
-}
-
-async function fetchCourses(): Promise<Course[]> {
-  try {
-    const res = await fetch(`${API_URL}/api/v1/courses?limit=24`, { next: { revalidate: 120 } });
-    if (!res.ok) return COURSES;
-    const { data } = (await res.json()) as { data: ApiCourse[] };
-    return data.length > 0 ? data.map(apiToCourse) : COURSES;
-  } catch {
-    return COURSES;
-  }
-}
+const CATEGORIES = ['Tous', 'Investissement', 'Financement', 'Gestion', 'Juridique', 'Promotion'];
 
 function CourseCard({ course }: { course: Course }): React.ReactElement {
   const level = LEVEL_CONFIG[course.level];
   return (
-    <article className="border-charcoal-100 group flex flex-col overflow-hidden rounded-xl border bg-white transition-all duration-300 hover:-translate-y-1 hover:shadow-lg">
-      <div className="relative h-44 overflow-hidden">
+    <article className="border-charcoal-100 group flex flex-col overflow-hidden rounded-[32px] border bg-white shadow-sm transition-all duration-500 hover:-translate-y-2 hover:shadow-2xl">
+      <div className="relative h-56 overflow-hidden">
         <img
           src={course.thumbnail}
           alt={course.title}
-          className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+          className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-110"
         />
-        <div className="bg-charcoal/40 absolute inset-0 flex items-center justify-center opacity-0 transition-opacity group-hover:opacity-100">
-          <div className="flex h-12 w-12 items-center justify-center rounded-full bg-white/90">
-            <Play className="text-navy fill-navy h-5 w-5" aria-hidden="true" />
+        <div className="absolute inset-0 flex items-center justify-center bg-black/20 transition-colors duration-500 group-hover:bg-black/40">
+          <div className="flex h-14 w-14 translate-y-4 items-center justify-center rounded-full bg-white/90 opacity-0 backdrop-blur-md transition-all duration-500 group-hover:translate-y-0 group-hover:opacity-100">
+            <Play className="text-navy fill-navy ml-1 h-6 w-6" />
           </div>
         </div>
-        {course.isFeatured && (
-          <Badge variant="gold" className="absolute left-2 top-2 text-xs">
-            ⭐ Recommandé
+        <div className="absolute left-4 top-4 flex gap-2">
+          {course.isFeatured && (
+            <Badge variant="gold" className="px-3 py-1 shadow-lg">
+              Premium
+            </Badge>
+          )}
+          <Badge variant={level.variant} className="px-3 py-1 shadow-lg">
+            {level.label}
           </Badge>
-        )}
-        <Badge variant={level.variant} className="absolute right-2 top-2 text-xs">
-          {level.label}
-        </Badge>
+        </div>
       </div>
 
-      <div className="flex flex-1 flex-col gap-3 p-5">
-        <div>
-          <p className="text-charcoal-400 mb-1 text-xs font-medium">{course.category}</p>
-          <h3 className="text-charcoal group-hover:text-navy line-clamp-2 font-semibold leading-snug transition-colors">
+      <div className="flex flex-1 flex-col gap-5 p-6">
+        <div className="space-y-2">
+          <p className="text-gold text-[10px] font-bold uppercase tracking-[0.2em]">
+            {course.category}
+          </p>
+          <h3 className="text-charcoal group-hover:text-navy font-serif text-xl font-bold leading-tight transition-colors">
             {course.title}
           </h3>
         </div>
 
-        <p className="text-charcoal-400 line-clamp-2 text-sm">{course.description}</p>
-
-        {/* Instructor */}
-        <div className="flex items-center gap-2">
-          <div
-            className="bg-navy flex h-7 w-7 items-center justify-center rounded-full text-xs font-semibold text-white"
-            aria-hidden="true"
-          >
+        <div className="border-charcoal-50 flex items-center gap-3 border-t pt-2">
+          <div className="bg-navy flex h-8 w-8 items-center justify-center rounded-lg text-xs font-bold text-white">
             {course.instructor.avatar}
           </div>
           <div>
-            <p className="text-charcoal text-xs font-medium">{course.instructor.name}</p>
-            <p className="text-charcoal-400 text-[10px]">{course.instructor.title}</p>
+            <p className="text-charcoal text-xs font-bold">{course.instructor.name}</p>
+            <p className="text-charcoal-400 text-[10px] font-medium">{course.instructor.title}</p>
           </div>
         </div>
 
-        {/* Stats */}
-        <div className="text-charcoal-400 flex items-center gap-3 text-xs">
-          <span className="flex items-center gap-1">
-            <Star className="fill-gold text-gold h-3.5 w-3.5" />
-            {course.rating} ({course.reviewCount})
-          </span>
-          <span className="flex items-center gap-1">
-            <Users className="h-3.5 w-3.5" />
-            {course.enrolledCount.toLocaleString()}
-          </span>
-          <span className="flex items-center gap-1">
-            <Clock className="h-3.5 w-3.5" />
+        <div className="grid grid-cols-2 gap-3">
+          <div className="text-charcoal-400 flex items-center gap-2 text-[11px] font-bold">
+            <Clock className="text-navy h-3.5 w-3.5" />
             {course.duration}
-          </span>
-          <span className="flex items-center gap-1">
-            <BookOpen className="h-3.5 w-3.5" />
-            {course.lessonCount} leçons
-          </span>
+          </div>
+          <div className="text-charcoal-400 flex items-center gap-2 text-[11px] font-bold">
+            <Users className="text-navy h-3.5 w-3.5" />
+            {course.enrolledCount.toLocaleString()}
+          </div>
         </div>
 
-        <div className="border-charcoal-50 mt-auto flex items-center justify-between border-t pt-3">
+        <div className="mt-auto flex items-center justify-between pt-4">
           {course.isFree ? (
-            <span className="text-lg font-bold text-emerald-700">Gratuit</span>
+            <span className="font-serif text-xl font-bold italic text-emerald-600 underline decoration-emerald-200 underline-offset-4">
+              Gratuit
+            </span>
           ) : (
-            <p className="text-navy font-mono font-bold">
+            <p className="text-navy font-serif text-2xl font-bold">
               {course.price.toLocaleString('fr-FR')}{' '}
-              <span className="text-charcoal-400 text-sm font-normal">FCFA</span>
+              <span className="text-charcoal-400 font-sans text-xs">FCFA</span>
             </p>
           )}
           <Link href={`/formation/${course.slug}` as Route}>
-            <Button size="sm">{course.isFree ? 'Commencer' : "S'inscrire"}</Button>
+            <Button className="rounded-full px-6 text-xs font-bold">
+              {course.isFree ? 'REJOINDRE' : "S'INSCRIRE"}
+            </Button>
           </Link>
         </div>
       </div>
@@ -339,86 +193,92 @@ function CourseCard({ course }: { course: Course }): React.ReactElement {
   );
 }
 
-export default async function FormationPage(): Promise<React.ReactElement> {
-  const courses = await fetchCourses();
+export default function FormationPage(): React.ReactElement {
   return (
-    <div className="bg-charcoal-50 min-h-screen">
-      {/* Hero */}
-      <section className="from-sky/90 to-navy bg-gradient-to-br px-4 py-16">
-        <div className="mx-auto max-w-7xl text-center">
-          <p className="text-gold mb-3 text-sm font-medium uppercase tracking-widest">Formation</p>
-          <h1 className="mb-4 font-serif text-3xl font-bold text-white sm:text-5xl">
-            Maîtrisez l'immobilier africain
-          </h1>
-          <p className="mx-auto mb-8 max-w-2xl text-lg text-white/70">
-            Des formations pratiques dispensées par des experts du marché immobilier en Afrique de
-            l'Ouest.
-          </p>
-          <div className="flex flex-wrap justify-center gap-6 text-sm text-white/80">
-            {[
-              { icon: BookOpen, label: '24 formations disponibles' },
-              { icon: Users, label: '5 000+ apprenants' },
-              { icon: Award, label: 'Certificats reconnus' },
-            ].map(({ icon: Icon, label }) => (
-              <div key={label} className="flex items-center gap-2">
-                <Icon className="text-gold h-4 w-4" aria-hidden="true" />
-                {label}
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
+    <div className="min-h-screen bg-[#FDFDFD]">
+      <header className="bg-navy pb-20 pt-32">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          <div className="flex flex-col gap-4 text-center md:text-left">
+            <p className="text-gold text-sm font-bold uppercase tracking-[0.2em]">
+              AfriBayit Academy
+            </p>
+            <h1 className="font-serif text-4xl font-bold leading-tight text-white md:text-6xl">
+              Devenez un expert de <br />
+              <span className="text-gold italic">l'immobilier africain</span>
+            </h1>
+            <p className="max-w-2xl text-base font-light text-white/60 md:text-lg">
+              Des formations pratiques dispensées par les meilleurs experts du marché pour sécuriser
+              vos investissements et développer votre patrimoine sur le continent.
+            </p>
 
-      <div className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
-        {/* Featured */}
-        <div className="mb-10">
-          <h2 className="text-charcoal mb-6 font-serif text-2xl font-bold">
-            Formations recommandées
-          </h2>
-          <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
-            {courses
-              .filter((c) => c.isFeatured)
-              .map((course) => (
-                <CourseCard key={course.id} course={course} />
-              ))}
-          </div>
-        </div>
-
-        {/* All courses */}
-        <div>
-          <div className="mb-6 flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
-            <h2 className="text-charcoal font-serif text-2xl font-bold">Toutes les formations</h2>
-            <div className="flex flex-wrap gap-2">
-              {CATEGORIES.map((cat) => (
-                <button
-                  key={cat}
-                  className="rounded-pill bg-charcoal-50 text-charcoal hover:bg-navy/10 hover:text-navy px-3 py-1.5 text-xs font-medium transition-colors"
+            <div className="mt-4 flex flex-wrap justify-center gap-8 md:justify-start">
+              {[
+                { label: '24+ Formations', icon: BookOpen },
+                { label: 'Certificats de réussite', icon: Award },
+                { label: 'Support experts', icon: Users },
+              ].map((item, i) => (
+                <div
+                  key={i}
+                  className="flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 py-2 text-sm font-medium text-white/80"
                 >
-                  {cat}
-                </button>
+                  <item.icon className="text-gold h-4 w-4" />
+                  {item.label}
+                </div>
               ))}
             </div>
           </div>
-          <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
-            {courses.map((course) => (
-              <CourseCard key={course.id} course={course} />
+        </div>
+      </header>
+
+      <div className="mx-auto max-w-7xl px-4 py-20 sm:px-6 lg:px-8">
+        {/* Categories */}
+        <div className="mb-12 flex flex-col justify-between gap-6 md:flex-row md:items-center">
+          <h2 className="text-charcoal font-serif text-3xl font-bold">Parcourir les cours</h2>
+          <div className="flex flex-wrap gap-2">
+            {CATEGORIES.map((cat) => (
+              <button
+                key={cat}
+                className="bg-charcoal-50 text-charcoal-500 hover:bg-navy rounded-full px-5 py-2 text-xs font-bold shadow-sm transition-all duration-300 hover:text-white"
+              >
+                {cat}
+              </button>
             ))}
           </div>
         </div>
 
-        {/* CTA */}
-        <div className="bg-navy mt-16 rounded-2xl p-8 text-center sm:p-12">
-          <Award className="text-gold mx-auto mb-4 h-10 w-10" aria-hidden="true" />
-          <h2 className="mb-3 font-serif text-2xl font-bold text-white sm:text-3xl">
-            Devenez formateur AfriBayit
-          </h2>
-          <p className="mx-auto mb-6 max-w-lg text-white/70">
-            Vous êtes expert en immobilier ? Partagez vos connaissances et générez des revenus en
-            créant vos formations.
-          </p>
-          <Button variant="gold" size="lg">
-            Proposer une formation
-          </Button>
+        {/* Courses Grid */}
+        <div className="grid grid-cols-1 gap-10 md:grid-cols-2 lg:grid-cols-3">
+          {COURSES.map((course) => (
+            <CourseCard key={course.id} course={course} />
+          ))}
+        </div>
+
+        {/* Instructor CTA */}
+        <div className="bg-navy relative mt-32 overflow-hidden rounded-[48px] p-8 text-center md:p-20 md:text-left">
+          <div className="bg-gold/10 absolute right-0 top-0 h-full w-1/3 translate-x-1/2 rounded-full blur-[100px]" />
+          <div className="relative z-10 grid items-center gap-12 md:grid-cols-2">
+            <div className="space-y-6">
+              <h2 className="font-serif text-4xl font-bold text-white md:text-5xl">
+                Partagez votre <span className="text-gold italic">expertise</span>
+              </h2>
+              <p className="text-lg font-light leading-relaxed text-white/60">
+                Vous êtes avocat, promoteur, notaire ou investisseur aguerri ? Devenez formateur sur
+                AfriBayit Academy et contribuez à bâtir l'immobilier de demain.
+              </p>
+              <Button
+                variant="gold"
+                className="shadow-gold/20 mx-auto flex h-14 items-center gap-2 rounded-full px-10 text-base font-bold shadow-xl md:mx-0"
+              >
+                POSTULER COMME FORMATEUR
+                <ArrowRight className="h-5 w-5" />
+              </Button>
+            </div>
+            <div className="hidden justify-end md:flex">
+              <div className="flex h-64 w-64 items-center justify-center rounded-full border-2 border-white/10 p-8">
+                <Award className="text-gold h-32 w-32 opacity-50" />
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </div>

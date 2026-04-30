@@ -5,13 +5,15 @@ import { StatsBar } from '@/components/landing/StatsBar';
 import { RecentListings } from '@/components/landing/RecentListings';
 import { ModulesSection } from '@/components/landing/ModulesSection';
 import { TestimonialsSection } from '@/components/landing/TestimonialsSection';
+import { TrustedBy } from '@/components/landing/TrustedBy';
+import { FinalCTA } from '@/components/landing/FinalCTA';
 import { SiteFooter } from '@/components/landing/SiteFooter';
 import { SiteNavbar } from '@/components/landing/SiteNavbar';
 
 export const metadata: Metadata = {
   title: 'Accueil',
   description:
-    'AfriBayit — La super-app immobilière de l\'Afrique de l\'Ouest. Trouvez votre propriété idéale au Bénin, Côte d\'Ivoire, Burkina Faso et Togo.',
+    "AfriBayit — La super-app immobilière de l'Afrique de l'Ouest. Trouvez votre propriété idéale au Bénin, Côte d'Ivoire, Burkina Faso et Togo.",
 };
 
 export default function HomePage(): React.ReactElement {
@@ -20,10 +22,12 @@ export default function HomePage(): React.ReactElement {
       <SiteNavbar />
       <main id="main-content">
         <HeroSection />
+        <TrustedBy />
         <StatsBar />
         <RecentListings />
         <ModulesSection />
         <TestimonialsSection />
+        <FinalCTA />
       </main>
       <SiteFooter />
     </div>

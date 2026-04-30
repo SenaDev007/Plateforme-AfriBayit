@@ -57,6 +57,10 @@ function formatPrice(amount: number, currency: string): string {
   return new Intl.NumberFormat('fr-FR', { style: 'currency', currency }).format(amount);
 }
 
+/**
+ * Premium Property Card
+ * Used for displaying properties in grids and carousels.
+ */
 export function PropertyCard({
   property,
   onFavorite,
@@ -76,103 +80,145 @@ export function PropertyCard({
   return (
     <motion.article
       className={cn(
-        'group relative flex flex-col overflow-hidden rounded-lg bg-white',
-        'border border-charcoal-100 shadow-card',
-        'transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)]',
-        'hover:-translate-y-1.5 hover:shadow-card-hover',
-        compact ? 'max-w-[280px]' : 'w-full',
+        'group relative flex flex-col overflow-hidden rounded-2xl bg-white',
+        'border-charcoal-100 shadow-card border',
+        'transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)]',
+        'hover:shadow-card-hover hover:-translate-y-2',
+        compact ? 'max-w-[300px]' : 'w-full',
         className,
       )}
       aria-label={`Propriété : ${property.title}`}
-      whileHover={{ y: -6 }}
-      transition={{ type: 'spring', stiffness: 300, damping: 25 }}
+      initial={{ opacity: 0, y: 20 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true }}
     >
-      {/* Image */}
-      <div className="relative overflow-hidden" style={{ paddingBottom: compact ? '60%' : '56.25%' }}>
+      {/* Image Container */}
+      <div className="relative aspect-[4/3] overflow-hidden">
         <img
           src={property.imageUrl}
           alt={property.title}
           className={cn(
             'absolute inset-0 h-full w-full object-cover',
-            'transition-transform duration-500 group-hover:scale-105',
+            'transition-transform duration-700 group-hover:scale-110',
           )}
           loading="lazy"
         />
 
+        {/* Gradient Overlay on Hover */}
+        <div className="from-charcoal-900/60 absolute inset-0 bg-gradient-to-t via-transparent to-transparent opacity-0 transition-opacity duration-500 group-hover:opacity-100" />
+
         {/* Badges overlay */}
-        <div className="absolute left-3 top-3 flex gap-1.5">
-          <Badge variant={purposeBadge[property.purpose]}>
+        <div className="absolute left-4 top-4 flex flex-col gap-2">
+          <Badge
+            variant={purposeBadge[property.purpose]}
+            className="text-navy border-none bg-white/90 px-3 py-1 shadow-lg backdrop-blur-sm"
+          >
             {purposeLabel[property.purpose]}
           </Badge>
-          {property.isFeatured && <Badge variant="gold">Premium</Badge>}
+          {property.isFeatured && (
+            <Badge variant="gold" className="px-3 py-1 shadow-lg">
+              Premium
+            </Badge>
+          )}
         </div>
 
         {/* Favorite button */}
         <button
           onClick={handleFavorite}
           className={cn(
-            'absolute right-3 top-3 rounded-full bg-white/90 p-2',
-            'transition-all duration-200 hover:scale-110',
-            'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-navy',
+            'absolute right-4 top-4 rounded-full bg-white/90 p-2.5 shadow-lg',
+            'transition-all duration-300 hover:scale-110 hover:bg-white',
+            'focus-visible:ring-gold focus-visible:outline-none focus-visible:ring-2',
           )}
           aria-label={favorited ? 'Retirer des favoris' : 'Ajouter aux favoris'}
           aria-pressed={favorited}
         >
           <Heart
-            className={cn('h-4 w-4', favorited ? 'fill-danger text-danger' : 'text-charcoal-400')}
+            className={cn(
+              'h-4 w-4 transition-colors duration-300',
+              favorited ? 'fill-danger text-danger' : 'text-charcoal-400',
+            )}
             aria-hidden="true"
           />
         </button>
+
+        {/* Price Tag Overlay (Bottom) */}
+        <div className="absolute bottom-4 left-4 right-4 translate-y-4 opacity-0 transition-all duration-500 group-hover:translate-y-0 group-hover:opacity-100">
+          <div className="flex items-center justify-between rounded-xl bg-white/95 p-3 shadow-xl backdrop-blur-md">
+            <span className="text-navy text-xs font-bold uppercase tracking-wider">
+              Prix Direct
+            </span>
+            <span className="text-navy font-mono text-sm font-bold">
+              {formatPrice(property.price, property.currency)}
+            </span>
+          </div>
+        </div>
       </div>
 
       {/* Content */}
-      <div className={cn('flex flex-1 flex-col gap-2', compact ? 'p-3' : 'p-4')}>
+      <div className={cn('flex flex-1 flex-col gap-3', compact ? 'p-4' : 'p-5')}>
         {/* Location */}
-        <div className="flex items-center gap-1 text-xs text-charcoal-400">
-          <MapPin className="h-3 w-3 flex-shrink-0" aria-hidden="true" />
+        <div className="text-charcoal-400 flex items-center gap-1.5 text-xs font-medium">
+          <MapPin className="text-gold h-3.5 w-3.5 flex-shrink-0" aria-hidden="true" />
           <span className="truncate">
             {property.city}, {property.country}
           </span>
         </div>
 
         {/* Title */}
-        <h3 className={cn('font-serif font-semibold text-charcoal leading-tight', compact ? 'text-sm' : 'text-base')}>
+        <h3
+          className={cn(
+            'text-charcoal group-hover:text-navy font-serif font-bold leading-tight transition-colors',
+            compact ? 'text-base' : 'text-xl',
+          )}
+        >
           {property.title}
         </h3>
 
         {/* Features */}
-        {!compact && (
-          <div className="flex items-center gap-3 text-xs text-charcoal-400">
-            {property.bedrooms != null && (
-              <span className="flex items-center gap-1">
-                <BedDouble className="h-3.5 w-3.5" aria-hidden="true" />
-                <span>{property.bedrooms} ch.</span>
+        <div className="text-charcoal-500 flex items-center gap-4 pt-1 text-xs font-medium">
+          {property.bedrooms != null && (
+            <span className="bg-charcoal-50 flex items-center gap-1.5 rounded-md px-2 py-1">
+              <BedDouble className="text-navy h-3.5 w-3.5" aria-hidden="true" />
+              <span>
+                {property.bedrooms} <span className="hidden sm:inline">chambres</span>
+                <span className="sm:hidden">ch.</span>
               </span>
-            )}
-            {property.bathrooms != null && (
-              <span className="flex items-center gap-1">
-                <Bath className="h-3.5 w-3.5" aria-hidden="true" />
-                <span>{property.bathrooms} sdb.</span>
+            </span>
+          )}
+          {property.bathrooms != null && (
+            <span className="bg-charcoal-50 flex items-center gap-1.5 rounded-md px-2 py-1">
+              <Bath className="text-navy h-3.5 w-3.5" aria-hidden="true" />
+              <span>
+                {property.bathrooms} <span className="hidden sm:inline">douches</span>
+                <span className="sm:hidden">sdb.</span>
               </span>
-            )}
-            {property.surface != null && (
-              <span className="flex items-center gap-1">
-                <Expand className="h-3.5 w-3.5" aria-hidden="true" />
-                <span>{property.surface} m²</span>
-              </span>
-            )}
-          </div>
-        )}
+            </span>
+          )}
+          {property.surface != null && (
+            <span className="bg-charcoal-50 flex items-center gap-1.5 rounded-md px-2 py-1">
+              <Expand className="text-navy h-3.5 w-3.5" aria-hidden="true" />
+              <span>{property.surface} m²</span>
+            </span>
+          )}
+        </div>
 
-        {/* Price + verified */}
-        <div className="mt-auto flex items-center justify-between pt-2">
-          <p className="font-mono font-semibold text-navy">
+        {/* Divider */}
+        <div className="bg-charcoal-100 my-1 h-px w-full" />
+
+        {/* Footer */}
+        <div className="flex items-center justify-between">
+          <p className="text-navy font-mono text-lg font-bold">
             {formatPrice(property.price, property.currency)}
           </p>
-          {property.isVerified && (
-            <span className="flex items-center gap-1 text-xs text-emerald-600">
+          {property.isVerified ? (
+            <span className="flex items-center gap-1 rounded-full bg-emerald-50 px-2 py-1 text-xs font-bold text-emerald-600">
               <CheckCircle2 className="h-3.5 w-3.5" aria-hidden="true" />
-              Vérifié
+              VÉRIFIÉ
+            </span>
+          ) : (
+            <span className="text-charcoal-300 text-[10px] font-bold uppercase tracking-widest">
+              Nouveau
             </span>
           )}
         </div>

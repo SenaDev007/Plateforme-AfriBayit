@@ -15,11 +15,18 @@
   }
 
   body {
-    @apply bg-white text-charcoal font-sans antialiased;
-    font-feature-settings: 'rlig' 1, 'calt' 1;
+    @apply text-charcoal bg-white font-sans antialiased;
+    font-feature-settings:
+      'rlig' 1,
+      'calt' 1;
   }
 
-  h1, h2, h3, h4, h5, h6 {
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
     @apply font-serif;
   }
 
@@ -36,7 +43,7 @@
 
   /* Focus styles for keyboard navigation */
   :focus-visible {
-    @apply outline-none ring-2 ring-navy ring-offset-2;
+    @apply ring-gold outline-none ring-2 ring-offset-2;
   }
 
   /* Scrollbar styling */
@@ -54,24 +61,28 @@
 @layer components {
   /* Glassmorphism utility */
   .glass {
-    @apply bg-white/70 backdrop-blur-glass border border-white/40 shadow-glass;
+    @apply backdrop-blur-glass shadow-glass border border-white/40 bg-white/80;
+  }
+  .glass-dark {
+    @apply bg-charcoal-900/60 backdrop-blur-glass shadow-glass border border-white/10;
   }
 
   /* Gold gradient text */
   .text-gradient-gold {
-    @apply bg-gradient-to-r from-gold-400 to-gold bg-clip-text text-transparent;
-  }
-
-  /* Navy gradient background */
-  .bg-hero {
-    background: linear-gradient(135deg, #001c51 0%, #003087 50%, #006685 100%);
+    @apply from-gold-300 via-gold to-gold-600 bg-gradient-to-r bg-clip-text text-transparent;
   }
 
   /* Section reveal animation */
   .reveal {
-    @apply opacity-0 translate-y-6;
+    @apply translate-y-6 opacity-0;
   }
   .reveal.visible {
-    @apply opacity-100 translate-y-0 transition-all duration-700 ease-[cubic-bezier(0.16,1,0.3,1)];
+    @apply translate-y-0 opacity-100 transition-all duration-700 ease-[cubic-bezier(0.16,1,0.3,1)];
+  }
+}
+
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
   }
 }
