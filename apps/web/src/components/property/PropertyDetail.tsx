@@ -306,10 +306,10 @@ export function PropertyDetail({ property }: PropertyDetailProps): React.ReactEl
                 </div>
                 <GeoTrustMapViewer
                   title={property.title}
-                  latitude={property.latitude || undefined}
-                  longitude={property.longitude || undefined}
-                  orthophotoUrl={property.droneMapping?.orthophotoUrl}
-                  polygonData={property.droneMapping?.polygonData}
+                  latitude={property.latitude ?? null}
+                  longitude={property.longitude ?? null}
+                  orthophotoUrl={property.droneMapping?.orthophotoUrl ?? null}
+                  polygonData={property.droneMapping?.polygonData ?? null}
                 />
                 <div className="mt-6 grid grid-cols-1 gap-6 md:grid-cols-2">
                   {property.droneMapping && (

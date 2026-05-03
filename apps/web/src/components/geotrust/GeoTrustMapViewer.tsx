@@ -6,12 +6,12 @@ import { Badge } from '@afribayit/ui';
 import { Maximize2, ShieldCheck, Info } from 'lucide-react';
 
 interface GeoTrustMapViewerProps {
-  orthophotoUrl?: string;
-  polygonData?: any; // GeoJSON
-  latitude?: number;
-  longitude?: number;
+  orthophotoUrl?: string | null;
+  polygonData?: any | null;
+  latitude?: number | null;
+  longitude?: number | null;
   zoom?: number;
-  title?: string;
+  title?: string | null;
 }
 
 const MAPBOX_TOKEN = process.env.NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN || '';
