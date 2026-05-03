@@ -15,8 +15,9 @@ import {
   FileText,
   User,
   ArrowRight,
+  Loader2,
 } from 'lucide-react';
-import { Card, Badge, Button, Loader2 } from '@afribayit/ui';
+import { Card, Badge, Button } from '@afribayit/ui';
 import { DashboardLayout } from '@/components/dashboard/DashboardLayout';
 import { api } from '@/lib/api';
 import { cn } from '@afribayit/ui/src/lib/cn';

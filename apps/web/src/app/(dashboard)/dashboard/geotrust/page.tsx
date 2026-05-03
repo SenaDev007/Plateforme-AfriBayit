@@ -9,13 +9,14 @@ import {
   CheckCircle2,
   Zap,
   Maximize,
-  Drone,
   Activity,
   Layers,
   ShieldCheck,
   AlertTriangle,
+  Loader2,
+  User,
 } from 'lucide-react';
-import { Card, Badge, Button, Loader2 } from '@afribayit/ui';
+import { Card, Badge, Button } from '@afribayit/ui';
 import { DashboardLayout } from '@/components/dashboard/DashboardLayout';
 import { cn } from '@afribayit/ui/src/lib/cn';
 
