@@ -32,6 +32,12 @@ interface ApiProperty {
   isVerified: boolean;
   isFeatured: boolean;
   images: Array<{ url: string; alt?: string | null; isPrimary?: boolean }>;
+  droneMapping?: {
+    orthophotoUrl: string;
+    polygonData: any;
+    area: number;
+  } | null;
+  metadata?: any;
   owner?: {
     id: string;
     firstName: string;
@@ -113,6 +119,8 @@ export default async function PropertyPage({
       reviewCount: 0,
       isVerified: property.owner?.kycLevel !== 'NONE',
     },
+    droneMapping: property.droneMapping,
+    blockchainProof: property.metadata?.blockchainProof,
   };
 
   return (

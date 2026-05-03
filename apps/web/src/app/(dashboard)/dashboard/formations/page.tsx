@@ -50,128 +50,131 @@ export default function FormationsDashboardPage(): React.ReactElement {
       setLoading(false);
       return;
     }
-    api.courses
-      .getMyEnrollments(token)
-      .then((res) => setEnrollments(res.data as EnrolledCourse[]))
+    fetch(`${process.env.NEXT_PUBLIC_API_URL}/v1/courses/me/enrollments`, {
+      headers: { Authorization: `Bearer ${token}` },
+    })
+      .then((res) => res.json())
+      .then((data) => setEnrollments(data))
       .catch(() => setEnrollments([]))
       .finally(() => setLoading(false));
   }, [token]);
 
   return (
     <DashboardLayout>
-      <div className="flex flex-col gap-6">
-        <div className="flex flex-wrap items-center justify-between gap-3">
-          <h1 className="text-charcoal font-serif text-2xl font-bold">Mes formations</h1>
-          <div className="flex gap-2">
-            <Link
-              href={'/dashboard/formations/certificats' as Route}
-              className="border-charcoal-200 text-charcoal hover:bg-charcoal-50 inline-flex items-center gap-1.5 rounded-lg border px-4 py-2 text-sm font-medium transition-colors"
+      <div className="flex flex-col gap-10">
+        <div className="flex flex-col justify-between gap-6 md:flex-row md:items-end">
+          <div>
+            <p className="text-gold mb-2 text-[10px] font-bold uppercase tracking-[0.3em]">
+              AfriBayit Academy
+            </p>
+            <h1 className="text-charcoal font-serif text-5xl font-bold">Mes Formations</h1>
+          </div>
+          <div className="flex gap-4">
+            <Button
+              variant="outline"
+              className="border-charcoal-100 h-12 gap-2 rounded-xl text-xs font-bold"
             >
-              <Award className="h-4 w-4 text-yellow-500" />
-              Mes certificats
-            </Link>
-            <Link
-              href="/formation"
-              className="bg-navy hover:bg-navy/90 rounded-lg px-4 py-2 text-sm font-medium text-white transition-colors"
-            >
-              Découvrir les formations
+              <Award className="text-gold h-4 w-4" />
+              MES CERTIFICATS
+            </Button>
+            <Link href="/formation">
+              <Button className="bg-navy h-12 rounded-xl px-6 text-xs font-bold">
+                DÉCOUVRIR LE CATALOGUE
+              </Button>
             </Link>
           </div>
         </div>
 
         {loading ? (
-          <div className="border-charcoal-100 flex items-center justify-center rounded-xl border bg-white py-20">
-            <Loader2 className="text-navy h-8 w-8 animate-spin" />
+          <div className="border-charcoal-100 flex items-center justify-center rounded-[32px] border bg-white py-20">
+            <Loader2 className="text-navy h-10 w-10 animate-spin" />
           </div>
         ) : enrollments.length === 0 ? (
-          <div className="border-charcoal-100 flex flex-col items-center justify-center gap-4 rounded-xl border bg-white py-20 text-center">
-            <GraduationCap className="text-charcoal-200 h-12 w-12" />
-            <p className="text-charcoal font-medium">Aucune formation en cours</p>
-            <p className="text-charcoal-400 text-sm">
-              Inscrivez-vous à une formation pour démarrer votre apprentissage.
-            </p>
-            <Link href="/formation" className="text-navy text-sm font-medium hover:underline">
-              Parcourir le catalogue →
+          <div className="border-charcoal-100 flex flex-col items-center justify-center gap-6 rounded-[32px] border bg-white px-6 py-20 text-center">
+            <div className="bg-charcoal-50 text-charcoal-200 flex h-20 w-20 items-center justify-center rounded-[32px]">
+              <GraduationCap className="h-10 w-10" />
+            </div>
+            <div>
+              <h3 className="text-charcoal mb-2 text-xl font-bold">
+                Prêt à investir dans votre savoir ?
+              </h3>
+              <p className="text-charcoal-400 max-w-md text-sm">
+                Inscrivez-vous à une formation pour comprendre les rouages de l'investissement
+                immobilier en Afrique.
+              </p>
+            </div>
+            <Link href="/formation">
+              <Button className="bg-navy h-14 rounded-2xl px-8 font-bold">
+                PARCOURIR LE CATALOGUE →
+              </Button>
             </Link>
           </div>
         ) : (
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
             {enrollments.map((enrollment) => {
               const c = enrollment.course;
               const isCompleted = enrollment.status === 'COMPLETED';
               return (
                 <Link
                   key={enrollment.id}
-                  href={`/formation/${c.slug}` as Route}
-                  className="border-charcoal-100 group flex flex-col overflow-hidden rounded-xl border bg-white transition-shadow hover:shadow-md"
+                  href={`/dashboard/formations/${c.slug}` as Route}
+                  className="border-charcoal-100 hover:border-navy/10 group relative flex flex-col overflow-hidden rounded-[32px] border bg-white transition-all duration-500 hover:shadow-2xl"
                 >
-                  {c.thumbnailUrl ? (
-                    <img
-                      src={c.thumbnailUrl}
-                      alt={c.title}
-                      className="h-36 w-full object-cover transition-transform duration-300 group-hover:scale-105"
-                    />
-                  ) : (
-                    <div className="bg-navy/10 flex h-36 items-center justify-center">
-                      <BookOpen className="text-navy/40 h-10 w-10" aria-hidden="true" />
+                  <div className="relative h-56 w-full overflow-hidden">
+                    {c.thumbnailUrl ? (
+                      <img
+                        src={c.thumbnailUrl}
+                        alt={c.title}
+                        className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-110"
+                      />
+                    ) : (
+                      <div className="bg-navy/10 flex h-full w-full items-center justify-center">
+                        <BookOpen className="text-navy/20 h-12 w-12" />
+                      </div>
+                    )}
+                    <div className="from-charcoal/80 absolute inset-0 flex items-end bg-gradient-to-t to-transparent p-6 opacity-0 transition-opacity group-hover:opacity-100">
+                      <span className="flex items-center gap-2 text-xs font-bold text-white">
+                        CONTINUER LE COURS <ChevronRight className="h-4 w-4" />
+                      </span>
                     </div>
-                  )}
-                  <div className="flex flex-1 flex-col gap-3 p-4">
+                  </div>
+
+                  <div className="flex flex-1 flex-col gap-4 p-8">
                     <div className="flex items-center gap-2">
-                      {c.level && (
-                        <Badge variant={LEVEL_VARIANTS[c.level] ?? 'default'} className="text-xs">
-                          {LEVEL_LABELS[c.level] ?? c.level}
-                        </Badge>
-                      )}
-                      {c.category && (
-                        <span className="text-charcoal-400 text-xs">{c.category}</span>
-                      )}
+                      <Badge
+                        variant={LEVEL_VARIANTS[c.level] ?? 'default'}
+                        className="px-3 py-1 text-[10px] font-bold uppercase tracking-widest"
+                      >
+                        {LEVEL_LABELS[c.level] ?? c.level}
+                      </Badge>
+                      <span className="text-charcoal-400 text-[10px] font-bold uppercase tracking-widest">
+                        {c.category}
+                      </span>
                     </div>
-                    <h3 className="text-charcoal group-hover:text-navy line-clamp-2 text-sm font-semibold transition-colors">
+
+                    <h3 className="text-charcoal line-clamp-2 font-serif text-xl font-bold leading-snug">
                       {c.title}
                     </h3>
 
-                    {/* Progress bar */}
-                    <div className="mt-auto">
-                      <div className="mb-1 flex items-center justify-between text-xs">
-                        <span className="text-charcoal-400">
-                          {isCompleted ? 'Terminé ✓' : `${enrollment.progress}% complété`}
+                    <div className="border-charcoal-50 mt-auto space-y-4 border-t pt-4">
+                      <div className="flex items-center justify-between">
+                        <span className="text-charcoal-400 text-[10px] font-bold uppercase tracking-widest">
+                          Progression
+                        </span>
+                        <span className="text-navy text-[10px] font-bold uppercase tracking-widest">
+                          {enrollment.progress}%
                         </span>
                       </div>
-                      <div className="bg-charcoal-100 h-1.5 w-full overflow-hidden rounded-full">
+                      <div className="bg-charcoal-50 h-1.5 w-full overflow-hidden rounded-full">
                         <div
-                          className={`h-full rounded-full transition-all ${
-                            isCompleted ? 'bg-success' : 'bg-navy'
-                          }`}
+                          className={cn(
+                            'h-full rounded-full transition-all duration-1000',
+                            isCompleted ? 'bg-emerald-500' : 'bg-navy',
+                          )}
                           style={{ width: `${enrollment.progress}%` }}
                         />
                       </div>
                     </div>
-
-                    {/* Quiz / certificate action */}
-                    <Link
-                      href={
-                        enrollment.certificateId
-                          ? (`/dashboard/formations/certificats/${enrollment.certificateId}` as Route)
-                          : (`/dashboard/formations/quiz/${c.id}` as Route)
-                      }
-                      onClick={(e) => e.stopPropagation()}
-                      className={`mt-2 flex w-full items-center justify-center gap-1.5 rounded-lg py-1.5 text-xs font-semibold transition-colors ${
-                        enrollment.certificateId
-                          ? 'bg-yellow-50 text-yellow-700 hover:bg-yellow-100'
-                          : 'bg-navy/5 text-navy hover:bg-navy/10'
-                      }`}
-                    >
-                      {enrollment.certificateId ? (
-                        <>
-                          <Award className="h-3.5 w-3.5" /> Voir le certificat
-                        </>
-                      ) : (
-                        <>
-                          <ClipboardList className="h-3.5 w-3.5" /> Passer l'évaluation
-                        </>
-                      )}
-                    </Link>
                   </div>
                 </Link>
               );

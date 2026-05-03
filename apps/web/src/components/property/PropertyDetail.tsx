@@ -20,9 +20,10 @@ import {
   ChevronRight,
   Maximize2,
 } from 'lucide-react';
-import { Badge, Button } from '@afribayit/ui';
+import { Badge, Button, Card } from '@afribayit/ui';
 import { cn } from '@afribayit/ui/src/lib/cn';
 import { TaxCalculator } from './TaxCalculator';
+import GeoTrustMapViewer from '../geotrust/GeoTrustMapViewer';
 
 interface PropertyImage {
   url: string;
@@ -64,6 +65,17 @@ interface PropertyDetailData {
   isFeatured: boolean;
   images: PropertyImage[];
   agent: Agent;
+  droneMapping?: {
+    orthophotoUrl: string;
+    polygonData: any;
+    area: number;
+  } | null;
+  blockchainProof?: {
+    hash: string;
+    txHash: string;
+    network: string;
+    timestamp: string;
+  } | null;
 }
 
 interface PropertyDetailProps {
@@ -264,6 +276,66 @@ export function PropertyDetail({ property }: PropertyDetailProps): React.ReactEl
                       <span className="text-charcoal-700 font-medium">{feature}</span>
                     </div>
                   ))}
+                </div>
+              </div>
+            )}
+
+            {/* GeoTrust Map Section */}
+            {(property.droneMapping || property.latitude) && (
+              <div className="space-y-6">
+                <div className="flex items-center justify-between">
+                  <h2 className="text-charcoal flex items-center gap-3 font-serif text-3xl font-bold">
+                    <div className="bg-navy h-8 w-1.5 rounded-full" />
+                    Expertise GeoTrust
+                  </h2>
+                  {property.droneMapping && (
+                    <Badge
+                      variant="gold"
+                      className="gap-2 px-4 py-1.5 font-bold uppercase tracking-widest"
+                    >
+                      <Shield className="h-4 w-4" />
+                      VÉRIFIÉ PAR DRONE
+                    </Badge>
+                  )}
+                </div>
+                <GeoTrustMapViewer
+                  title={property.title}
+                  latitude={property.latitude || undefined}
+                  longitude={property.longitude || undefined}
+                  orthophotoUrl={property.droneMapping?.orthophotoUrl}
+                  polygonData={property.droneMapping?.polygonData}
+                />
+                <div className="mt-6 grid grid-cols-1 gap-6 md:grid-cols-2">
+                  {property.droneMapping && (
+                    <Card className="bg-charcoal-50 border-charcoal-100/50 flex items-center gap-4 p-6">
+                      <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-white shadow-sm">
+                        <Expand className="text-navy h-6 w-6" />
+                      </div>
+                      <div>
+                        <p className="text-charcoal-400 text-[10px] font-bold uppercase tracking-widest">
+                          Surface Certifiée
+                        </p>
+                        <p className="text-charcoal text-lg font-bold">
+                          {property.droneMapping.area.toLocaleString()} m²
+                        </p>
+                      </div>
+                    </Card>
+                  )}
+                  {property.blockchainProof && (
+                    <Card className="bg-navy flex items-center gap-4 border-none p-6 text-white">
+                      <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-white/10">
+                        <Shield className="text-gold h-6 w-6" />
+                      </div>
+                      <div>
+                        <p className="text-[10px] font-bold uppercase tracking-widest text-white/50">
+                          Ancrage Blockchain
+                        </p>
+                        <p className="max-w-[150px] truncate font-mono text-xs">
+                          {property.blockchainProof.txHash}
+                        </p>
+                      </div>
+                    </Card>
+                  )}
                 </div>
               </div>
             )}

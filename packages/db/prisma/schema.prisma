@@ -164,6 +164,13 @@ enum NotificationCategory {
   MARKETING
   SOCIAL
 }
+ 
+enum CommissionStatus {
+  PENDING
+  APPROVED
+  PAID
+  CANCELLED
+}
 
 // ─── USERS ────────────────────────────────────────────────────────────────────
 
@@ -187,6 +194,10 @@ model User {
   reputationScore Float   @default(0)
   twoFactorSecret String?
   twoFactorEnabled Boolean @default(false)
+  referralCode    String?   @unique
+  referredById    String?
+  points          Int       @default(0)
+  totalEarnings   Float     @default(0)
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
 
@@ -221,6 +232,10 @@ model User {
   surveyorProfile     Surveyor?
   notificationPrefs   NotificationPreference[]
   notaryReviews       NotaryReview[]
+  referredBy          User?     @relation("ReferralTree", fields: [referredById], references: [id])
+  referrals           User[]    @relation("ReferralTree")
+  commissions         Commission[]
+  lessonProgress      LessonProgress[]
 
   @@index([email])
   @@index([phone])
@@ -675,6 +690,7 @@ model Transaction {
   payout         Payout?
   notaryAssignment NotaryAssignment?
   surveyAssignment SurveyAssignment?
+  commissions      Commission[]
 
   @@index([buyerId])
   @@index([sellerId])
@@ -822,6 +838,7 @@ model Lesson {
   createdAt DateTime @default(now())
 
   course Course @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  lessonProgress LessonProgress[]
 
   @@index([courseId])
   @@map("lessons")
@@ -842,6 +859,20 @@ model Enrollment {
 
   @@unique([userId, courseId])
   @@map("enrollments")
+}
+ 
+model LessonProgress {
+  id        String   @id @default(cuid())
+  userId    String
+  lessonId  String
+  isCompleted Boolean @default(true)
+  completedAt DateTime @default(now())
+ 
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  lesson Lesson @relation(fields: [lessonId], references: [id], onDelete: Cascade)
+ 
+  @@unique([userId, lessonId])
+  @@map("lesson_progress")
 }
 
 // ─── QUIZ & CERTIFICATES ──────────────────────────────────────────────────────
@@ -1016,6 +1047,25 @@ model Review {
 
   @@index([targetId])
   @@map("reviews")
+}
+ 
+model Commission {
+  id            String           @id @default(cuid())
+  userId        String           // L'ambassadeur qui reçoit la commission
+  transactionId String           // La transaction parente
+  amount        Float            // Montant de la commission
+  currency      String           @default("XOF")
+  status        CommissionStatus @default(PENDING)
+  notes         String?
+  createdAt     DateTime         @default(now())
+  updatedAt     DateTime         @updatedAt
+ 
+  user          User             @relation(fields: [userId], references: [id])
+  transaction   Transaction      @relation(fields: [transactionId], references: [id])
+ 
+  @@index([userId])
+  @@index([transactionId])
+  @@map("commissions")
 }
 
 // ─── NOTIFICATIONS ────────────────────────────────────────────────────────────

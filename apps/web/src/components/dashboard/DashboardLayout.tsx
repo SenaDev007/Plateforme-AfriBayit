@@ -25,6 +25,7 @@ import {
   Gavel,
   Compass,
   Beaker,
+  Share2,
 } from 'lucide-react';
 import { cn } from '@afribayit/ui/src/lib/cn';
 import { useNotifications } from '@/hooks/useNotifications';
@@ -39,6 +40,7 @@ const NAV_ITEMS: Array<{ label: string; href: Route; icon: React.ElementType }> 
   { label: 'Mes formations', href: '/dashboard/formations', icon: GraduationCap },
   { label: 'Notifications', href: '/dashboard/notifications', icon: Bell },
   { label: 'Profil & KYC', href: '/dashboard/profil', icon: User },
+  { label: 'Ambassadeurs', href: '/dashboard/ambassadeur', icon: Share2 },
 ];
 
 interface DashboardLayoutProps {

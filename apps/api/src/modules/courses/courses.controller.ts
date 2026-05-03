@@ -63,8 +63,10 @@ export class CoursesController {
 
   @Get(':slug')
   @ApiOperation({ summary: "Détail d'une formation par slug" })
-  findBySlug(@Param('slug') slug: string) {
-    return this.coursesService.findBySlug(slug);
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  findBySlug(@Param('slug') slug: string, @CurrentUser() user: { id: string }) {
+    return this.coursesService.findBySlug(slug, user?.id);
   }
 
   @Post()
@@ -86,18 +88,6 @@ export class CoursesController {
     return this.coursesService.enroll(id, user.id);
   }
 
-  @Patch('enrollments/:id/progress')
-  @UseGuards(JwtAuthGuard)
-  @ApiBearerAuth()
-  @ApiOperation({ summary: 'Mettre à jour la progression' })
-  updateProgress(
-    @Param('id') id: string,
-    @Body('progress', ParseIntPipe) progress: number,
-    @CurrentUser() user: { id: string },
-  ) {
-    return this.coursesService.updateProgress(id, user.id, progress);
-  }
-
   @Post('lessons')
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
@@ -107,6 +97,14 @@ export class CoursesController {
     @CurrentUser() user: { id: string },
   ) {
     return this.coursesService.addLesson(body, user.id);
+  }
+
+  @Post('lessons/:lessonId/complete')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Marquer une leçon comme terminée' })
+  completeLesson(@Param('lessonId') lessonId: string, @CurrentUser() user: { id: string }) {
+    return this.coursesService.completeLesson(user.id, lessonId);
   }
 
   // ── Quiz ───────────────────────────────────────────────────────────────────

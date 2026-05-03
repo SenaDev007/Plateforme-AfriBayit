@@ -1,10 +1,11 @@
 import { Module } from '@nestjs/common';
-import { GeoTrustService } from './geotrust.service';
 import { GeoTrustController } from './geotrust.controller';
+import { GeoTrustService } from './geotrust.service';
+import { BlockchainAnchorService } from './blockchain.service';
 
 @Module({
-  providers: [GeoTrustService],
   controllers: [GeoTrustController],
-  exports: [GeoTrustService],
+  providers: [GeoTrustService, BlockchainAnchorService],
+  exports: [GeoTrustService, BlockchainAnchorService],
 })
 export class GeoTrustModule {}
