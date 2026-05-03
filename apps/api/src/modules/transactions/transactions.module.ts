@@ -11,10 +11,13 @@ import { PayoutController } from './payout.controller';
 import { AuthModule } from '../auth/auth.module';
 import { NotificationsModule } from '../notifications/notifications.module';
 import { NotaryModule } from '../notary/notary.module';
+import { GeoTrustModule } from '../geotrust/geotrust.module';
+import { SimulationController } from './simulation.controller';
+import { TransactionSimulationService } from './simulation.service';
 
 @Module({
-  imports: [AuthModule, NotificationsModule, NotaryModule],
-  controllers: [TransactionsController, DisputesController, PayoutController],
+  imports: [AuthModule, NotificationsModule, NotaryModule, GeoTrustModule],
+  controllers: [TransactionsController, DisputesController, PayoutController, SimulationController],
   providers: [
     TransactionsService,
     EscrowService,
@@ -22,6 +25,7 @@ import { NotaryModule } from '../notary/notary.module';
     StripeService,
     DisputesService,
     PayoutService,
+    TransactionSimulationService,
   ],
   exports: [TransactionsService, EscrowService, DisputesService, PayoutService],
 })
