@@ -45,9 +45,15 @@ const NAV_ITEMS: Array<{ label: string; href: Route; icon: React.ElementType }> 
 
 interface DashboardLayoutProps {
   children: React.ReactNode;
+  hideSidebar?: boolean;
+  hideSidebarOnMobile?: boolean;
 }
 
-export function DashboardLayout({ children }: DashboardLayoutProps): React.ReactElement {
+export function DashboardLayout({
+  children,
+  hideSidebar = false,
+  hideSidebarOnMobile = false,
+}: DashboardLayoutProps): React.ReactElement {
   const pathname = usePathname();
   const router = useRouter();
   const { data: session } = useSession();
@@ -72,8 +78,9 @@ export function DashboardLayout({ children }: DashboardLayoutProps): React.React
         className={cn(
           'bg-navy fixed inset-y-0 left-0 z-50 w-72 text-white shadow-2xl',
           'flex flex-col transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)]',
-          'lg:relative lg:translate-x-0',
+          hideSidebar ? 'hidden' : 'lg:relative lg:translate-x-0',
           isSidebarOpen ? 'translate-x-0' : '-translate-x-full',
+          hideSidebarOnMobile && 'hidden lg:flex',
         )}
       >
         {/* Logo Section */}
@@ -264,12 +271,14 @@ export function DashboardLayout({ children }: DashboardLayoutProps): React.React
       <div className="flex min-w-0 flex-1 flex-col">
         {/* Top Header */}
         <header className="border-charcoal-100 sticky top-0 z-40 flex h-24 items-center justify-between border-b bg-white/50 px-8 backdrop-blur-xl">
-          <button
-            onClick={() => setIsSidebarOpen(true)}
-            className="bg-charcoal-50 flex h-10 w-10 items-center justify-center rounded-xl lg:hidden"
-          >
-            <Menu className="text-charcoal h-6 w-6" />
-          </button>
+          {!hideSidebar && (
+            <button
+              onClick={() => setIsSidebarOpen(true)}
+              className="bg-charcoal-50 flex h-10 w-10 items-center justify-center rounded-xl lg:hidden"
+            >
+              <Menu className="text-charcoal h-6 w-6" />
+            </button>
+          )}
 
           <div className="bg-charcoal-50 border-charcoal-100 hidden h-12 w-96 items-center gap-3 rounded-2xl border px-4 md:flex">
             <div className="h-2 w-2 animate-pulse rounded-full bg-emerald-500" />
