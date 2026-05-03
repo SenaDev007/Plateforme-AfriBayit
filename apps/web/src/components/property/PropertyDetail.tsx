@@ -65,17 +65,23 @@ interface PropertyDetailData {
   isFeatured: boolean;
   images: PropertyImage[];
   agent: Agent;
-  droneMapping?: {
-    orthophotoUrl: string;
-    polygonData: any;
-    area: number;
-  } | null;
-  blockchainProof?: {
-    hash: string;
-    txHash: string;
-    network: string;
-    timestamp: string;
-  } | null;
+  droneMapping?:
+    | {
+        orthophotoUrl: string;
+        polygonData: any;
+        area: number;
+      }
+    | null
+    | undefined;
+  blockchainProof?:
+    | {
+        hash: string;
+        txHash: string;
+        network: string;
+        timestamp: string;
+      }
+    | null
+    | undefined;
 }
 
 interface PropertyDetailProps {

@@ -119,8 +119,8 @@ export default async function PropertyPage({
       reviewCount: 0,
       isVerified: property.owner?.kycLevel !== 'NONE',
     },
-    droneMapping: property.droneMapping,
-    blockchainProof: property.metadata?.blockchainProof,
+    droneMapping: property.droneMapping ?? null,
+    blockchainProof: property.metadata?.blockchainProof ?? null,
   };
 
   return (
