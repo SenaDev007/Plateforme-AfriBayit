@@ -10,7 +10,9 @@ const NAV_LINKS = [
   { label: 'Hôtels', href: '/hotels' },
   { label: 'Artisans', href: '/artisans' },
   { label: 'Formation', href: '/formation' },
-  { label: 'Communauté', href: '/communaute' },
+  { label: 'GeoTrust', href: '/dashboard/geotrust' },
+  { label: 'Notaires', href: '/dashboard/notaire' },
+  { label: 'Ambassadeurs', href: '/dashboard/ambassadeur' },
 ];
 
 const COUNTRY_DOMAINS: Record<string, string> = {

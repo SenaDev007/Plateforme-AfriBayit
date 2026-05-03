@@ -41,6 +41,9 @@ const NAV_ITEMS: Array<{ label: string; href: Route; icon: React.ElementType }> 
   { label: 'Notifications', href: '/dashboard/notifications', icon: Bell },
   { label: 'Profil & KYC', href: '/dashboard/profil', icon: User },
   { label: 'Ambassadeurs', href: '/dashboard/ambassadeur', icon: Share2 },
+  { label: 'Dossiers Notaire', href: '/dashboard/notaire', icon: Gavel },
+  { label: 'Missions Géomètre', href: '/dashboard/geotrust', icon: Compass },
+  { label: 'Labo Simulations', href: '/dashboard/dev', icon: Beaker },
 ];
 
 interface DashboardLayoutProps {
