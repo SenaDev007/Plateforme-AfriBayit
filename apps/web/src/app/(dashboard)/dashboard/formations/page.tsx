@@ -5,7 +5,7 @@ import { useState, useEffect } from 'react';
 import { useSession } from 'next-auth/react';
 import Link from 'next/link';
 import type { Route } from 'next';
-import { BookOpen, Loader2, GraduationCap, Award, ClipboardList } from 'lucide-react';
+import { BookOpen, Loader2, GraduationCap, Award, ClipboardList, ChevronRight } from 'lucide-react';
 import { Badge, Button } from '@afribayit/ui';
 import { DashboardLayout } from '@/components/dashboard/DashboardLayout';
 import { cn } from '@afribayit/ui/src/lib/cn';
