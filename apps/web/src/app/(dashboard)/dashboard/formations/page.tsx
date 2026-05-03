@@ -6,8 +6,9 @@ import { useSession } from 'next-auth/react';
 import Link from 'next/link';
 import type { Route } from 'next';
 import { BookOpen, Loader2, GraduationCap, Award, ClipboardList } from 'lucide-react';
-import { Badge } from '@afribayit/ui';
+import { Badge, Button } from '@afribayit/ui';
 import { DashboardLayout } from '@/components/dashboard/DashboardLayout';
+import { cn } from '@afribayit/ui/src/lib/cn';
 import { api } from '@/lib/api';
 
 interface EnrolledCourse {
