@@ -19,6 +19,7 @@ import {
   Building2,
   Briefcase,
   Camera,
+  Home,
 } from 'lucide-react';
 import { Button, Input } from '@afribayit/ui';
 import toast from 'react-hot-toast';

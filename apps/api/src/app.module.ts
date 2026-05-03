@@ -22,6 +22,7 @@ import { SecurityModule } from './modules/security/security.module';
 import { NotaryModule } from './modules/notary/notary.module';
 import { ComplianceModule } from './modules/compliance/compliance.module';
 import { AiModule } from './modules/ai/ai.module';
+import { GeoTrustModule } from './modules/geotrust/geotrust.module';
 
 @Module({
   imports: [
@@ -86,6 +87,7 @@ import { AiModule } from './modules/ai/ai.module';
     NotaryModule,
     ComplianceModule,
     AiModule,
+    GeoTrustModule,
   ],
   providers: [
     // Apply ThrottlerGuard globally — every route is rate-limited by default

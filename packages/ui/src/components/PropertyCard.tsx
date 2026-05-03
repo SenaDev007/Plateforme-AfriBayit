@@ -2,7 +2,7 @@
 
 import * as React from 'react';
 import { motion } from 'framer-motion';
-import { Heart, MapPin, BedDouble, Bath, Expand, CheckCircle2 } from 'lucide-react';
+import { Heart, MapPin, BedDouble, Bath, Expand, CheckCircle2, Compass } from 'lucide-react';
 import { cn } from '../lib/cn';
 import { Badge } from './Badge';
 
@@ -212,12 +212,13 @@ export function PropertyCard({
             {formatPrice(property.price, property.currency)}
           </p>
           {property.isVerified ? (
-            <span className="flex items-center gap-1 rounded-full bg-emerald-50 px-2 py-1 text-xs font-bold text-emerald-600">
-              <CheckCircle2 className="h-3.5 w-3.5" aria-hidden="true" />
-              VÉRIFIÉ
+            <span className="bg-navy/5 text-navy border-navy/10 flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-[10px] font-bold">
+              <Compass className="h-3.5 w-3.5" aria-hidden="true" />
+              GÉO-VÉRIFIÉ
             </span>
           ) : (
-            <span className="text-charcoal-300 text-[10px] font-bold uppercase tracking-widest">
+            <span className="text-charcoal-300 flex items-center gap-1 text-[10px] font-bold uppercase tracking-widest">
+              <div className="bg-gold h-1.5 w-1.5 rounded-full" />
               Nouveau
             </span>
           )}

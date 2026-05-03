@@ -24,6 +24,9 @@ enum UserRole {
   ARTISAN
   ADMIN
   SUPER_ADMIN
+  NOTARY
+  SURVEYOR
+  AGENT
 }
 
 enum KycLevel {
@@ -215,6 +218,7 @@ model User {
   quizAttempts        QuizAttempt[]
   certificates        Certificate[]
   notaryProfile       Notary?
+  surveyorProfile     Surveyor?
   notificationPrefs   NotificationPreference[]
   notaryReviews       NotaryReview[]
 
@@ -351,6 +355,64 @@ model NotaryReview {
   @@map("notary_reviews")
 }
 
+// ─── GEOTRUST & SURVEYORS ───────────────────────────────────────────────────
+
+model Surveyor {
+  id            String    @id @default(cuid())
+  userId        String    @unique
+  licenseNumber String    @unique // Numéro d'agrément
+  jurisdiction  Country
+  city          String?
+  isAvailable   Boolean   @default(true)
+  rating        Float     @default(0)
+  reviewCount   Int       @default(0)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  user         User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  assignments  SurveyAssignment[]
+  droneData    DroneMapping[]
+
+  @@index([jurisdiction, city])
+  @@map("surveyors")
+}
+
+model SurveyAssignment {
+  id            String   @id @default(cuid())
+  transactionId String?  @unique
+  propertyId    String
+  surveyorId    String
+  status        String   // PENDING, IN_PROGRESS, COMPLETED, CANCELLED
+  reportUrl     String?  // PDF du rapport d'expertise
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  property      Property    @relation(fields: [propertyId], references: [id])
+  surveyor      Surveyor    @relation(fields: [surveyorId], references: [id])
+  transaction   Transaction? @relation(fields: [transactionId], references: [id])
+
+  @@index([propertyId])
+  @@index([surveyorId])
+  @@map("survey_assignments")
+}
+
+model DroneMapping {
+  id            String   @id @default(cuid())
+  propertyId    String   @unique
+  surveyorId    String
+  orthophotoUrl String   // URL de l'image haute résolution
+  polygonData   Json     // Coordonnées du polygone (GeoJSON)
+  area          Float    // Surface calculée par drone
+  elevationData Json?    // Données d'élévation
+  capturedAt    DateTime
+  createdAt     DateTime @default(now())
+
+  property      Property @relation(fields: [propertyId], references: [id])
+  surveyor      Surveyor @relation(fields: [surveyorId], references: [id])
+
+  @@map("drone_mappings")
+}
+
 // ─── NOTIFICATION PREFERENCES ────────────────────────────────────────────────
 
 model NotificationPreference {
@@ -410,6 +472,8 @@ model Property {
   favorites       Favorite[]
   transactions    Transaction[]
   reviews         Review[]
+  surveyAssignments SurveyAssignment[]
+  droneData        DroneMapping?
 
   @@index([country, city, status])
   @@index([ownerId])
@@ -610,6 +674,7 @@ model Transaction {
   dispute        Dispute?
   payout         Payout?
   notaryAssignment NotaryAssignment?
+  surveyAssignment SurveyAssignment?
 
   @@index([buyerId])
   @@index([sellerId])

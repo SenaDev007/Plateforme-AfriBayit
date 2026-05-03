@@ -17,6 +17,7 @@ import {
   Clock,
   MapPin,
   Search,
+  MessageSquare,
 } from 'lucide-react';
 import { Card, Badge, PropertyCard, Button } from '@afribayit/ui';
 import type { PropertyCardData } from '@afribayit/ui';

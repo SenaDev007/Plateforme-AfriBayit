@@ -106,4 +106,24 @@ export class NotaryService {
       include: { user: { select: { firstName: true, lastName: true, avatar: true, city: true } } },
     });
   }
+
+  /** Find all assignments for a given user ID (who must be a notary) */
+  async findAssignmentsByUserId(userId: string): Promise<NotaryAssignment[]> {
+    const notary = await this.prisma.notary.findUnique({ where: { userId } });
+    if (!notary) throw new NotFoundException('Profil notaire introuvable.');
+
+    return this.prisma.notaryAssignment.findMany({
+      where: { notaryId: notary.id },
+      include: {
+        transaction: {
+          include: {
+            property: true,
+            buyer: { select: { firstName: true, lastName: true } },
+            seller: { select: { firstName: true, lastName: true } },
+          },
+        },
+      },
+      orderBy: { createdAt: 'desc' },
+    });
+  }
 }

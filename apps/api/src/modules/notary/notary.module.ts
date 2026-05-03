@@ -1,10 +1,10 @@
 import { Module } from '@nestjs/common';
 import { NotaryService } from './notary.service';
-// import { NotaryController } from './notary.controller';
+import { NotaryController } from './notary.controller';
 
 @Module({
   providers: [NotaryService],
-  // controllers: [NotaryController],
+  controllers: [NotaryController],
   exports: [NotaryService],
 })
 export class NotaryModule {}

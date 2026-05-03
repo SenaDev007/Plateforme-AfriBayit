@@ -22,6 +22,8 @@ import {
   ChevronRight,
   ShieldCheck,
   Wallet,
+  Gavel,
+  Compass,
 } from 'lucide-react';
 import { cn } from '@afribayit/ui/src/lib/cn';
 import { useNotifications } from '@/hooks/useNotifications';
@@ -151,6 +153,62 @@ export function DashboardLayout({ children }: DashboardLayoutProps): React.React
               </Link>
             );
           })}
+
+          {/* Professional Section: Notary */}
+          {session?.user?.role === 'NOTARY' && (
+            <div className="mt-8 space-y-1.5">
+              <p className="text-gold/60 px-6 pb-2 text-[10px] font-bold uppercase tracking-[0.2em]">
+                Espace Professionnel
+              </p>
+              <Link
+                href="/dashboard/notaire"
+                className={cn(
+                  'group relative flex items-center gap-4 overflow-hidden rounded-2xl px-6 py-4 text-sm font-medium transition-all duration-300',
+                  pathname === '/dashboard/notaire'
+                    ? 'bg-gold text-navy shadow-gold/10 shadow-lg'
+                    : 'text-white/50 hover:bg-white/5 hover:text-white',
+                )}
+              >
+                <Gavel
+                  className={cn(
+                    'h-5 w-5',
+                    pathname === '/dashboard/notaire'
+                      ? 'text-navy'
+                      : 'transition-transform group-hover:scale-110',
+                  )}
+                />
+                <span className="flex-1 font-bold tracking-tight">Dossiers Notaire</span>
+              </Link>
+            </div>
+          )}
+
+          {/* Professional Section: Surveyor */}
+          {session?.user?.role === 'SURVEYOR' && (
+            <div className="mt-8 space-y-1.5">
+              <p className="text-gold/60 px-6 pb-2 text-[10px] font-bold uppercase tracking-[0.2em]">
+                GeoTrust Portal
+              </p>
+              <Link
+                href="/dashboard/geotrust"
+                className={cn(
+                  'group relative flex items-center gap-4 overflow-hidden rounded-2xl px-6 py-4 text-sm font-medium transition-all duration-300',
+                  pathname === '/dashboard/geotrust'
+                    ? 'bg-gold text-navy shadow-gold/10 shadow-lg'
+                    : 'text-white/50 hover:bg-white/5 hover:text-white',
+                )}
+              >
+                <Compass
+                  className={cn(
+                    'h-5 w-5',
+                    pathname === '/dashboard/geotrust'
+                      ? 'text-navy'
+                      : 'transition-transform group-hover:scale-110',
+                  )}
+                />
+                <span className="flex-1 font-bold tracking-tight">Missions Géomètre</span>
+              </Link>
+            </div>
+          )}
         </nav>
 
         {/* Footer actions */}
