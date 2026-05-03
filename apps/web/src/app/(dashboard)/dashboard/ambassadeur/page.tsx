@@ -16,6 +16,7 @@ import {
 } from 'lucide-react';
 import { Card, Button, Badge } from '@afribayit/ui';
 import { DashboardLayout } from '@/components/dashboard/DashboardLayout';
+import { cn } from '@afribayit/ui/src/lib/cn';
 import toast from 'react-hot-toast';
 
 export default function AmbassadorDashboard() {

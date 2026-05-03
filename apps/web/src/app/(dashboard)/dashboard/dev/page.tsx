@@ -1,9 +1,17 @@
 'use client';
 import React, { useState } from 'react';
 import { useSession } from 'next-auth/react';
-import { Card, Button, Badge, Loader2 } from '@afribayit/ui';
+import { Card, Button, Badge } from '@afribayit/ui';
 import { DashboardLayout } from '@/components/dashboard/DashboardLayout';
-import { Play, Database, ArrowRight, CheckCircle2, AlertTriangle, Beaker } from 'lucide-react';
+import {
+  Play,
+  Database,
+  ArrowRight,
+  CheckCircle2,
+  AlertTriangle,
+  Beaker,
+  Loader2,
+} from 'lucide-react';
 import toast from 'react-hot-toast';
 
 export default function DevDashboard() {
