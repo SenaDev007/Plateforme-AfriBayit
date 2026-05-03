@@ -25,8 +25,8 @@ export default function GeoTrustMapViewer({
   title,
 }: GeoTrustMapViewerProps) {
   const [viewState, setViewState] = useState({
-    latitude,
-    longitude,
+    latitude: latitude ?? 6.366,
+    longitude: longitude ?? 2.418,
     zoom,
   });
 
@@ -78,10 +78,10 @@ export default function GeoTrustMapViewer({
             type="image"
             url={orthophotoUrl}
             coordinates={[
-              [longitude - 0.001, latitude + 0.001],
-              [longitude + 0.001, latitude + 0.001],
-              [longitude + 0.001, latitude - 0.001],
-              [longitude - 0.001, latitude - 0.001],
+              [(longitude ?? 2.418) - 0.001, (latitude ?? 6.366) + 0.001],
+              [(longitude ?? 2.418) + 0.001, (latitude ?? 6.366) + 0.001],
+              [(longitude ?? 2.418) + 0.001, (latitude ?? 6.366) - 0.001],
+              [(longitude ?? 2.418) - 0.001, (latitude ?? 6.366) - 0.001],
             ]}
           >
             <Layer id="drone-layer" type="raster" paint={{ 'raster-opacity': 0.8 }} />
