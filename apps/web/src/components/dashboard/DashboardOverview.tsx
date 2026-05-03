@@ -6,10 +6,22 @@ import { useState, useEffect } from 'react';
 import { useSession } from 'next-auth/react';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
-import { TrendingUp, Heart, CreditCard, Eye, Loader2 } from 'lucide-react';
-import { Card, CardTitle, Badge, PropertyCard } from '@afribayit/ui';
+import {
+  TrendingUp,
+  Heart,
+  CreditCard,
+  Eye,
+  Loader2,
+  ArrowUpRight,
+  ShieldCheck,
+  Clock,
+  MapPin,
+  Search,
+} from 'lucide-react';
+import { Card, Badge, PropertyCard, Button } from '@afribayit/ui';
 import type { PropertyCardData } from '@afribayit/ui';
 import { api } from '@/lib/api';
+import { cn } from '@afribayit/ui/src/lib/cn';
 
 interface ApiMineProperty {
   id: string;
@@ -108,12 +120,12 @@ const STATUS_VARIANTS: Record<string, 'default' | 'sky' | 'gold' | 'success' | '
 
 const containerVariants = {
   hidden: {},
-  visible: { transition: { staggerChildren: 0.08 } },
+  visible: { transition: { staggerChildren: 0.1 } },
 };
 
 const itemVariants = {
-  hidden: { opacity: 0, y: 16 },
-  visible: { opacity: 1, y: 0, transition: { duration: 0.4 } },
+  hidden: { opacity: 0, y: 20 },
+  visible: { opacity: 1, y: 0, transition: { duration: 0.6, ease: [0.16, 1, 0.3, 1] } },
 };
 
 export function DashboardOverview(): React.ReactElement {
@@ -159,7 +171,6 @@ export function DashboardOverview(): React.ReactElement {
           reputation: user.reputationScore ?? 0,
         });
 
-        // Escrow balance — buyer's funded/validated transactions
         const fundedTxs = txs.filter(
           (tx) => tx.buyerId === userId && ['FUNDED', 'VALIDATED'].includes(tx.status),
         );
@@ -168,193 +179,289 @@ export function DashboardOverview(): React.ReactElement {
           setEscrow({ total, currency: fundedTxs[0]!.currency, count: fundedTxs.length });
         }
 
-        // Recent transactions (last 3)
         const sorted = [...txs].sort(
           (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
         );
-        setRecentTxs(sorted.slice(0, 3));
-
-        // Recent favorites (first 3)
+        setRecentTxs(sorted.slice(0, 5));
         setRecentFavs(favs.slice(0, 3).map(toCardData));
       })
-      .catch(() => {
-        // keep zeroed defaults
-      })
+      .catch(() => {})
       .finally(() => setLoading(false));
   }, [token, userId]);
-
-  const statsCards = [
-    {
-      label: 'Mes annonces',
-      value: stats.annonces,
-      icon: Eye,
-      color: 'text-navy',
-      bg: 'bg-navy/10',
-    },
-    {
-      label: 'Favoris',
-      value: stats.favoris,
-      icon: Heart,
-      color: 'text-danger',
-      bg: 'bg-danger/10',
-    },
-    {
-      label: 'Transactions',
-      value: stats.transactions,
-      icon: CreditCard,
-      color: 'text-emerald-600',
-      bg: 'bg-emerald/10',
-    },
-    {
-      label: 'Score réputation',
-      value: stats.reputation > 0 ? stats.reputation.toFixed(1) : '—',
-      icon: TrendingUp,
-      color: 'text-gold-600',
-      bg: 'bg-gold/10',
-    },
-  ];
 
   if (loading) {
     return (
       <div className="flex min-h-[40vh] items-center justify-center">
-        <Loader2 className="text-navy h-8 w-8 animate-spin" />
+        <Loader2 className="text-navy h-10 w-10 animate-spin" />
       </div>
     );
   }
 
   return (
-    <div className="flex flex-col gap-6">
-      {/* Welcome */}
-      <div>
-        <h1 className="text-charcoal font-serif text-2xl font-bold sm:text-3xl">
-          Bonjour{firstName ? `, ${firstName}` : ''} 👋
-        </h1>
-        <p className="text-charcoal-400 mt-1">Voici un aperçu de votre activité.</p>
-      </div>
-
-      {/* Stats */}
+    <motion.div
+      className="flex flex-col gap-10"
+      variants={containerVariants}
+      initial="hidden"
+      animate="visible"
+    >
+      {/* Header Section */}
       <motion.div
-        className="grid grid-cols-2 gap-4 lg:grid-cols-4"
-        variants={containerVariants}
-        initial="hidden"
-        animate="visible"
+        variants={itemVariants}
+        className="flex flex-col justify-between gap-6 md:flex-row md:items-end"
       >
-        {statsCards.map((stat) => {
-          const Icon = stat.icon;
-          return (
-            <motion.div key={stat.label} variants={itemVariants}>
-              <Card hoverable className="flex flex-col gap-2">
-                <div className={`flex h-10 w-10 items-center justify-center rounded-lg ${stat.bg}`}>
-                  <Icon className={`h-5 w-5 ${stat.color}`} aria-hidden="true" />
-                </div>
-                <p className="text-charcoal font-mono text-2xl font-bold">{stat.value}</p>
-                <p className="text-charcoal-400 text-xs">{stat.label}</p>
-              </Card>
-            </motion.div>
-          );
-        })}
+        <div>
+          <p className="text-gold mb-2 text-[10px] font-bold uppercase tracking-[0.3em]">
+            Centre de Commandes
+          </p>
+          <h1 className="text-charcoal font-serif text-3xl font-bold leading-tight md:text-5xl">
+            Ravi de vous revoir,
+            <br />
+            <span className="text-navy italic">{firstName || 'Propriétaire'}</span>
+          </h1>
+        </div>
+        <div className="flex gap-3">
+          <Button
+            variant="outline"
+            className="border-charcoal-200 h-14 rounded-full px-8 text-xs font-bold uppercase tracking-widest"
+          >
+            GÉRER MON PROFIL
+          </Button>
+          <Button className="bg-navy shadow-navy/20 h-14 rounded-full px-8 text-xs font-bold uppercase tracking-widest shadow-lg">
+            NOUVELLE ANNONCE
+          </Button>
+        </div>
       </motion.div>
 
-      {/* Wallet / Escrow card — only shown when buyer has funded transactions */}
-      {escrow && (
-        <motion.div
-          className="from-navy to-navy/80 rounded-xl bg-gradient-to-r p-6 text-white"
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.3 }}
-        >
-          <p className="mb-1 text-sm text-white/70">Solde en escrow</p>
-          <p className="font-mono text-3xl font-bold">
-            {formatAmount(escrow.total, escrow.currency)}
-          </p>
-          <p className="mt-1 text-xs text-white/50">
-            {escrow.count} transaction{escrow.count > 1 ? 's' : ''} en attente de validation
-          </p>
-          <div className="mt-4 flex gap-2">
-            <Link
-              href={'/dashboard/transactions' as Route}
-              className="rounded-pill bg-white/20 px-4 py-1.5 text-sm font-medium transition-colors hover:bg-white/30"
+      {/* Stats Grid */}
+      <motion.div
+        className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4"
+        variants={itemVariants}
+      >
+        {[
+          { label: 'Annonces Actives', value: stats.annonces, icon: Eye, color: 'navy' },
+          { label: 'Biens en Favoris', value: stats.favoris, icon: Heart, color: 'gold' },
+          { label: 'Transactions', value: stats.transactions, icon: CreditCard, color: 'navy' },
+          {
+            label: 'Score de Confiance',
+            value: stats.reputation.toFixed(1),
+            icon: ShieldCheck,
+            color: 'gold',
+          },
+        ].map((stat, i) => (
+          <div
+            key={i}
+            className="border-charcoal-100 group rounded-[32px] border bg-white p-8 shadow-sm transition-all duration-500 hover:-translate-y-1 hover:shadow-xl"
+          >
+            <div
+              className={cn(
+                'mb-6 flex h-12 w-12 items-center justify-center rounded-2xl transition-transform group-hover:rotate-6',
+                stat.color === 'navy' ? 'bg-navy/5 text-navy' : 'bg-gold/10 text-gold',
+              )}
             >
-              Voir détails
+              <stat.icon className="h-6 w-6" />
+            </div>
+            <p className="text-charcoal mb-1 font-serif text-4xl font-bold">{stat.value}</p>
+            <p className="text-charcoal-400 text-[11px] font-bold uppercase tracking-widest">
+              {stat.label}
+            </p>
+          </div>
+        ))}
+      </motion.div>
+
+      <div className="grid grid-cols-1 gap-10 lg:grid-cols-3">
+        {/* Main Activity Feed (2/3) */}
+        <motion.div className="space-y-8 lg:col-span-2" variants={itemVariants}>
+          <div className="flex items-center justify-between">
+            <h2 className="text-charcoal font-serif text-2xl font-bold">Activités Récentes</h2>
+            <Link
+              href="/dashboard/transactions"
+              className="text-navy hover:text-gold text-[10px] font-bold uppercase tracking-widest transition-colors"
+            >
+              VOIR L'HISTORIQUE COMPLET
             </Link>
+          </div>
+
+          <div className="border-charcoal-100 overflow-hidden rounded-[40px] border bg-white shadow-sm">
+            {recentTxs.length > 0 ? (
+              <div className="divide-charcoal-50 divide-y">
+                {recentTxs.map((tx) => (
+                  <div
+                    key={tx.id}
+                    className="hover:bg-charcoal-50/50 flex flex-col items-start justify-between gap-6 p-8 transition-colors md:flex-row md:items-center"
+                  >
+                    <div className="flex items-center gap-6">
+                      <div className="bg-charcoal-50 text-navy flex h-16 w-16 items-center justify-center rounded-3xl shadow-inner">
+                        {tx.property ? (
+                          <Building2 className="h-7 w-7" />
+                        ) : (
+                          <CreditCard className="h-7 w-7" />
+                        )}
+                      </div>
+                      <div>
+                        <p className="text-charcoal mb-1 text-base font-bold leading-tight">
+                          {tx.property?.title || `Transaction ${tx.reference}`}
+                        </p>
+                        <div className="text-charcoal-400 flex items-center gap-4 text-[11px] font-bold uppercase tracking-wider">
+                          <span className="flex items-center gap-1.5">
+                            <Clock className="h-3.5 w-3.5" />{' '}
+                            {new Date(tx.createdAt).toLocaleDateString('fr-FR')}
+                          </span>
+                          <span className="flex items-center gap-1.5">
+                            <MapPin className="h-3.5 w-3.5" />{' '}
+                            {tx.property?.slug ? 'Immobilier' : 'Service'}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                    <div className="flex w-full flex-col items-end gap-3 md:w-auto">
+                      <p className="text-navy font-serif text-xl font-bold">
+                        {formatAmount(Number(tx.amount), tx.currency)}
+                      </p>
+                      <Badge
+                        variant={STATUS_VARIANTS[tx.status] ?? 'default'}
+                        className="px-4 py-1 text-[9px] font-bold uppercase tracking-widest"
+                      >
+                        {STATUS_LABELS[tx.status] ?? tx.status}
+                      </Badge>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="space-y-4 p-20 text-center">
+                <div className="bg-charcoal-50 text-charcoal-200 mx-auto flex h-20 w-20 items-center justify-center rounded-full">
+                  <CreditCard className="h-10 w-10" />
+                </div>
+                <p className="text-charcoal-400 font-medium">
+                  Aucune activité transactionnelle récente.
+                </p>
+              </div>
+            )}
           </div>
         </motion.div>
-      )}
 
-      <div className="grid gap-6 lg:grid-cols-2">
-        {/* Recent transactions */}
-        <Card>
-          <div className="mb-4 flex items-center justify-between">
-            <CardTitle>Transactions récentes</CardTitle>
-            <Link
-              href={'/dashboard/transactions' as Route}
-              className="text-navy text-xs hover:underline"
-            >
-              Voir tout
-            </Link>
-          </div>
-          {recentTxs.length > 0 ? (
-            <div className="space-y-3">
-              {recentTxs.map((tx) => (
-                <div
-                  key={tx.id}
-                  className="border-charcoal-50 flex items-center justify-between border-b py-2 last:border-0"
-                >
-                  <div>
-                    <p className="text-charcoal max-w-[180px] truncate text-sm font-medium">
-                      {tx.property?.title ?? `${tx.buyer.firstName} → ${tx.seller.firstName}`}
-                    </p>
-                    <p className="text-charcoal-400 font-mono text-xs">{tx.reference}</p>
-                  </div>
-                  <div className="flex flex-col items-end gap-1">
-                    <p className="text-charcoal font-mono text-sm font-semibold">
-                      {formatAmount(Number(tx.amount), tx.currency)}
-                    </p>
-                    <Badge variant={STATUS_VARIANTS[tx.status] ?? 'default'}>
-                      {STATUS_LABELS[tx.status] ?? tx.status}
-                    </Badge>
-                  </div>
-                </div>
-              ))}
+        {/* Sidebar Stats (1/3) */}
+        <motion.div className="space-y-8" variants={itemVariants}>
+          {/* Escrow Card */}
+          {escrow ? (
+            <div className="bg-navy shadow-navy/20 relative overflow-hidden rounded-[40px] p-10 text-white shadow-2xl">
+              <div className="bg-gold/10 absolute right-0 top-0 h-32 w-32 -translate-y-1/2 translate-x-1/2 rounded-full blur-3xl" />
+              <p className="text-gold mb-8 text-[10px] font-bold uppercase tracking-[0.3em]">
+                Sécurisé par Escrow
+              </p>
+              <p className="mb-2 font-serif text-5xl font-bold tracking-tight">
+                {formatAmount(escrow.total, escrow.currency).split(' ')[0]}
+                <span className="ml-2 font-sans text-xl font-medium opacity-40">
+                  {escrow.currency}
+                </span>
+              </p>
+              <p className="mb-8 text-xs font-medium leading-relaxed text-white/40">
+                Fonds sécurisés pour {escrow.count} transaction{escrow.count > 1 ? 's' : ''} en
+                cours.
+              </p>
+              <Button
+                variant="gold"
+                className="h-14 w-full rounded-2xl text-xs font-bold uppercase tracking-widest"
+              >
+                GÉRER MES FONDS
+              </Button>
             </div>
           ) : (
-            <p className="text-charcoal-400 py-6 text-center text-sm">Aucune transaction.</p>
+            <div className="border-charcoal-100 space-y-6 rounded-[40px] border bg-white p-10 text-center">
+              <div className="bg-gold/10 text-gold mx-auto flex h-16 w-16 items-center justify-center rounded-3xl">
+                <TrendingUp className="h-8 w-8" />
+              </div>
+              <h3 className="text-charcoal font-serif text-xl font-bold">
+                Optimisez vos rendements
+              </h3>
+              <p className="text-charcoal-400 text-xs leading-relaxed">
+                Commencez à investir ou louez vos biens pour voir vos statistiques évoluer ici.
+              </p>
+              <Button
+                variant="outline"
+                className="h-12 w-full rounded-2xl text-[10px] font-bold uppercase tracking-widest"
+              >
+                DÉCOUVRIR LES OPPORTUNITÉS
+              </Button>
+            </div>
           )}
-        </Card>
 
-        {/* Recent favorites */}
-        <Card>
-          <div className="mb-4 flex items-center justify-between">
-            <CardTitle>Favoris récents</CardTitle>
-            <Link
-              href={'/dashboard/favoris' as Route}
-              className="text-navy text-xs hover:underline"
-            >
-              Voir tout
-            </Link>
-          </div>
-          {recentFavs.length > 0 ? (
-            <div className="space-y-3">
-              {recentFavs.map((property) => (
+          {/* Quick Actions */}
+          <div className="space-y-4">
+            <h3 className="text-charcoal px-4 font-serif text-xl font-bold">Actions Rapides</h3>
+            <div className="grid grid-cols-2 gap-4">
+              {[
+                { label: 'Support', icon: MessageSquare, href: '/support' },
+                { label: 'Recherche', icon: Search, href: '/recherche' },
+              ].map((action, i) => (
                 <Link
-                  key={property.id}
-                  href={`/proprietes/${property.slug}` as Route}
-                  className="block"
+                  key={i}
+                  href={action.href as Route}
+                  className="border-charcoal-100 hover:border-navy group flex flex-col items-center gap-3 rounded-[24px] border bg-white p-6 transition-all hover:shadow-lg"
                 >
-                  <PropertyCard property={property} compact />
+                  <action.icon className="text-charcoal-400 group-hover:text-navy h-6 w-6 transition-colors" />
+                  <span className="text-charcoal text-[10px] font-bold uppercase tracking-widest">
+                    {action.label}
+                  </span>
                 </Link>
               ))}
             </div>
-          ) : (
-            <div className="flex flex-col items-center gap-2 py-6 text-center">
-              <p className="text-charcoal-400 text-sm">Aucun favori pour l&apos;instant.</p>
-              <Link href={'/recherche' as Route} className="text-navy text-xs hover:underline">
-                Explorer les propriétés →
-              </Link>
-            </div>
-          )}
-        </Card>
+          </div>
+        </motion.div>
       </div>
-    </div>
+
+      {/* Favorites Preview */}
+      {recentFavs.length > 0 && (
+        <motion.div variants={itemVariants} className="space-y-8">
+          <div className="flex items-center justify-between">
+            <h2 className="text-charcoal font-serif text-2xl font-bold">Coup de Cœur</h2>
+            <Link
+              href="/dashboard/favoris"
+              className="text-navy text-[10px] font-bold uppercase tracking-widest"
+            >
+              VOIR TOUT
+            </Link>
+          </div>
+          <div className="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-3">
+            {recentFavs.map((fav) => (
+              <div key={fav.id} className="group relative">
+                <PropertyCard property={fav} />
+                <div className="absolute right-4 top-4 opacity-0 transition-opacity group-hover:opacity-100">
+                  <div className="flex h-10 w-10 cursor-pointer items-center justify-center rounded-xl bg-white/90 shadow-lg backdrop-blur-md">
+                    <ArrowUpRight className="text-navy h-5 w-5" />
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </motion.div>
+      )}
+    </motion.div>
+  );
+}
+
+// Sub-component for Building2 which is not imported
+function Building2(props: any) {
+  return (
+    <svg
+      {...props}
+      xmlns="http://www.w3.org/2000/svg"
+      width="24"
+      height="24"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path d="M6 22V4a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v18" />
+      <path d="M6 12H4a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h2" />
+      <path d="M18 9h2a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2h-2" />
+      <path d="M10 6h4" />
+      <path d="M10 10h4" />
+      <path d="M10 14h4" />
+      <path d="M10 18h4" />
+    </svg>
   );
 }

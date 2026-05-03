@@ -20,9 +20,12 @@ import {
   Menu,
   X,
   ChevronRight,
+  ShieldCheck,
+  Wallet,
 } from 'lucide-react';
-import { cn } from '@afribayit/ui';
+import { cn } from '@afribayit/ui/src/lib/cn';
 import { useNotifications } from '@/hooks/useNotifications';
+import { motion, AnimatePresence } from 'framer-motion';
 
 const NAV_ITEMS: Array<{ label: string; href: Route; icon: React.ElementType }> = [
   { label: "Vue d'ensemble", href: '/dashboard', icon: LayoutDashboard },
@@ -33,7 +36,6 @@ const NAV_ITEMS: Array<{ label: string; href: Route; icon: React.ElementType }> 
   { label: 'Mes formations', href: '/dashboard/formations', icon: GraduationCap },
   { label: 'Notifications', href: '/dashboard/notifications', icon: Bell },
   { label: 'Profil & KYC', href: '/dashboard/profil', icon: User },
-  { label: 'Paramètres', href: '/dashboard/parametres', icon: Settings },
 ];
 
 interface DashboardLayoutProps {
@@ -59,130 +61,174 @@ export function DashboardLayout({ children }: DashboardLayoutProps): React.React
   };
 
   return (
-    <div className="bg-charcoal-50 flex min-h-screen">
+    <div className="text-charcoal flex min-h-screen bg-[#F8F9FA]">
       {/* Sidebar */}
       <aside
         className={cn(
-          'border-charcoal-100 fixed inset-y-0 left-0 z-50 w-64 border-r bg-white',
-          'flex flex-col transition-transform duration-300 ease-[cubic-bezier(0.16,1,0.3,1)]',
+          'bg-navy fixed inset-y-0 left-0 z-50 w-72 text-white shadow-2xl',
+          'flex flex-col transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)]',
           'lg:relative lg:translate-x-0',
           isSidebarOpen ? 'translate-x-0' : '-translate-x-full',
         )}
-        aria-label="Navigation dashboard"
       >
-        {/* Logo */}
-        <div className="border-charcoal-100 flex h-16 items-center justify-between border-b px-5">
-          <Link href="/" className="font-serif text-2xl font-bold">
-            <span className="text-navy">Afri</span>
-            <span className="text-gold">Bayit</span>
+        {/* Logo Section */}
+        <div className="flex h-24 items-center border-b border-white/5 px-8">
+          <Link href="/" className="group flex items-center gap-1.5">
+            <div className="bg-gold/20 border-gold/30 flex h-8 w-8 items-center justify-center rounded-lg border">
+              <div className="bg-gold h-4 w-4 rounded-sm" />
+            </div>
+            <span className="font-serif text-2xl font-bold tracking-tight">
+              Afri<span className="text-gold">Bayit</span>
+            </span>
           </Link>
           <button
             onClick={() => setIsSidebarOpen(false)}
-            className="text-charcoal-400 hover:text-charcoal p-1 lg:hidden"
-            aria-label="Fermer le menu"
+            className="ml-auto text-white/40 hover:text-white lg:hidden"
           >
-            <X className="h-5 w-5" aria-hidden="true" />
+            <X className="h-6 w-6" />
           </button>
         </div>
 
-        {/* User mini */}
-        <div className="border-charcoal-100 border-b px-5 py-4">
-          <div className="flex items-center gap-3">
-            <div className="bg-navy flex h-10 w-10 items-center justify-center rounded-full text-sm font-semibold text-white">
-              {initials}
-            </div>
-            <div className="min-w-0 flex-1">
-              <p className="text-charcoal truncate text-sm font-medium">
-                {firstName || email || 'Mon compte'}
-              </p>
-              {email && firstName && <p className="text-charcoal-400 truncate text-xs">{email}</p>}
+        {/* User Context */}
+        <div className="px-6 py-8">
+          <div className="group relative overflow-hidden rounded-3xl border border-white/10 bg-white/5 p-5">
+            <div className="bg-gold/10 absolute right-0 top-0 h-16 w-16 -translate-x-1/2 -translate-y-1/2 rounded-full opacity-0 blur-xl transition-opacity group-hover:opacity-100" />
+            <div className="relative z-10 flex items-center gap-4">
+              <div className="from-gold/80 to-gold text-navy shadow-gold/20 flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br text-lg font-bold shadow-lg">
+                {initials}
+              </div>
+              <div className="min-w-0">
+                <p className="mb-1 truncate text-sm font-bold leading-none">
+                  {firstName || 'Propriétaire'}
+                </p>
+                <div className="flex items-center gap-1.5">
+                  <ShieldCheck className="text-gold h-3 w-3" />
+                  <span className="text-[10px] font-bold uppercase tracking-widest text-white/40">
+                    Niveau 2 vérifié
+                  </span>
+                </div>
+              </div>
             </div>
           </div>
         </div>
 
         {/* Navigation */}
-        <nav className="flex-1 space-y-0.5 overflow-y-auto px-3 py-4">
-          {NAV_ITEMS.map(({ label, href, icon: Icon }) => {
-            const isActive = pathname === href;
+        <nav className="no-scrollbar flex-1 space-y-1.5 overflow-y-auto px-4 pb-8">
+          <p className="px-6 pb-2 text-[10px] font-bold uppercase tracking-[0.2em] text-white/30">
+            Menu Principal
+          </p>
+          {NAV_ITEMS.map((item) => {
+            const isActive = pathname === item.href;
             return (
               <Link
-                key={href}
-                href={href}
-                aria-current={isActive ? 'page' : undefined}
+                key={item.href}
+                href={item.href}
                 className={cn(
-                  'flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium',
-                  'transition-all duration-150',
+                  'group relative flex items-center gap-4 overflow-hidden rounded-2xl px-6 py-4 text-sm font-medium transition-all duration-300',
                   isActive
-                    ? 'bg-navy/10 text-navy'
-                    : 'text-charcoal-400 hover:bg-charcoal-50 hover:text-charcoal',
+                    ? 'bg-gold text-navy shadow-gold/10 shadow-lg'
+                    : 'text-white/50 hover:bg-white/5 hover:text-white',
                 )}
               >
-                <Icon className="h-4 w-4 flex-shrink-0" aria-hidden="true" />
-                <span className="flex-1">{label}</span>
-                {href === '/dashboard/notifications' && unreadCount > 0 && (
-                  <span className="bg-danger flex h-5 w-5 items-center justify-center rounded-full text-[10px] font-bold text-white">
-                    {unreadCount > 99 ? '99+' : unreadCount}
+                <item.icon
+                  className={cn(
+                    'h-5 w-5',
+                    isActive ? 'text-navy' : 'transition-transform group-hover:scale-110',
+                  )}
+                />
+                <span className="flex-1 font-bold tracking-tight">{item.label}</span>
+                {item.href === '/dashboard/notifications' && unreadCount > 0 && (
+                  <span className="bg-gold-600 flex h-5 min-w-[20px] items-center justify-center rounded-full px-1.5 text-[10px] font-bold text-white">
+                    {unreadCount}
                   </span>
                 )}
-                {isActive && <ChevronRight className="text-navy h-3 w-3" aria-hidden="true" />}
+                {isActive && (
+                  <motion.div
+                    layoutId="activeNav"
+                    className="bg-navy absolute left-0 h-6 w-1.5 rounded-r-full"
+                  />
+                )}
               </Link>
             );
           })}
         </nav>
 
-        {/* Logout */}
-        <div className="border-charcoal-100 border-t p-3">
+        {/* Footer actions */}
+        <div className="space-y-4 border-t border-white/5 p-6">
           <button
-            onClick={() => void handleSignOut()}
-            className="text-charcoal-400 hover:bg-danger/5 hover:text-danger flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors"
-            aria-label="Se déconnecter"
+            onClick={() => router.push('/dashboard/parametres' as Route)}
+            className="flex w-full items-center gap-4 px-6 py-3 text-sm font-bold text-white/40 transition-colors hover:text-white"
           >
-            <LogOut className="h-4 w-4" aria-hidden="true" />
-            Se déconnecter
+            <Settings className="h-5 w-5" />
+            Paramètres
+          </button>
+          <button
+            onClick={handleSignOut}
+            className="hover:text-gold flex w-full items-center gap-4 px-6 py-3 text-sm font-bold text-white/30 transition-colors"
+          >
+            <LogOut className="h-5 w-5" />
+            Déconnexion
           </button>
         </div>
       </aside>
 
-      {/* Overlay mobile */}
-      {isSidebarOpen && (
-        <div
-          className="bg-charcoal/50 fixed inset-0 z-40 lg:hidden"
-          onClick={() => setIsSidebarOpen(false)}
-          aria-hidden="true"
-        />
-      )}
-
-      {/* Main */}
+      {/* Main Content */}
       <div className="flex min-w-0 flex-1 flex-col">
-        {/* Top bar */}
-        <header className="border-charcoal-100 sticky top-0 z-30 flex h-16 items-center gap-4 border-b bg-white px-4 sm:px-6">
+        {/* Top Header */}
+        <header className="border-charcoal-100 sticky top-0 z-40 flex h-24 items-center justify-between border-b bg-white/50 px-8 backdrop-blur-xl">
           <button
             onClick={() => setIsSidebarOpen(true)}
-            className="text-charcoal-400 hover:text-charcoal p-2 lg:hidden"
-            aria-label="Ouvrir le menu"
-            aria-expanded={isSidebarOpen}
+            className="bg-charcoal-50 flex h-10 w-10 items-center justify-center rounded-xl lg:hidden"
           >
-            <Menu className="h-5 w-5" aria-hidden="true" />
+            <Menu className="text-charcoal h-6 w-6" />
           </button>
-          <div className="flex-1" />
-          <Link
-            href="/dashboard/notifications"
-            className="text-charcoal-400 hover:text-charcoal hover:bg-charcoal-50 relative rounded-lg p-2"
-            aria-label={`Notifications${unreadCount > 0 ? ` (${unreadCount} non lues)` : ''}`}
-          >
-            <Bell className="h-5 w-5" aria-hidden="true" />
-            {unreadCount > 0 && (
-              <span
-                className="bg-danger absolute right-1.5 top-1.5 h-2 w-2 rounded-full"
-                aria-hidden="true"
-              />
-            )}
-          </Link>
+
+          <div className="bg-charcoal-50 border-charcoal-100 hidden h-12 w-96 items-center gap-3 rounded-2xl border px-4 md:flex">
+            <div className="h-2 w-2 animate-pulse rounded-full bg-emerald-500" />
+            <span className="text-charcoal-400 text-[11px] font-bold uppercase tracking-widest">
+              Marché Immobilier Ouvert
+            </span>
+          </div>
+
+          <div className="flex items-center gap-6">
+            <div className="mr-4 hidden flex-col items-end sm:flex">
+              <p className="text-charcoal-400 mb-1 text-[10px] font-bold uppercase tracking-widest">
+                Portefeuille
+              </p>
+              <div className="flex items-center gap-2">
+                <Wallet className="text-navy h-4 w-4" />
+                <span className="font-serif text-lg font-bold">
+                  1 250 000{' '}
+                  <span className="text-charcoal-400 font-sans text-xs font-medium">XOF</span>
+                </span>
+              </div>
+            </div>
+
+            <Link
+              href="/dashboard/notifications"
+              className="border-charcoal-100 text-charcoal-400 hover:text-navy relative flex h-12 w-12 items-center justify-center rounded-2xl border bg-white transition-all hover:shadow-lg"
+            >
+              <Bell className="h-5 w-5" />
+              {unreadCount > 0 && (
+                <span className="bg-gold absolute right-3 top-3 h-2.5 w-2.5 rounded-full border-2 border-white" />
+              )}
+            </Link>
+          </div>
         </header>
 
-        {/* Page content */}
-        <main id="main-content" className="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8">
-          {children}
+        {/* Viewport */}
+        <main className="no-scrollbar flex-1 overflow-y-auto p-8 md:p-12">
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={pathname}
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
+              transition={{ duration: 0.4 }}
+            >
+              {children}
+            </motion.div>
+          </AnimatePresence>
         </main>
       </div>
     </div>

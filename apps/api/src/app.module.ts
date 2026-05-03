@@ -19,6 +19,9 @@ import { DatabaseModule } from './database/database.module';
 import { QueueModule } from './modules/queue/queue.module';
 import { GatewaysModule } from './gateways/gateways.module';
 import { SecurityModule } from './modules/security/security.module';
+import { NotaryModule } from './modules/notary/notary.module';
+import { ComplianceModule } from './modules/compliance/compliance.module';
+import { AiModule } from './modules/ai/ai.module';
 
 @Module({
   imports: [
@@ -80,6 +83,9 @@ import { SecurityModule } from './modules/security/security.module';
     CoursesModule,
     CommunityModule,
     MessagesModule,
+    NotaryModule,
+    ComplianceModule,
+    AiModule,
   ],
   providers: [
     // Apply ThrottlerGuard globally — every route is rate-limited by default

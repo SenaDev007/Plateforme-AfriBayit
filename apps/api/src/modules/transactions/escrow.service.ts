@@ -5,7 +5,11 @@ import { Decimal } from '@prisma/client/runtime/library';
 /** Valid state machine transitions for escrow */
 const VALID_TRANSITIONS: Record<TransactionStatus, TransactionStatus[]> = {
   INITIATED: ['FUNDED', 'CANCELLED'],
-  FUNDED: ['VALIDATED', 'DISPUTED', 'CANCELLED'],
+  FUNDED: ['NOTARY_ASSIGNED', 'VALIDATED', 'DISPUTED', 'CANCELLED'],
+  NOTARY_ASSIGNED: ['NOTARY_IN_PROGRESS', 'DISPUTED', 'CANCELLED'],
+  NOTARY_IN_PROGRESS: ['DEED_SIGNED', 'DISPUTED', 'CANCELLED'],
+  DEED_SIGNED: ['ANDF_REGISTERED', 'DISPUTED', 'CANCELLED'],
+  ANDF_REGISTERED: ['VALIDATED', 'DISPUTED'],
   VALIDATED: ['RELEASED', 'DISPUTED'],
   RELEASED: ['COMPLETED'],
   COMPLETED: [],

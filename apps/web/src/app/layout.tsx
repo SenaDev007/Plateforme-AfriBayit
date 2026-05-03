@@ -38,6 +38,9 @@ export const viewport: Viewport = {
   initialScale: 1,
 };
 
+import { RebeccaChat } from '@/components/ai/RebeccaChat';
+import { MobileTabBar } from '@/components/navigation/MobileTabBar';
+
 export default async function RootLayout({
   children,
 }: Readonly<{
@@ -58,13 +61,15 @@ export default async function RootLayout({
               style: {
                 background: '#2C2E2F',
                 color: '#fff',
-                borderRadius: '8px',
+                borderRadius: '16px',
                 fontSize: '14px',
               },
               success: { iconTheme: { primary: '#00A651', secondary: '#fff' } },
               error: { iconTheme: { primary: '#D93025', secondary: '#fff' } },
             }}
           />
+          <RebeccaChat />
+          <MobileTabBar />
         </NextIntlClientProvider>
       </body>
     </html>

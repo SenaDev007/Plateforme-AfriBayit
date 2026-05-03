@@ -18,6 +18,7 @@ import { FedaPayService } from './payments/fedapay.service';
 import { StripeService } from './payments/stripe.service';
 import { AuthService } from '../auth/auth.service';
 import { PayoutService } from './payout.service';
+import { NotaryService } from '../notary/notary.service';
 
 const LARGE_AMOUNT_THRESHOLD_XOF = 100_000;
 
@@ -44,6 +45,7 @@ export class TransactionsService {
     private readonly stripeService: StripeService,
     private readonly authService: AuthService,
     private readonly payoutService: PayoutService,
+    private readonly notaryService: NotaryService,
   ) {}
 
   /** Initiate a new transaction and create escrow account */
@@ -262,6 +264,16 @@ export class TransactionsService {
         'Stripe payment_intent.succeeded',
       );
       this.logger.log(`Escrow funded via Stripe for transaction ${transaction.reference}`);
+
+      // Auto-assign notary for property purchases
+      if (transaction.type === 'PROPERTY_PURCHASE' && transaction.propertyId) {
+        const prop = await this.prisma.property.findUnique({
+          where: { id: transaction.propertyId },
+        });
+        if (prop) {
+          await this.notaryService.assignNotary(transaction.id, prop.country, prop.city);
+        }
+      }
     }
 
     if (event.type === 'payment_intent.payment_failed') {
@@ -301,6 +313,16 @@ export class TransactionsService {
         'SYSTEM',
         'FedaPay payment confirmed',
       );
+
+      // Auto-assign notary for property purchases
+      if (transaction.type === 'PROPERTY_PURCHASE' && transaction.propertyId) {
+        const prop = await this.prisma.property.findUnique({
+          where: { id: transaction.propertyId },
+        });
+        if (prop) {
+          await this.notaryService.assignNotary(transaction.id, prop.country, prop.city);
+        }
+      }
     } else if (status === 'CANCELLED') {
       await this.escrowService.transition(
         transaction.id,
