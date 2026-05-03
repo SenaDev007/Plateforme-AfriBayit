@@ -22,15 +22,16 @@ export function FinalCTA(): React.ReactElement {
               >
                 <div className="bg-gold/20 text-gold mb-6 inline-flex items-center gap-2 rounded-full px-4 py-2 text-xs font-bold uppercase tracking-widest">
                   <Zap className="fill-gold h-3 w-3" />
-                  Prêt à commencer ?
+                  L'HÉSITATION COÛTE CHER.
                 </div>
-                <h2 className="font-serif text-4xl font-bold leading-[1.1] text-white md:text-6xl">
-                  Sécurisez votre <br />
-                  <span className="text-gradient-gold italic">patrimoine</span> aujourd'hui
+                <h2 className="font-sans text-5xl font-black leading-[1.1] tracking-tighter text-white md:text-7xl">
+                  Passez à l'action. <br />
+                  <span className="text-gold font-serif font-normal italic">Blindez</span> votre
+                  avenir.
                 </h2>
                 <p className="mt-6 max-w-lg text-lg font-light leading-relaxed text-white/70 md:text-xl">
-                  Rejoignez des milliers d'utilisateurs qui font confiance à AfriBayit pour leurs
-                  transactions immobilières transfrontalières.
+                  L'immobilier africain n'attend pas. Les meilleures parcelles sont sécurisées en ce
+                  moment même par ceux qui ont le système. Ne restez pas sur la touche.
                 </p>
               </motion.div>
 
@@ -40,14 +41,14 @@ export function FinalCTA(): React.ReactElement {
                   whileTap={{ scale: 0.95 }}
                   className="bg-gold text-navy hover:bg-gold-400 shadow-gold/20 group flex items-center gap-3 rounded-full px-10 py-5 text-lg font-bold shadow-xl transition-all"
                 >
-                  Démarrer mon projet
+                  J'intègre le système
                   <ArrowRight className="h-5 w-5 transition-transform group-hover:translate-x-2" />
                 </motion.button>
                 <motion.button
                   whileHover={{ scale: 1.05 }}
                   className="rounded-full border border-white/20 bg-white/5 px-10 py-5 text-lg font-bold text-white backdrop-blur-md transition-all hover:bg-white/10"
                 >
-                  Voir les démos
+                  Je me forme d'abord
                 </motion.button>
               </div>
 

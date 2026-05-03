@@ -13,9 +13,9 @@ import {
 
 const modules = [
   {
-    title: 'SecureTrade Escrow',
+    title: 'Séquestre Inviolable',
     description:
-      "Protégez vos fonds. Le paiement n'est libéré qu'après vérification physique du bien par nos experts.",
+      "Ne versez plus jamais d'argent dans le vide. Vos fonds sont bloqués et ultra-sécurisés jusqu'à la signature finale chez le Notaire. Tolérance zéro pour l'arnaque.",
     icon: ShieldCheck,
     color: 'bg-navy',
     textColor: 'text-white',
@@ -24,9 +24,9 @@ const modules = [
       'https://images.unsplash.com/photo-1560518883-ce09059eeffa?q=80&w=1000&auto=format&fit=crop',
   },
   {
-    title: 'GeoTrust Drone',
+    title: 'Radar GeoTrust 3D',
     description:
-      'Vérification topographique et cartographie 3D par drone pour chaque terrain listé.',
+      'Fini les terrains litigeux ou imaginaires. Nos drones inspectent et certifient chaque mètre carré. Vous achetez ce que vous voyez, avec une précision chirurgicale.',
     icon: Plane,
     color: 'bg-gold/10',
     textColor: 'text-charcoal',
@@ -34,7 +34,8 @@ const modules = [
   },
   {
     title: 'AfriBayit Academy',
-    description: "Formez-vous à l'investissement immobilier en Afrique avec nos experts certifiés.",
+    description:
+      "Ne laissez plus l'ignorance vous coûter des millions. Apprenez les stratégies des top investisseurs et bâtissez un empire intergénérationnel blindé.",
     icon: GraduationCap,
     color: 'bg-charcoal-50',
     textColor: 'text-charcoal',
@@ -43,17 +44,18 @@ const modules = [
       'https://images.unsplash.com/photo-1523240795612-9a054b0db644?q=80&w=1000&auto=format&fit=crop',
   },
   {
-    title: 'Ambassadeurs',
-    description: 'Devenez partenaire et gagnez des commissions sur chaque transaction parrainée.',
+    title: 'Réseau Ambassadeurs',
+    description:
+      "Transformez votre réseau en or massif. Recommandez l'excellence et encaissez des commissions premiums sur chaque transaction.",
     icon: Share2,
     color: 'bg-gold',
     textColor: 'text-navy',
     span: 'md:col-span-1 md:row-span-1',
   },
   {
-    title: 'Blockchain Ledger',
+    title: 'Ancrage Blockchain',
     description:
-      'Chaque titre de propriété est ancré sur la blockchain pour une traçabilité totale.',
+      'Votre titre de propriété est gravé dans le marbre numérique. Inaltérable. Infalsifiable. Dormez enfin sur vos deux oreilles.',
     icon: Database,
     color: 'bg-charcoal-900',
     textColor: 'text-white',
@@ -67,11 +69,11 @@ export function ModulesSection(): React.ReactElement {
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="mb-20 text-center">
           <p className="text-gold mb-4 text-[10px] font-bold uppercase tracking-[0.4em]">
-            L'Écosystème AfriBayit
+            Le Bouclier Anti-Arnaques Définitif
           </p>
-          <h2 className="text-charcoal font-serif text-4xl font-bold tracking-tight md:text-6xl">
-            Une Technologie de <br />
-            <span className="font-normal italic">Confiance Absolue</span>
+          <h2 className="text-charcoal font-sans text-4xl font-black tracking-tighter md:text-6xl lg:text-7xl">
+            Investissez en Afrique <br />
+            <span className="font-serif font-normal italic">les Yeux Fermés.</span>
           </h2>
         </div>
 

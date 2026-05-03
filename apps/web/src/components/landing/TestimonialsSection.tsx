@@ -7,24 +7,24 @@ import { Star, Quote } from 'lucide-react';
 const TESTIMONIALS = [
   {
     name: 'Aminata Koné',
-    role: 'Acheteuse · Abidjan, CI',
+    role: 'Investisseuse · Abidjan, CI',
     avatar: 'https://images.unsplash.com/photo-1531123897727-8f129e16fd3c?q=80&w=200',
     rating: 5,
-    text: "J'ai acquis ma résidence principale à Cocody via AfriBayit. La sécurisation des fonds par escrow et la vérification des titres m'ont apporté une sérénité que je n'avais trouvée nulle part ailleurs en Afrique.",
+    text: "Avant AfriBayit, j'avais peur d'investir au pays à cause des litiges. Aujourd'hui, je suis multi-propriétaire à Cocody, titres fonciers en main. Leur séquestre offre une garantie de 100%. Tolérance zéro pour l'improvisation.",
   },
   {
     name: 'Dr. Samuel Mensah',
-    role: 'Investisseur Diaspora · Paris / Accra',
+    role: 'Diaspora · Paris / Accra',
     avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?q=80&w=200',
     rating: 5,
-    text: 'La plateforme est intuitive et les services juridiques intégrés sont un vrai plus. Je gère mon portfolio immobilier au Bénin et au Burkina Faso depuis la France sans aucune difficulté.',
+    text: "Gérer mon patrimoine depuis l'Europe était un cauchemar. Avec AfriBayit, je pilote plus d'un million d'euros d'actifs depuis mon smartphone. C'est le standard institutionnel, enfin disponible pour nous.",
   },
   {
     name: 'Fatouma Touré',
-    role: 'Hôtelière · Cotonou, Bénin',
+    role: 'Opératrice Hospitality · Cotonou',
     avatar: 'https://images.unsplash.com/photo-1523824921871-d6f1a15151f1?q=80&w=200',
     rating: 5,
-    text: "Depuis que j'utilise le module Hospitality pour ma résidence, mon taux d'occupation a grimpé de 40%. La gestion des paiements Mobile Money simplifie tout pour mes clients locaux.",
+    text: "En 3 mois sur le module Hospitality, j'ai explosé ma rentabilité. Mon taux d'occupation est à 92%, je reçois mes fonds directement sur Mobile Money. C'est simple : ça tourne, et ça encaisse.",
   },
 ];
 
@@ -60,14 +60,14 @@ export function TestimonialsSection(): React.ReactElement {
             transition={{ duration: 0.6 }}
           >
             <p className="text-gold mb-4 text-sm font-bold uppercase tracking-[0.2em]">
-              Social Proof
+              Résultats Prouvés
             </p>
             <h2
               id="testimonials-title"
-              className="text-charcoal font-serif text-4xl font-bold sm:text-5xl"
+              className="text-charcoal font-sans text-4xl font-black tracking-tighter sm:text-6xl lg:text-7xl"
             >
-              Ils bâtissent leur futur <br />
-              avec <span className="text-navy italic">AfriBayit</span>
+              Ils ont arrêté de rêver. <br />
+              <span className="text-navy font-serif font-normal italic">Ils encaissent.</span>
             </h2>
           </motion.div>
         </div>

@@ -12,10 +12,10 @@ interface Stat {
 }
 
 const STATS: Stat[] = [
-  { value: 12500, suffix: '+', label: 'Utilisateurs actifs' },
-  { value: 3200, suffix: '+', label: 'Propriétés listées' },
-  { value: 850, suffix: 'M', label: 'FCFA en transactions', prefix: '' },
-  { value: 4, suffix: '', label: 'Pays couverts' },
+  { value: 12500, suffix: '+', label: 'Investisseurs Sereins' },
+  { value: 3200, suffix: '+', label: 'Actifs Certifiés' },
+  { value: 850, suffix: 'M', label: 'FCFA Sécurisés', prefix: '' },
+  { value: 4, suffix: '', label: 'Pays Maîtrisés' },
 ];
 
 function AnimatedNumber({
@@ -73,7 +73,7 @@ export function StatsBar(): React.ReactElement {
               viewport={{ once: true }}
               transition={{ delay: i * 0.1, duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
             >
-              <div className="font-serif text-5xl font-bold text-white sm:text-6xl">
+              <div className="font-sans text-5xl font-black tracking-tighter text-white sm:text-6xl md:text-7xl">
                 <AnimatedNumber
                   target={stat.value}
                   suffix={stat.suffix}

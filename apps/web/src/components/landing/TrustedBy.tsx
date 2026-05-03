@@ -8,8 +8,8 @@ export function TrustedBy(): React.ReactElement {
   return (
     <section className="border-charcoal-50 border-b bg-white py-12">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <p className="text-charcoal-400 mb-10 text-center text-xs font-semibold uppercase tracking-[0.2em]">
-          Ils nous font confiance pour la sécurisation de leurs flux
+        <p className="text-charcoal-400 mb-10 text-center text-xs font-bold uppercase tracking-[0.2em]">
+          Adoubé par les institutions financières les plus strictes d'Afrique
         </p>
         <div className="flex flex-wrap items-center justify-center gap-8 opacity-30 grayscale transition-all duration-700 hover:opacity-100 hover:grayscale-0 md:gap-16">
           {PARTNERS.map((name) => (

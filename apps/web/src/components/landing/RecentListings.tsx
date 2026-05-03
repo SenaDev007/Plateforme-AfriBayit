@@ -158,13 +158,13 @@ export function RecentListings(): React.ReactElement | null {
             transition={{ duration: 0.8 }}
           >
             <p className="text-gold mb-3 text-sm font-bold uppercase tracking-[0.2em]">
-              Sélection Exclusive
+              L'Élite du Foncier
             </p>
             <h2
               id="recent-listings-title"
-              className="text-charcoal font-serif text-4xl font-bold leading-tight sm:text-5xl"
+              className="text-charcoal font-sans text-4xl font-black leading-tight tracking-tighter sm:text-5xl"
             >
-              Propriétés <span className="text-navy italic">d'exception</span>
+              Opportunités <span className="text-navy font-serif italic">Rares & Sécurisées</span>
             </h2>
           </motion.div>
 
