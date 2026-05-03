@@ -127,7 +127,7 @@ export default function DevDashboard() {
                 <div className="grid grid-cols-2 gap-3">
                   <Button
                     variant="outline"
-                    onClick={() => toast.info('Créez une transaction manuellement pour tester')}
+                    onClick={() => toast('Créez une transaction manuellement pour tester')}
                     className="h-10 text-[10px]"
                   >
                     SIMULER PAIEMENT
