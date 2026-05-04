@@ -136,9 +136,9 @@ export function RegisterStepper(): React.ReactElement {
         password: formData.password!,
         firstName: formData.firstName!,
         lastName: formData.lastName!,
-        phone: formData.phone,
-        role: formData.role,
-        country: formData.country,
+        ...(formData.phone ? { phone: formData.phone } : {}),
+        ...(formData.role ? { role: formData.role } : {}),
+        ...(formData.country ? { country: formData.country } : {}),
       };
 
       await api.auth.register(finalData);
