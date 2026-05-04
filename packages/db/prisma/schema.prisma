@@ -29,6 +29,14 @@ enum UserRole {
   SURVEYOR
   AGENT
   GUESTHOUSE_OWNER
+  EXPERT
+  PROMOTER
+}
+
+enum CourseLevel {
+  BEGINNER
+  INTERMEDIATE
+  ADVANCED
 }
 
 enum KycLevel {
@@ -249,6 +257,27 @@ model User {
   referrals           User[]    @relation("ReferralTree")
   commissions         Commission[]
   lessonProgress      LessonProgress[]
+
+  // Social & Community (Section 5.7)
+  followers           Follow[]        @relation("UserFollowed")
+  following           Follow[]        @relation("UserFollowing")
+  connectionsSent     Connection[]    @relation("ConnectionSender")
+  connectionsReceived  Connection[]    @relation("ConnectionReceiver")
+  skillEndorsementsGiven SkillEndorsement[] @relation("EndorsementAuthor")
+  skillEndorsementsReceived SkillEndorsement[] @relation("EndorsementTarget")
+  
+  // Academy & Expert (Section 5.6)
+  coursesAuthored     Course[]        @relation("CourseAuthor")
+  certificatesEarned  Certificate[]   @relation("CertificateUser")
+  
+  // Analytics (Section 5.9)
+  profileViews        ProfileView[]   @relation("ViewedUser")
+  profileViewsMade    ProfileView[]   @relation("ViewerUser")
+
+  // Premium (Section 5.5b)
+  premiumTier         String          @default("STARTER") // STARTER, PRO_ESSENTIAL, PRO_ADVANCED, ELITE, ENTERPRISE
+  premiumExpiresAt    DateTime?
+  inMailCredits       Int             @default(0)
 
   @@index([email])
   @@index([phone])
@@ -612,6 +641,143 @@ model HotelRoom {
   @@map("hotel_rooms")
 }
 
+// ─── ACADEMY (Section 5.6) ────────────────────────────────────────────────────
+
+model Course {
+  id            String    @id @default(cuid())
+  authorId      String
+  title         String
+  slug          String    @unique
+  description   String    @db.Text
+  category      String
+  price         Decimal   @db.Decimal(12, 2)
+  currency      Currency  @default(XOF)
+  thumbnail     String?
+  level         CourseLevel @default(BEGINNER)
+  status        String    @default("DRAFT") // DRAFT, UNDER_REVIEW, PUBLISHED
+  rating        Float     @default(0)
+  reviewCount   Int       @default(0)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  author        User            @relation("CourseAuthor", fields: [authorId], references: [id])
+  modules       CourseModule[]
+  enrollments   Enrollment[]
+  certificates  Certificate[]
+
+  @@map("courses")
+}
+
+model CourseModule {
+  id          String   @id @default(cuid())
+  courseId    String
+  title       String
+  order       Int
+  lessons     Lesson[]
+
+  course      Course   @relation(fields: [courseId], references: [id], onDelete: Cascade)
+
+  @@map("course_modules")
+}
+
+model Lesson {
+  id          String   @id @default(cuid())
+  moduleId    String
+  title       String
+  content     String?  @db.Text
+  videoUrl    String?
+  duration    Int?     // minutes
+  order       Int
+
+  module      CourseModule @relation(fields: [moduleId], references: [id], onDelete: Cascade)
+  progress    LessonProgress[]
+
+  @@map("lessons")
+}
+
+model Enrollment {
+  id          String   @id @default(cuid())
+  userId      String
+  courseId    String
+  progress    Float    @default(0)
+  completed   Boolean  @default(false)
+  enrolledAt  DateTime @default(now())
+
+  user        User     @relation(fields: [userId], references: [id])
+  course      Course   @relation(fields: [courseId], references: [id])
+
+  @@unique([userId, courseId])
+  @@map("enrollments")
+}
+
+model Certificate {
+  id            String   @id @default(cuid())
+  userId        String
+  courseId      String
+  certificateNo String   @unique // Unique ID for QR verification
+  issuedAt      DateTime @default(now())
+  fileUrl       String?
+
+  user          User     @relation("CertificateUser", fields: [userId], references: [id])
+  course        Course   @relation(fields: [courseId], references: [id])
+
+  @@map("certificates")
+}
+
+// ─── SOCIAL & COMMUNITY (Section 5.7) ──────────────────────────────────────────
+
+model Follow {
+  id          String   @id @default(cuid())
+  followerId  String
+  followedId  String
+  createdAt   DateTime @default(now())
+
+  follower    User     @relation("UserFollowing", fields: [followerId], references: [id])
+  followed    User     @relation("UserFollowed", fields: [followedId], references: [id])
+
+  @@unique([followerId, followedId])
+  @@map("follows")
+}
+
+model Connection {
+  id          String   @id @default(cuid())
+  senderId    String
+  receiverId  String
+  status      String   @default("PENDING") // PENDING, ACCEPTED, REJECTED
+  createdAt   DateTime @default(now())
+
+  sender      User     @relation("ConnectionSender", fields: [senderId], references: [id])
+  receiver    User     @relation("ConnectionReceiver", fields: [receiverId], references: [id])
+
+  @@unique([senderId, receiverId])
+  @@map("connections")
+}
+
+model SkillEndorsement {
+  id          String   @id @default(cuid())
+  authorId    String
+  targetId    String
+  skill       String
+  createdAt   DateTime @default(now())
+
+  author      User     @relation("EndorsementAuthor", fields: [authorId], references: [id])
+  target      User     @relation("EndorsementTarget", fields: [targetId], references: [id])
+
+  @@map("skill_endorsements")
+}
+
+model ProfileView {
+  id          String   @id @default(cuid())
+  viewerId    String?  // Null for anonymous
+  viewedId    String
+  createdAt   DateTime @default(now())
+
+  viewer      User?    @relation("ViewerUser", fields: [viewerId], references: [id])
+  viewed      User     @relation("ViewedUser", fields: [viewedId], references: [id])
+
+  @@map("profile_views")
+}
+
 model HotelBooking {
   id          String        @id @default(cuid())
   userId      String
@@ -657,7 +823,14 @@ model Artisan {
   rating       Float    @default(0)
   reviewCount  Int      @default(0)
   jobsDone     Int      @default(0)
-  hourlyRate   Int?
+  
+  // Section 5.4b.3 - Artisan Specifics
+  trades        Json?     // Array of { type: string, primary: boolean }
+  dailyRate     Decimal?  @db.Decimal(12, 2)
+  yearsExp      Int       @default(0)
+  location      String?   // Zone d'intervention
+  projects      ArtisanProject[]
+
   currency     Currency @default(XOF)
   phone        String
   whatsapp     String?
@@ -668,6 +841,19 @@ model Artisan {
   services ArtisanService[]
 
   @@map("artisans")
+}
+
+model ArtisanProject {
+  id          String   @id @default(cuid())
+  artisanId   String
+  title       String
+  description String?  @db.Text
+  images      Json?
+  year        Int?
+  
+  artisan     Artisan  @relation(fields: [artisanId], references: [id], onDelete: Cascade)
+
+  @@map("artisan_projects")
 }
 
 model ArtisanService {
@@ -696,6 +882,8 @@ model Agent {
   slug          String    @unique
   isCertified   Boolean   @default(false)
   certificationDate DateTime?
+  languages     Json?     // Array of strings
+  specialties   Json?     // Array of strings
   rating        Float     @default(0)
   reviewCount   Int       @default(0)
   createdAt     DateTime  @default(now())
