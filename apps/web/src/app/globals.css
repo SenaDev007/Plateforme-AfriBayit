@@ -21,7 +21,8 @@
   }
 
   body {
-    @apply text-charcoal bg-white font-sans antialiased;
+    @apply text-charcoal text-body-mobile md:text-body-desktop bg-white font-sans antialiased;
+    line-height: 1.7;
     font-feature-settings:
       'rlig' 1,
       'calt' 1;
