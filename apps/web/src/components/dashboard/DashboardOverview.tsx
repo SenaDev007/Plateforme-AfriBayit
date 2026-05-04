@@ -23,6 +23,15 @@ import { Card, Badge, PropertyCard, Button } from '@afribayit/ui';
 import type { PropertyCardData } from '@afribayit/ui';
 import { api } from '@/lib/api';
 import { cn } from '@afribayit/ui/src/lib/cn';
+import {
+  LineChart,
+  Line,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
+} from 'recharts';
 
 interface ApiMineProperty {
   id: string;
@@ -119,16 +128,6 @@ const STATUS_VARIANTS: Record<string, 'default' | 'sky' | 'gold' | 'success' | '
   REFUNDED: 'danger',
 };
 
-import {
-  LineChart,
-  Line,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  ResponsiveContainer,
-} from 'recharts';
-
 const chartData = [
   { name: 'Jan', value: 400 },
   { name: 'Fév', value: 300 },
@@ -137,16 +136,6 @@ const chartData = [
   { name: 'Mai', value: 500 },
   { name: 'Juin', value: 900 },
 ];
-
-import {
-  LineChart,
-  Line,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  ResponsiveContainer,
-} from 'recharts';
 
 const containerVariants = {
   hidden: {},
