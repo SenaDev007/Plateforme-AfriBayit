@@ -25,6 +25,7 @@ import {
   Target,
   Globe,
   MessageSquare,
+  Eye,
 } from 'lucide-react';
 import { Button, Input } from '@afribayit/ui';
 import { signIn } from 'next-auth/react';
