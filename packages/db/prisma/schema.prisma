@@ -12,6 +12,7 @@ datasource db {
   url        = env("DATABASE_URL")
   directUrl  = env("DIRECT_URL")
   extensions = [postgis, pg_trgm, unaccent]
+  schemas    = ["public", "bj", "ci", "bf", "tg"]
 }
 
 // ─── ENUMS ───────────────────────────────────────────────────────────────────

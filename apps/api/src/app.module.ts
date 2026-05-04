@@ -23,12 +23,23 @@ import { NotaryModule } from './modules/notary/notary.module';
 import { ComplianceModule } from './modules/compliance/compliance.module';
 import { AiModule } from './modules/ai/ai.module';
 import { GeoTrustModule } from './modules/geotrust/geotrust.module';
+import { GraphQLModule } from '@nestjs/graphql';
+import { ApolloDriver, ApolloDriverConfig } from '@nestjs/apollo';
+import { join } from 'path';
 
 @Module({
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
       envFilePath: ['.env', '.env.local'],
+    }),
+
+    // GraphQL — Section 3.1.2
+    GraphQLModule.forRoot<ApolloDriverConfig>({
+      driver: ApolloDriver,
+      autoSchemaFile: join(process.cwd(), 'src/schema.gql'),
+      sortSchema: true,
+      playground: process.env['NODE_ENV'] !== 'production',
     }),
 
     // Rate limiting — applied globally via APP_GUARD below

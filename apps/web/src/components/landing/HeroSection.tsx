@@ -3,6 +3,7 @@ import type React from 'react';
 import { motion, useScroll, useTransform } from 'framer-motion';
 import { SearchBar } from '@afribayit/ui';
 import { Shield, CheckCircle, Globe } from 'lucide-react';
+import { InteractiveGlobe } from '@/components/visual/InteractiveGlobe';
 
 const HERO_BG =
   'https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?q=80&w=2000&auto=format&fit=crop'; // Darker, moody modern mansion
@@ -81,6 +82,11 @@ export function HeroSection(): React.ReactElement {
 
         {/* Right Side: Floating Cards (Desktop Only) */}
         <div className="relative hidden h-[600px] w-full max-w-lg lg:block">
+          {/* Central Interactive Globe — Section 3.1.1 */}
+          <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 opacity-40">
+            <InteractiveGlobe />
+          </div>
+
           <motion.div
             animate={{ y: [0, -20, 0], rotate: [0, 2, 0] }}
             transition={{ duration: 6, repeat: Infinity, ease: 'easeInOut' }}

@@ -1,0 +1,36 @@
+_format_version: "3.0"
+_transform: true
+
+services:
+  - name: afribayit-api
+    url: http://api:4000
+    routes:
+      - name: api-v1
+        paths:
+          - /api/v1
+    plugins:
+      - name: rate-limiting
+        config:
+          minute: 100
+          policy: local
+      - name: cors
+        config:
+          origins:
+            - "*"
+          methods:
+            - GET
+            - POST
+            - PUT
+            - DELETE
+            - OPTIONS
+          headers:
+            - Authorization
+            - Content-Type
+          credentials: true
+
+  - name: afribayit-web
+    url: http://web:3000
+    routes:
+      - name: web-home
+        paths:
+          - /

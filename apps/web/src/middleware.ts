@@ -12,7 +12,12 @@ export async function middleware(request: NextRequest): Promise<NextResponse> {
   const hostname = request.headers.get('host') ?? '';
   const subdomain = hostname.split('.')[0]?.toLowerCase() ?? '';
 
-  const country = SUPPORTED_COUNTRIES.includes(subdomain) ? subdomain : 'bj';
+  const cfCountry = request.headers.get('cf-ipcountry')?.toLowerCase();
+  const country = SUPPORTED_COUNTRIES.includes(subdomain)
+    ? subdomain
+    : SUPPORTED_COUNTRIES.includes(cfCountry ?? '')
+      ? cfCountry!
+      : 'bj';
 
   // Admin Route Protection
   if (request.nextUrl.pathname.startsWith('/admin')) {

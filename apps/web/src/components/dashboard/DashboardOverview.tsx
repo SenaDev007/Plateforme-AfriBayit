@@ -119,6 +119,35 @@ const STATUS_VARIANTS: Record<string, 'default' | 'sky' | 'gold' | 'success' | '
   REFUNDED: 'danger',
 };
 
+import {
+  LineChart,
+  Line,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
+} from 'recharts';
+
+const chartData = [
+  { name: 'Jan', value: 400 },
+  { name: 'Fév', value: 300 },
+  { name: 'Mar', value: 600 },
+  { name: 'Avr', value: 800 },
+  { name: 'Mai', value: 500 },
+  { name: 'Juin', value: 900 },
+];
+
+import {
+  LineChart,
+  Line,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
+} from 'recharts';
+
 const containerVariants = {
   hidden: {},
   visible: { transition: { staggerChildren: 0.1 } },
@@ -267,6 +296,44 @@ export function DashboardOverview(): React.ReactElement {
             </p>
           </div>
         ))}
+      </motion.div>
+
+      {/* Analytics Section — Section 3.1.1 */}
+      <motion.div
+        variants={itemVariants}
+        className="border-charcoal-100 rounded-[40px] border bg-white p-8 shadow-sm"
+      >
+        <h3 className="text-charcoal mb-8 font-serif text-2xl font-bold">Performance de l'Actif</h3>
+        <div className="h-[300px] w-full">
+          <ResponsiveContainer width="100%" height="100%">
+            <LineChart data={chartData}>
+              <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#F1F3F4" />
+              <XAxis
+                dataKey="name"
+                axisLine={false}
+                tickLine={false}
+                tick={{ fontSize: 12, fill: '#666' }}
+                dy={10}
+              />
+              <YAxis hide />
+              <Tooltip
+                contentStyle={{
+                  borderRadius: '16px',
+                  border: 'none',
+                  boxShadow: '0 10px 30px rgba(0,0,0,0.1)',
+                }}
+              />
+              <Line
+                type="monotone"
+                dataKey="value"
+                stroke="#003087"
+                strokeWidth={4}
+                dot={{ r: 6, fill: '#003087', strokeWidth: 0 }}
+                activeDot={{ r: 8, strokeWidth: 0 }}
+              />
+            </LineChart>
+          </ResponsiveContainer>
+        </div>
       </motion.div>
 
       <div className="grid grid-cols-1 gap-10 lg:grid-cols-3">

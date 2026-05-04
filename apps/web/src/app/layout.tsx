@@ -40,6 +40,8 @@ export const viewport: Viewport = {
 
 import { RebeccaChat } from '@/components/ai/RebeccaChat';
 import { MobileTabBar } from '@/components/navigation/MobileTabBar';
+import QueryProvider from '@/providers/QueryProvider';
+import GraphQLProvider from '@/providers/GraphQLProvider';
 
 export default async function RootLayout({
   children,
@@ -53,23 +55,27 @@ export default async function RootLayout({
     <html lang={locale} suppressHydrationWarning>
       <body>
         <NextIntlClientProvider locale={locale} messages={messages}>
-          {children}
-          <Toaster
-            position="top-right"
-            toastOptions={{
-              duration: 4000,
-              style: {
-                background: '#2C2E2F',
-                color: '#fff',
-                borderRadius: '16px',
-                fontSize: '14px',
-              },
-              success: { iconTheme: { primary: '#00A651', secondary: '#fff' } },
-              error: { iconTheme: { primary: '#D93025', secondary: '#fff' } },
-            }}
-          />
-          <RebeccaChat />
-          <MobileTabBar />
+          <QueryProvider>
+            <GraphQLProvider>
+              {children}
+              <Toaster
+                position="top-right"
+                toastOptions={{
+                  duration: 4000,
+                  style: {
+                    background: '#2C2E2F',
+                    color: '#fff',
+                    borderRadius: '16px',
+                    fontSize: '14px',
+                  },
+                  success: { iconTheme: { primary: '#00A651', secondary: '#fff' } },
+                  error: { iconTheme: { primary: '#D93025', secondary: '#fff' } },
+                }}
+              />
+              <RebeccaChat />
+              <MobileTabBar />
+            </GraphQLProvider>
+          </QueryProvider>
         </NextIntlClientProvider>
       </body>
     </html>
