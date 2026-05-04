@@ -320,6 +320,25 @@ export default function ParametresPage(): React.ReactElement {
                 <Button variant="outline">Activer la 2FA</Button>
               </div>
 
+              <div className="border-charcoal-100 space-y-4 border-t pt-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-charcoal text-sm font-medium">
+                      Authentification Biométrique
+                    </p>
+                    <p className="text-charcoal-400 text-xs">
+                      Utilisez Face ID, empreinte digitale ou Passkey pour vous connecter plus
+                      rapidement.
+                    </p>
+                  </div>
+                  <Badge variant="outline">Optionnel</Badge>
+                </div>
+                <Button variant="outline" className="gap-2">
+                  <Smartphone className="h-4 w-4" />
+                  Configurer Biométrie
+                </Button>
+              </div>
+
               <div className="border-charcoal-100 border-t pt-6">
                 <h3 className="text-charcoal mb-3 text-sm font-medium">Sessions actives</h3>
                 <div className="bg-charcoal-50 flex items-center justify-between rounded-lg p-3">
@@ -412,6 +431,19 @@ export default function ParametresPage(): React.ReactElement {
               <div>
                 <h2 className="text-charcoal mb-1 font-semibold">Gestion du compte</h2>
                 <p className="text-charcoal-400 text-sm">Actions irréversibles sur votre compte.</p>
+              </div>
+
+              <div className="border-gold/20 bg-gold/5 flex items-center justify-between rounded-xl border p-6">
+                <div>
+                  <p className="text-gold text-[10px] font-bold uppercase tracking-widest">
+                    Niveau d'Accès
+                  </p>
+                  <p className="text-navy text-xl font-bold italic">AfriBayit Premium</p>
+                  <p className="text-charcoal-400 text-xs">
+                    Inclus : Analytics avancés, VR, Conciergerie IA
+                  </p>
+                </div>
+                <Badge variant="success">ACTIF</Badge>
               </div>
 
               <div className="border-charcoal-100 space-y-3 rounded-xl border p-4">

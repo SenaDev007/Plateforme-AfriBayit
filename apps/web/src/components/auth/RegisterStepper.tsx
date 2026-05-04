@@ -38,7 +38,7 @@ const STEPS = [
   { id: 3, title: 'Cibles', icon: Map },
   { id: 4, title: 'Budget', icon: Briefcase },
   { id: 5, title: 'Alertes', icon: Bell },
-  { id: 6, title: 'KYC', icon: Shield },
+  { id: 6, title: 'Tour', icon: Eye },
   { id: 7, title: 'IA', icon: Sparkles },
 ];
 
@@ -449,41 +449,48 @@ export function RegisterStepper(): React.ReactElement {
           >
             <div className="text-center">
               <h2 className="text-charcoal mb-2 font-serif text-3xl font-bold">
-                Sécurité GeoTrust
+                Tour Guidé Interactif
               </h2>
               <p className="text-charcoal-400 text-sm">
-                Vérifiez votre identité pour sécuriser vos fonds.
+                Découvrez l'interface de nouvelle génération.
               </p>
             </div>
-            <div className="grid grid-cols-2 gap-4">
-              <label className="border-charcoal-100 hover:bg-charcoal-50 flex cursor-pointer flex-col items-center gap-4 rounded-[32px] border-2 border-dashed p-8 transition-all">
-                <Upload className="text-charcoal-300 h-6 w-6" />
-                <span className="text-charcoal-400 text-[10px] font-bold uppercase">
-                  Pièce d'Identité
-                </span>
-                <input type="file" className="hidden" />
-              </label>
-              <label className="border-charcoal-100 hover:bg-charcoal-50 flex cursor-pointer flex-col items-center gap-4 rounded-[32px] border-2 border-dashed p-8 transition-all">
-                <Camera className="text-charcoal-300 h-6 w-6" />
-                <span className="text-charcoal-400 text-[10px] font-bold uppercase">
-                  Selfie Live
-                </span>
-                <input type="file" className="hidden" />
-              </label>
-            </div>
-            <div className="bg-navy/5 flex gap-3 rounded-2xl p-4">
-              <Shield className="text-navy h-5 w-5 flex-shrink-0" />
-              <p className="text-charcoal-500 text-[10px] leading-relaxed">
-                Chiffrement AES-256 actif. Vos données sont isolées et sécurisées conformément aux
-                normes RGPD & Section 4.1 du CDC.
-              </p>
+            <div className="space-y-4">
+              <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                <div className="bg-navy/5 border-navy/10 space-y-3 rounded-[32px] border p-6">
+                  <Globe className="text-navy h-6 w-6" />
+                  <p className="text-xs font-bold uppercase tracking-wider">Globe 3D</p>
+                  <p className="text-charcoal-500 text-[10px]">
+                    Visualisez les opportunités sur notre globe interactif Three.js.
+                  </p>
+                </div>
+                <div className="bg-gold/5 border-gold/10 space-y-3 rounded-[32px] border p-6">
+                  <Eye className="text-gold h-6 w-6" />
+                  <p className="text-xs font-bold uppercase tracking-wider">Visites VR</p>
+                  <p className="text-charcoal-500 text-[10px]">
+                    Immergez-vous dans les propriétés grâce à la réalité virtuelle.
+                  </p>
+                </div>
+              </div>
+              <div className="bg-charcoal-50 flex items-center gap-4 rounded-[32px] p-6">
+                <div className="rounded-2xl bg-white p-3 shadow-sm">
+                  <Shield className="text-charcoal h-5 w-5" />
+                </div>
+                <div className="flex-1">
+                  <p className="text-xs font-bold uppercase tracking-wider">Sécurité GeoTrust</p>
+                  <p className="text-charcoal-400 text-[10px]">
+                    Vos fonds sont sécurisés par escrow et KYC (obligatoire pour transactions).
+                  </p>
+                </div>
+                <CheckCircle2 className="text-emerald h-5 w-5" />
+              </div>
             </div>
             <div className="flex gap-4">
               <Button variant="ghost" onClick={onPrev} className="h-14 rounded-2xl px-8">
                 RETOUR
               </Button>
               <Button fullWidth onClick={onNext} className="h-14 rounded-2xl font-bold shadow-lg">
-                SUIVANT
+                COMMENCER LE TOUR
               </Button>
             </div>
           </motion.div>

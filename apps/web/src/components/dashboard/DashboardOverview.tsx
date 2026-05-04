@@ -245,9 +245,21 @@ export function DashboardOverview(): React.ReactElement {
           >
             GÉRER MON PROFIL
           </Button>
-          <Button className="bg-navy shadow-navy/20 h-14 rounded-full px-8 text-xs font-bold uppercase tracking-widest shadow-lg">
-            NOUVELLE ANNONCE
-          </Button>
+          {session?.user?.role === 'BUYER' && (
+            <Button className="bg-gold shadow-gold/20 h-14 rounded-full px-8 text-xs font-bold uppercase tracking-widest text-white shadow-lg">
+              CALCULATEUR ROI
+            </Button>
+          )}
+          {(session?.user?.role === 'SELLER' || session?.user?.role === 'GUESTHOUSE_OWNER') && (
+            <Button className="bg-navy shadow-navy/20 h-14 rounded-full px-8 text-xs font-bold uppercase tracking-widest shadow-lg">
+              NOUVELLE ANNONCE
+            </Button>
+          )}
+          {session?.user?.role === 'ARTISAN' && (
+            <Button className="bg-emerald shadow-emerald/20 h-14 rounded-full px-8 text-xs font-bold uppercase tracking-widest text-white shadow-lg">
+              PUBLIER RÉALISATION
+            </Button>
+          )}
         </div>
       </motion.div>
 
