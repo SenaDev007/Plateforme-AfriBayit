@@ -881,6 +881,234 @@ model ArtisanService {
   @@map("artisan_services")
 }
 
+// ─── FINTECH & ESCROW (Section 7B) ──────────────────────────────────────────
+
+model Wallet {
+  id                String          @id @default(cuid())
+  userId            String          @unique
+  balanceAvailable  Decimal         @default(0) @db.Decimal(18, 4)
+  balanceEscrowHeld Decimal         @default(0) @db.Decimal(18, 4)
+  balancePending    Decimal         @default(0) @db.Decimal(18, 4)
+  currency          Currency        @default(XOF)
+  totalTransacted   Decimal         @default(0) @db.Decimal(18, 4)
+  user              User            @relation(fields: [userId], references: [id])
+  ledgerEntries     LedgerEntry[]
+  
+  createdAt         DateTime        @default(now())
+  updatedAt         DateTime        @updatedAt
+
+  @@map("wallets")
+}
+
+model LedgerEntry {
+  id            String      @id @default(cuid())
+  walletId      String
+  transactionId String?
+  type          LedgerType
+  debitAccount  String
+  creditAccount String
+  amount        Decimal     @db.Decimal(18, 4)
+  currency      Currency
+  providerRef   String?
+  checksum      String      // SHA-256 for integrity
+  wallet        Wallet      @relation(fields: [walletId], references: [id])
+  
+  createdAt     DateTime    @default(now())
+
+  @@map("ledger_entries")
+}
+
+enum LedgerType {
+  ESCROW_HOLD
+  ESCROW_RELEASE
+  PAYOUT
+  REFUND
+  FEE
+}
+
+model Escrow {
+  id                String          @id @default(cuid())
+  transactionId     String          @unique
+  status            EscrowStatus    @default(PENDING)
+  amount            Decimal         @db.Decimal(18, 4)
+  commission        Decimal         @db.Decimal(18, 4)
+  conditions        Json?           // { buyerConfirm: bool, docsValid: bool, inspectionValid: bool }
+  releaseTriggered  Boolean         @default(false)
+  disputeId         String?
+  
+  transaction       Transaction     @relation(fields: [transactionId], references: [id])
+  dispute           Dispute?        @relation(fields: [disputeId], references: [id])
+  
+  createdAt         DateTime        @default(now())
+  updatedAt         DateTime        @updatedAt
+
+  @@map("escrows")
+}
+
+enum EscrowStatus {
+  PENDING
+  FUNDED
+  RELEASED
+  REFUNDED
+  DISPUTED
+}
+
+model Dispute {
+  id            String      @id @default(cuid())
+  escrowId      String
+  raisedById    String
+  reason        String      @db.Text
+  status        DisputeStatus @default(OPEN)
+  evidenceUrls  String[]
+  resolution    String?     @db.Text
+  escrows       Escrow[]
+  
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+
+  @@map("disputes")
+}
+
+enum DisputeStatus {
+  OPEN
+  UNDER_REVIEW
+  MEDIATION
+  RESOLVED
+  CANCELLED
+}
+
+// ─── GEOTRUST & GEOSPATIAL (Section 7C) ──────────────────────────────────────
+
+model GeometerProfile {
+  id              String      @id @default(cuid())
+  userId          String      @unique
+  orderNumber     String      @unique
+  specialties     String[]    // TOPO, BORNAGE, DRONE, 3D
+  isCertified     Boolean     @default(false)
+  user            User        @relation(fields: [userId], references: [id])
+  missions        GeometerMission[]
+  
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
+
+  @@map("geometer_profiles")
+}
+
+model GeometerMission {
+  id                String          @id @default(cuid())
+  propertyId        String
+  geometerId        String
+  serviceCode       String          // GEO_TOPO, GEO_DRON, etc.
+  status            MissionStatus   @default(PENDING)
+  scheduledAt       DateTime?
+  reportUrl         String?
+  geojsonUrl        String?
+  aiScore           Float?
+  blockchainHash    String?
+  
+  property          Property        @relation(fields: [propertyId], references: [id])
+  geometer          GeometerProfile @relation(fields: [geometerId], references: [id])
+  
+  createdAt         DateTime        @default(now())
+  updatedAt         DateTime        @updatedAt
+
+  @@map("geometer_missions")
+}
+
+enum MissionStatus {
+  PENDING
+  ASSIGNED
+  IN_PROGRESS
+  COMPLETED
+  CANCELLED
+  REJECTED
+}
+
+// ─── HOSPITALITY (Section 7D) ───────────────────────────────────────────────
+
+model Hotel {
+  id              String      @id @default(cuid())
+  ownerId         String
+  name            String
+  level           HotelLevel  @default(DIRECT)
+  starRating      Int?
+  description     String?     @db.Text
+  policies        Json?
+  otaRefs         Json?       // { bookingId, expediaId }
+  status          String      @default("ACTIVE")
+  rooms           HotelRoom[]
+  bookings        HotelBooking[]
+  
+  owner           User        @relation(fields: [ownerId], references: [id])
+  
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
+
+  @@map("hotels")
+}
+
+enum HotelLevel {
+  OTA
+  DIRECT
+}
+
+model HotelRoom {
+  id              String          @id @default(cuid())
+  hotelId         String
+  type            HotelRoomType
+  capacity        Int
+  amenities       String[]
+  basePrice       Decimal         @db.Decimal(15, 2)
+  photos          String[]
+  availability    RoomAvailability[]
+  bookings        HotelBooking[]
+  
+  hotel           Hotel           @relation(fields: [hotelId], references: [id])
+
+  @@map("hotel_rooms")
+}
+
+model RoomAvailability {
+  id              String      @id @default(cuid())
+  roomId          String
+  date            DateTime
+  status          AvailabilityStatus @default(AVAILABLE)
+  priceOverride   Decimal?    @db.Decimal(15, 2)
+  
+  room            HotelRoom   @relation(fields: [roomId], references: [id])
+
+  @@index([roomId, date])
+  @@map("room_availabilities")
+}
+
+enum AvailabilityStatus {
+  AVAILABLE
+  BOOKED
+  BLOCKED
+}
+
+model HotelBooking {
+  id              String      @id @default(cuid())
+  hotelId         String
+  roomId          String
+  userId          String
+  checkIn         DateTime
+  checkOut        DateTime
+  totalAmount     Decimal     @db.Decimal(15, 2)
+  currency        Currency    @default(XOF)
+  status          BookingStatus @default(PENDING)
+  paymentRef      String?
+  
+  hotel           Hotel       @relation(fields: [hotelId], references: [id])
+  room            HotelRoom   @relation(fields: [roomId], references: [id])
+  user            User        @relation(fields: [userId], references: [id])
+  
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
+
+  @@map("hotel_bookings")
+}
+
 // ─── AGENTS ───────────────────────────────────────────────────────────────────
 
 model Agent {
