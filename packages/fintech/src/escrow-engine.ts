@@ -24,28 +24,33 @@ export class EscrowEngine {
       include: { transaction: true },
     });
 
-    if (!escrow || escrow.status !== 'FUNDED') return false;
+    if (!escrow || (escrow.status !== 'FUNDED' && escrow.status !== 'IN_PROGRESS')) return false;
 
     const conditions = escrow.conditions as unknown as EscrowConditions;
     const tx = escrow.transaction;
 
     let isReady = false;
 
-    // Logic per transaction type (Section 7B.3.2)
+    // Transition to IN_PROGRESS if funded (Section 7B.3.1)
+    if (escrow.status === 'FUNDED') {
+      await prisma.escrow.update({
+        where: { id: escrowId },
+        data: { status: 'IN_PROGRESS' },
+      });
+    }
+
+    // Evaluate conditions for VALIDATION state (Section 7B.3.2)
     switch (tx.type) {
       case 'SALE':
-        // Docs + Inspection + Buyer Confirm
-        isReady = conditions.docsValid && conditions.inspectionValid && conditions.buyerConfirm;
+        isReady = conditions.docsValid && conditions.inspectionValid;
         break;
 
       case 'RENT_SHORT':
-        // Check-in + 24h safety
         isReady = conditions.buyerConfirm && conditions.fraudHoldExpired;
         break;
 
       case 'ARTISAN':
       case 'GEOMETER':
-        // Delivery + Buyer Confirm
         isReady = conditions.sellerConfirm && conditions.buyerConfirm;
         break;
 
@@ -54,6 +59,14 @@ export class EscrowEngine {
     }
 
     if (isReady) {
+      // Transition to VALIDATION then RELEASED (Section 7B.3.1)
+      await prisma.escrow.update({
+        where: { id: escrowId },
+        data: { status: 'VALIDATION' },
+      });
+
+      // In a real system, there might be a final confirmation click here
+      // But for the engine, if all conditions are met, we move to terminal state
       await this.releaseFunds(escrowId);
       return true;
     }

@@ -60,12 +60,21 @@ export function calculateCommission(type: TransactionType, amount: number): Comm
       };
 
     case 'GUESTHOUSE_HOST':
-      // 3% par réservation
+      // 3% par réservation chambre
       return {
         sellerFee: amount * 0.03,
         buyerFee: 0,
         totalFee: amount * 0.03,
         mode: 'PMS_AUTO',
+      };
+
+    case 'GUESTHOUSE_GUEST':
+      // 10-13% frais de service voyageur
+      return {
+        sellerFee: 0,
+        buyerFee: amount * 0.13,
+        totalFee: amount * 0.13,
+        mode: 'ADDED_PRE',
       };
 
     case 'ARTISAN':
