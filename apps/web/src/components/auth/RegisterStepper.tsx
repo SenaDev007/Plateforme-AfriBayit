@@ -24,6 +24,7 @@ import {
   Sparkles,
   Target,
   Globe,
+  MessageSquare,
 } from 'lucide-react';
 import { Button, Input } from '@afribayit/ui';
 import { signIn } from 'next-auth/react';
