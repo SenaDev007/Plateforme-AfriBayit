@@ -7,7 +7,7 @@ import {
   Layers,
   Maximize,
   FileCheck,
-  Drone,
+  Aperture as Drone,
   Box,
   ShieldCheck,
   AlertOctagon,
