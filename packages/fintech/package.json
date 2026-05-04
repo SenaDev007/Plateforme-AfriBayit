@@ -1,0 +1,18 @@
+{
+  "name": "@afribayit/fintech",
+  "version": "0.1.0",
+  "private": true,
+  "description": "AfriBayit Fintech Core — Sections 6 & 7B/7C/7D",
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "scripts": {
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@afribayit/db": "*"
+  },
+  "devDependencies": {
+    "typescript": "^5.4.5",
+    "@types/node": "^20.14.9"
+  }
+}

@@ -30,7 +30,7 @@ export const RebeccaChat = () => {
   }, [messages, isTyping]);
 
   const handleSend = async () => {
-    if (!input.trim()) return;
+    if (!input.trim() || isTyping) return;
 
     const userMsg = {
       id: Date.now().toString(),
@@ -39,21 +39,40 @@ export const RebeccaChat = () => {
       timestamp: new Date(),
     };
     setMessages((prev) => [...prev, userMsg]);
+    const currentInput = input;
     setInput('');
     setIsTyping(true);
 
-    // Simulation de l'appel Rebecca (Section 8.2.1)
-    setTimeout(() => {
-      const assistantMsg = {
-        id: (Date.now() + 1).toString(),
-        role: 'assistant',
-        content:
-          "Je recherche les meilleures opportunités pour vous... D'après vos préférences, il y a 3 terrains vérifiés GeoTrust à Cotonou qui correspondent à votre budget.",
-        timestamp: new Date(),
-      };
-      setMessages((prev) => [...prev, assistantMsg]);
+    try {
+      // Section 8.2 — Live API call to Rebecca backend
+      const res = await fetch('/api/ai/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ message: currentInput }),
+      });
+      const data = await res.json();
+      setMessages((prev) => [
+        ...prev,
+        {
+          id: (Date.now() + 1).toString(),
+          role: 'assistant',
+          content: data.reply || "Je n'ai pas pu traiter votre demande.",
+          timestamp: new Date(),
+        },
+      ]);
+    } catch {
+      setMessages((prev) => [
+        ...prev,
+        {
+          id: (Date.now() + 1).toString(),
+          role: 'assistant',
+          content: 'Désolée, je rencontre une difficulté technique. Réessayez dans un instant.',
+          timestamp: new Date(),
+        },
+      ]);
+    } finally {
       setIsTyping(false);
-    }, 1500);
+    }
   };
 
   return (
