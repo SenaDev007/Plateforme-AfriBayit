@@ -127,7 +127,7 @@ export function ProfessionalProfile({
             <div className="flex w-full gap-3 md:w-auto">
               <Button
                 onClick={() => setIsFollowing(!isFollowing)}
-                variant={isFollowing ? 'outline' : 'default'}
+                variant={isFollowing ? 'outline' : 'primary'}
                 className={cn(
                   'h-14 flex-1 rounded-2xl px-8 font-bold shadow-lg transition-all md:flex-none',
                   isFollowing ? 'border-navy text-navy' : 'bg-navy shadow-navy/20 text-white',
