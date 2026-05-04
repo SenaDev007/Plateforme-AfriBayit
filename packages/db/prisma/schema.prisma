@@ -558,6 +558,7 @@ model Property {
   geometerMissions GeometerMission[]
   conflictA        ConflictZone[]    @relation("ConflictA")
   conflictB        ConflictZone[]    @relation("ConflictB")
+  listingAIScore   ListingAIScore?
 
   @@index([country, city, status])
   @@index([ownerId])
@@ -1781,4 +1782,60 @@ model AuditLog {
   @@index([tenantId])
   @@index([createdAt])
   @@map("audit_logs")
+}
+
+// ─── SECTION 8.5 — BLOCKCHAIN AUDIT TRAIL ─────────────────────────────────────
+
+model BlockchainAnchor {
+  id            String   @id @default(cuid())
+  documentId    String
+  documentType  String   // TITRE_FONCIER, GEOTRUST_REPORT, CONTRAT, LEDGER_ENTRY
+  contentHash   String   // SHA-256 du contenu
+  txHash        String   // Transaction hash Polygon PoS
+  network       String   @default("Polygon PoS")
+  blockNumber   Int?
+  anchoredAt    DateTime @default(now())
+  
+  // QR-code verifiable link
+  verifyUrl     String?
+
+  @@index([documentId])
+  @@index([txHash])
+  @@map("blockchain_anchors")
+}
+
+// ─── SECTION 8.3.4 — DOCUMENT AI AUDIT TRAIL ──────────────────────────────────
+
+model DocumentAuditLog {
+  id              String   @id @default(cuid())
+  documentId      String
+  documentType    String   // TITRE_FONCIER, ACTE_NOTARIE, etc.
+  model           String   // claude-3-5-sonnet-20241022
+  coherenceScore  Int
+  visualScore     Int
+  finalScore      Int
+  decision        String   // AUTO_VALIDATED, HUMAN_QUEUE, REJECTED
+  mismatches      String[]
+  processedAt     DateTime @default(now())
+
+  @@index([documentId])
+  @@index([decision])
+  @@map("document_audit_logs")
+}
+
+// ─── SECTION 8.3.1 — AI LISTING SCORES ────────────────────────────────────────
+
+model ListingAIScore {
+  id                  String   @id @default(cuid())
+  propertyId          String   @unique
+  totalScore          Int      // 0-100
+  completenessScore   Int
+  priceCoherenceScore Int
+  certificationScore  Int
+  fraudFlags          String[]
+  computedAt          DateTime @default(now())
+
+  property            Property @relation(fields: [propertyId], references: [id])
+
+  @@map("listing_ai_scores")
 }
