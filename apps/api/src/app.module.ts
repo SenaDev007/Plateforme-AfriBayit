@@ -42,15 +42,18 @@ import { join } from 'path';
       playground: process.env['NODE_ENV'] !== 'production',
     }),
 
-    // Rate limiting — applied globally via APP_GUARD below
+    // Rate limiting — Section 10.2.1 Rate Limiting Différencié
     ThrottlerModule.forRootAsync({
       imports: [ConfigModule],
       inject: [ConfigService],
-      useFactory: (config: ConfigService) => ({
+      useFactory: () => ({
         throttlers: [
-          { name: 'default', ttl: 60_000, limit: config.get<number>('THROTTLE_LIMIT', 100) },
-          { name: 'auth', ttl: 60_000, limit: 10 }, // stricter for auth endpoints
-          { name: 'upload', ttl: 60_000, limit: 20 }, // for file upload endpoints
+          { name: 'default', ttl: 60_000, limit: 100 }, // API authentifiée (100 req/min)
+          { name: 'auth', ttl: 60_000, limit: 5 }, // Auth: login, OTP, register (5 req/min)
+          { name: 'public', ttl: 60_000, limit: 30 }, // API publique anonyme (30 req/min)
+          { name: 'premium', ttl: 60_000, limit: 200 }, // Agent Premium (200 req/min)
+          { name: 'sensitive', ttl: 3600_000, limit: 10 }, // Escrow, KYC (10 req/heure)
+          { name: 'partner', ttl: 60_000, limit: 500 }, // API partenaires (500 req/min)
         ],
       }),
     }),
