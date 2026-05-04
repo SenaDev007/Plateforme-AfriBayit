@@ -549,6 +549,9 @@ model Property {
   surveyAssignments SurveyAssignment[]
   droneData        DroneMapping?
   agent            Agent?          @relation(fields: [agentId], references: [id])
+  geometerMissions GeometerMission[]
+  conflictA        ConflictZone[]    @relation("ConflictA")
+  conflictB        ConflictZone[]    @relation("ConflictB")
 
   @@index([country, city, status])
   @@index([ownerId])
@@ -933,11 +936,18 @@ model Escrow {
   amount            Decimal         @db.Decimal(18, 4)
   commission        Decimal         @db.Decimal(18, 4)
   conditions        Json?           // { buyerConfirm: bool, docsValid: bool, inspectionValid: bool }
+  
+  // Section 7C.5.1 - GeoTrust Extended Fields
+  geometerMissionId String?
+  geometerValidationStatus GeometerValidationStatus @default(PENDING)
+  adminValidationRequired Boolean @default(false)
+  
   releaseTriggered  Boolean         @default(false)
   disputeId         String?
   
   transaction       Transaction     @relation(fields: [transactionId], references: [id])
   dispute           Dispute?        @relation(fields: [disputeId], references: [id])
+  geometerMission   GeometerMission? @relation(fields: [geometerMissionId], references: [id])
   
   createdAt         DateTime        @default(now())
   updatedAt         DateTime        @updatedAt
@@ -946,11 +956,22 @@ model Escrow {
 }
 
 enum EscrowStatus {
-  PENDING
+  CREATED
   FUNDED
+  IN_PROGRESS
+  VALIDATION
   RELEASED
-  REFUNDED
   DISPUTED
+  REFUNDED
+  EXPIRED
+}
+
+enum GeometerValidationStatus {
+  PENDING
+  IN_PROGRESS
+  VALIDATED
+  ALERT
+  REJECTED
 }
 
 model Dispute {
@@ -961,6 +982,7 @@ model Dispute {
   status        DisputeStatus @default(OPEN)
   evidenceUrls  String[]
   resolution    String?     @db.Text
+  metadata      Json?       // { step: 'COLLECTION', deadline: Date }
   escrows       Escrow[]
   
   createdAt     DateTime    @default(now())
@@ -971,8 +993,9 @@ model Dispute {
 
 enum DisputeStatus {
   OPEN
-  UNDER_REVIEW
+  COLLECTION
   MEDIATION
+  ADMIN_REVIEW
   RESOLVED
   CANCELLED
 }
@@ -1008,11 +1031,55 @@ model GeometerMission {
   
   property          Property        @relation(fields: [propertyId], references: [id])
   geometer          GeometerProfile @relation(fields: [geometerId], references: [id])
+  escrows           Escrow[]
+  waypoints         GpsWaypoint[]
+  droneCoverage     DroneCoverage?
   
   createdAt         DateTime        @default(now())
   updatedAt         DateTime        @updatedAt
 
   @@map("geometer_missions")
+}
+
+model GpsWaypoint {
+  id                String          @id @default(cuid())
+  missionId         String
+  pointGeom         String          // WKT or GeoJSON string
+  altitude          Float?
+  accuracy          Float?
+  capturedAt        DateTime        @default(now())
+  
+  mission           GeometerMission @relation(fields: [missionId], references: [id])
+
+  @@map("gps_waypoints")
+}
+
+model DroneCoverage {
+  id                String          @id @default(cuid())
+  missionId         String          @unique
+  orthophotoUrl     String
+  mntUrl            String?
+  resolutionCm      Float?
+  capturedAt        DateTime
+  bboxPolygon       String          // GeoJSON boundary
+  
+  mission           GeometerMission @relation(fields: [missionId], references: [id])
+
+  @@map("drone_coverages")
+}
+
+model ConflictZone {
+  id                String          @id @default(cuid())
+  propertyIdA       String
+  propertyIdB       String
+  overlapPolygon    String          // WKT or GeoJSON
+  overlapArea       Float
+  detectedAt        DateTime        @default(now())
+  
+  propertyA         Property        @relation("ConflictA", fields: [propertyIdA], references: [id])
+  propertyB         Property        @relation("ConflictB", fields: [propertyIdB], references: [id])
+
+  @@map("conflict_zones")
 }
 
 enum MissionStatus {

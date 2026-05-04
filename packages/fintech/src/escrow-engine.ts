@@ -39,10 +39,14 @@ export class EscrowEngine {
       });
     }
 
-    // Evaluate conditions for VALIDATION state (Section 7B.3.2)
+    // Evaluate conditions for VALIDATION state (Section 7B.3.2 & 7C.5.2)
+    const geometerValid =
+      !escrow.geometerMissionId || escrow.geometerValidationStatus === 'VALIDATED';
+
     switch (tx.type) {
       case 'SALE':
-        isReady = conditions.docsValid && conditions.inspectionValid;
+        // Section 7C.5.2 - Transition blocked if ALERT or PENDING
+        isReady = conditions.docsValid && conditions.inspectionValid && geometerValid;
         break;
 
       case 'RENT_SHORT':
@@ -55,10 +59,19 @@ export class EscrowEngine {
         break;
 
       default:
-        isReady = conditions.buyerConfirm;
+        isReady = conditions.buyerConfirm && geometerValid;
     }
 
-    if (isReady) {
+    // Check for alerts (Section 7C.5.2)
+    if (escrow.geometerValidationStatus === 'ALERT') {
+      await prisma.escrow.update({
+        where: { id: escrowId },
+        data: { status: 'DISPUTED' },
+      });
+      return false;
+    }
+
+    if (isReady && !escrow.adminValidationRequired) {
       // Transition to VALIDATION then RELEASED (Section 7B.3.1)
       await prisma.escrow.update({
         where: { id: escrowId },
