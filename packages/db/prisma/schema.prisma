@@ -64,6 +64,12 @@ enum PropertyType {
   WAREHOUSE
 }
 
+enum CourseLevel {
+  BEGINNER
+  INTERMEDIATE
+  ADVANCED
+}
+
 enum PropertyStatus {
   DRAFT
   ACTIVE
@@ -144,12 +150,6 @@ enum BookingStatus {
   CHECKED_IN
   CHECKED_OUT
   CANCELLED
-}
-
-enum CourseLevel {
-  BEGINNER
-  INTERMEDIATE
-  ADVANCED
 }
 
 enum NotificationType {
@@ -278,6 +278,8 @@ model User {
   premiumTier         String          @default("STARTER") // STARTER, PRO_ESSENTIAL, PRO_ADVANCED, ELITE, ENTERPRISE
   premiumExpiresAt    DateTime?
   inMailCredits       Int             @default(0)
+  reputationScore     Int             @default(0) // Section 5.7.2 (0-1000)
+  reputationLevel     String          @default("DECOUVREUR") // DECOUVREUR, ACTEUR, EXPERT, AMBASSADEUR
 
   @@index([email])
   @@index([phone])
@@ -529,6 +531,13 @@ model Property {
   verificationStatus  PropertyStatus  @default(DRAFT)
   rejectionReason     String?
   agentId             String?         // If published by an agent
+  documents           Json?     // Array of { type: string, url: string, status: string }
+  
+  // Section 5.1.2 - Advanced Media
+  vrTourUrl           String?
+  droneVideoUrl       String?
+  reconstruction3dUrl String?
+  
   notaryId            String?         // Linked notary for validation
 
   owner           User            @relation(fields: [ownerId], references: [id])

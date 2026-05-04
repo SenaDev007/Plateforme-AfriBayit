@@ -19,6 +19,9 @@ import {
   X,
   Loader2,
   Shield,
+  Compass,
+  Camera,
+  Expand,
 } from 'lucide-react';
 import { Input, Button, cn } from '@afribayit/ui';
 import { api } from '@/lib/api';
@@ -696,6 +699,10 @@ export function PublishPropertyForm(): React.ReactElement {
                 {formData.country === 'BJ' && ' Pour le Bénin, un Titre Foncier ou ACD est requis.'}
                 {formData.country === 'CI' &&
                   " Pour la Côte d'Ivoire, une Lettre d'Attribution ou ACD est requis."}
+                {formData.country === 'BF' &&
+                  ' Pour le Burkina Faso, un PUH ou un Titre Foncier est requis.'}
+                {formData.country === 'TG' &&
+                  ' Pour le Togo, un Titre Foncier ou Certificat de propriété est requis.'}
               </p>
             </div>
 
@@ -783,6 +790,32 @@ export function PublishPropertyForm(): React.ReactElement {
               />
               <span className="text-charcoal text-sm">Prix négociable</span>
             </label>
+
+            <div className="space-y-4 pt-2">
+              <p className="text-charcoal text-sm font-bold uppercase tracking-widest">
+                Services Premium (Section 5.1.2)
+              </p>
+              <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+                {[
+                  { id: 'hasVr', label: 'Visite VR 360°', icon: Compass },
+                  { id: 'hasDrone', label: 'Vue Drone', icon: Camera },
+                  { id: 'has3d', label: '3D Interactive', icon: Expand },
+                ].map((service) => (
+                  <label
+                    key={service.id}
+                    className="border-charcoal-100 hover:bg-charcoal-50 flex cursor-pointer items-center gap-3 rounded-xl border p-3 transition-colors"
+                  >
+                    <input
+                      type="checkbox"
+                      className="border-charcoal-300 accent-navy h-4 w-4 rounded"
+                    />
+                    <div className="flex flex-col">
+                      <span className="text-charcoal text-xs font-bold">{service.label}</span>
+                    </div>
+                  </label>
+                ))}
+              </div>
+            </div>
 
             {/* Summary */}
             <div className="bg-charcoal-50 space-y-2 rounded-xl p-4 text-sm">

@@ -2,7 +2,16 @@
 
 import * as React from 'react';
 import { motion } from 'framer-motion';
-import { Heart, MapPin, BedDouble, Bath, Expand, CheckCircle2, Compass } from 'lucide-react';
+import {
+  Heart,
+  MapPin,
+  BedDouble,
+  Bath,
+  Expand,
+  CheckCircle2,
+  Compass,
+  BadgeCheck,
+} from 'lucide-react';
 import { cn } from '../lib/cn';
 import { Badge } from './Badge';
 
@@ -22,6 +31,9 @@ export interface PropertyCardData {
   imageUrl: string;
   isVerified?: boolean;
   isFeatured?: boolean;
+  hasVr?: boolean;
+  hasDrone?: boolean;
+  has3d?: boolean;
 }
 
 interface PropertyCardProps {
@@ -120,6 +132,32 @@ export function PropertyCard({
               Premium
             </Badge>
           )}
+          <div className="flex gap-1.5">
+            {property.hasVr && (
+              <div
+                className="text-navy rounded-lg bg-white/90 p-1.5 shadow-lg backdrop-blur-sm"
+                title="Visite VR disponible"
+              >
+                <Compass className="h-3.5 w-3.5" />
+              </div>
+            )}
+            {property.hasDrone && (
+              <div
+                className="text-navy rounded-lg bg-white/90 p-1.5 shadow-lg backdrop-blur-sm"
+                title="Vue Drone disponible"
+              >
+                <BadgeCheck className="text-gold h-3.5 w-3.5" />
+              </div>
+            )}
+            {property.has3d && (
+              <div
+                className="text-navy rounded-lg bg-white/90 p-1.5 shadow-lg backdrop-blur-sm"
+                title="Reconstitution 3D disponible"
+              >
+                <Expand className="h-3.5 w-3.5" />
+              </div>
+            )}
+          </div>
         </div>
 
         {/* Favorite button */}
