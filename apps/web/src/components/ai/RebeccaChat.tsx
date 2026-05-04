@@ -1,148 +1,144 @@
 'use client';
-import React, { useState, useRef, useEffect } from 'react';
+
+import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { MessageSquare, X, Send, Sparkles, Loader2, Minus, Maximize2 } from 'lucide-react';
-import { cn } from '@afribayit/ui/src/lib/cn';
-import { Button } from '@afribayit/ui';
+import { MessageCircle, X, Send, Bot, User, Sparkles } from 'lucide-react';
 
-interface Message {
-  role: 'user' | 'rebecca';
-  content: string;
-}
-
-export function RebeccaChat() {
+/**
+ * Section 8.2.3 - Web Chat Widget Rebecca
+ * Interface premium avec animations Framer Motion et streaming simulé.
+ */
+export const RebeccaChat = () => {
   const [isOpen, setIsOpen] = useState(false);
-  const [messages, setMessages] = useState<Message[]>([
+  const [messages, setMessages] = useState([
     {
-      role: 'rebecca',
+      id: '1',
+      role: 'assistant',
       content:
-        "Bonjour ! Je suis Rebecca, votre experte AfriBayit. Comment puis-je vous aider dans votre projet immobilier aujourd'hui ?",
+        "Bonjour ! Je suis Rebecca, votre assistante AfriBayit. Comment puis-je vous aider dans votre projet immobilier aujourd'hui ?",
+      timestamp: new Date(),
     },
   ]);
   const [input, setInput] = useState('');
-  const [loading, setLoading] = useState(false);
+  const [isTyping, setIsTyping] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (scrollRef.current) {
       scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
     }
-  }, [messages]);
+  }, [messages, isTyping]);
 
   const handleSend = async () => {
-    if (!input.trim() || loading) return;
+    if (!input.trim()) return;
 
-    const userMsg = input.trim();
-    setMessages((prev) => [...prev, { role: 'user', content: userMsg }]);
+    const userMsg = {
+      id: Date.now().toString(),
+      role: 'user',
+      content: input,
+      timestamp: new Date(),
+    };
+    setMessages((prev) => [...prev, userMsg]);
     setInput('');
-    setLoading(true);
+    setIsTyping(true);
 
-    try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/v1/ai/rebecca/chat`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ message: userMsg }),
-      });
-      const data = await response.json();
-      setMessages((prev) => [...prev, { role: 'rebecca', content: data.reply }]);
-    } catch (error) {
-      setMessages((prev) => [
-        ...prev,
-        {
-          role: 'rebecca',
-          content: 'Je suis désolée, une erreur est survenue. Pouvez-vous répéter ?',
-        },
-      ]);
-    } finally {
-      setLoading(false);
-    }
+    // Simulation de l'appel Rebecca (Section 8.2.1)
+    setTimeout(() => {
+      const assistantMsg = {
+        id: (Date.now() + 1).toString(),
+        role: 'assistant',
+        content:
+          "Je recherche les meilleures opportunités pour vous... D'après vos préférences, il y a 3 terrains vérifiés GeoTrust à Cotonou qui correspondent à votre budget.",
+        timestamp: new Date(),
+      };
+      setMessages((prev) => [...prev, assistantMsg]);
+      setIsTyping(false);
+    }, 1500);
   };
 
   return (
-    <div className="fixed bottom-8 right-8 z-[100] flex flex-col items-end">
+    <div className="fixed bottom-6 right-6 z-50">
       <AnimatePresence>
         {isOpen && (
           <motion.div
-            initial={{ opacity: 0, scale: 0.9, y: 20 }}
-            animate={{ opacity: 1, scale: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.9, y: 20 }}
-            className="mb-4 flex h-[550px] w-[380px] flex-col overflow-hidden rounded-[32px] border border-white/20 bg-white/90 shadow-2xl backdrop-blur-2xl"
+            initial={{ opacity: 0, y: 20, scale: 0.95 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: 20, scale: 0.95 }}
+            className="mb-4 flex h-[500px] w-96 flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-2xl dark:border-slate-800 dark:bg-slate-900"
           >
             {/* Header */}
-            <div className="bg-navy flex items-center justify-between p-6 text-white">
+            <div className="flex items-center justify-between bg-gradient-to-r from-blue-600 to-indigo-700 p-4 text-white">
               <div className="flex items-center gap-3">
-                <div className="bg-gold/20 border-gold/30 flex h-10 w-10 items-center justify-center rounded-xl border">
-                  <Sparkles className="text-gold h-5 w-5" />
+                <div className="relative">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-full bg-white/20 backdrop-blur-sm">
+                    <Bot className="h-6 w-6" />
+                  </div>
+                  <div className="absolute bottom-0 right-0 h-3 w-3 rounded-full border-2 border-white bg-green-400"></div>
                 </div>
                 <div>
-                  <p className="text-sm font-bold leading-tight">Rebecca IA</p>
-                  <p className="text-[10px] font-bold uppercase tracking-widest text-white/40">
-                    Assistante Experte
+                  <h3 className="font-bold">Rebecca</h3>
+                  <p className="flex items-center gap-1 text-xs text-blue-100">
+                    <Sparkles className="h-3 w-3" /> IA Core Active
                   </p>
                 </div>
               </div>
               <button
                 onClick={() => setIsOpen(false)}
-                className="text-white/40 transition-colors hover:text-white"
+                className="rounded-lg p-1 transition-colors hover:bg-white/10"
               >
                 <X className="h-5 w-5" />
               </button>
             </div>
 
             {/* Messages */}
-            <div ref={scrollRef} className="no-scrollbar flex-1 space-y-4 overflow-y-auto p-6">
-              {messages.map((msg, i) => (
+            <div ref={scrollRef} className="flex-1 space-y-4 overflow-y-auto scroll-smooth p-4">
+              {messages.map((msg) => (
                 <div
-                  key={i}
-                  className={cn(
-                    'flex max-w-[85%] flex-col',
-                    msg.role === 'user' ? 'ml-auto items-end' : 'mr-auto items-start',
-                  )}
+                  key={msg.id}
+                  className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}
                 >
                   <div
-                    className={cn(
-                      'rounded-3xl px-5 py-3.5 text-sm leading-relaxed',
+                    className={`max-w-[80%] rounded-2xl p-3 text-sm ${
                       msg.role === 'user'
-                        ? 'bg-navy rounded-br-none text-white'
-                        : 'bg-charcoal-50 text-charcoal border-charcoal-100 rounded-bl-none border',
-                    )}
+                        ? 'rounded-tr-none bg-blue-600 text-white'
+                        : 'rounded-tl-none bg-slate-100 text-slate-800 dark:bg-slate-800 dark:text-slate-200'
+                    }`}
                   >
                     {msg.content}
                   </div>
-                  <span className="text-charcoal-300 mt-1.5 text-[10px] font-bold uppercase tracking-wider">
-                    {msg.role === 'user' ? 'Vous' : 'Rebecca'}
-                  </span>
                 </div>
               ))}
-              {loading && (
-                <div className="text-charcoal-400 flex items-center gap-2 px-5 text-xs font-bold">
-                  <Loader2 className="h-3 w-3 animate-spin" />
-                  Rebecca réfléchit...
+              {isTyping && (
+                <div className="flex justify-start">
+                  <div className="flex gap-1 rounded-2xl rounded-tl-none bg-slate-100 p-3 dark:bg-slate-800">
+                    <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-slate-400"></span>
+                    <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-slate-400 [animation-delay:0.2s]"></span>
+                    <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-slate-400 [animation-delay:0.4s]"></span>
+                  </div>
                 </div>
               )}
             </div>
 
             {/* Input */}
-            <div className="p-6 pt-2">
-              <div className="relative">
+            <div className="border-t border-slate-200 p-4 dark:border-slate-800">
+              <div className="flex gap-2">
                 <input
                   type="text"
                   value={input}
                   onChange={(e) => setInput(e.target.value)}
-                  onKeyPress={(e) => e.key === 'Enter' && handleSend()}
-                  placeholder="Posez votre question..."
-                  className="bg-charcoal-50 focus:ring-navy h-14 w-full rounded-2xl border-none px-5 pr-14 text-sm font-medium transition-all focus:ring-2"
+                  onKeyDown={(e) => e.key === 'Enter' && handleSend()}
+                  placeholder="Posez votre question à Rebecca..."
+                  className="flex-1 rounded-xl border-none bg-slate-50 px-4 py-2 text-sm outline-none transition-all focus:ring-2 focus:ring-blue-500 dark:bg-slate-800"
                 />
                 <button
                   onClick={handleSend}
-                  disabled={!input.trim() || loading}
-                  className="bg-navy hover:bg-navy-600 shadow-navy/20 absolute right-2 top-2 flex h-10 w-10 items-center justify-center rounded-xl text-white shadow-lg transition-all disabled:opacity-50"
+                  className="rounded-xl bg-blue-600 p-2 text-white transition-all hover:bg-blue-700 active:scale-95"
                 >
-                  <Send className="h-4 w-4" />
+                  <Send className="h-5 w-5" />
                 </button>
               </div>
-              <p className="text-charcoal-300 mt-3 text-center text-[9px] font-medium">
-                Réponses générées par IA • Base de connaissances AfriBayit
+              <p className="mt-2 text-center text-[10px] text-slate-400">
+                Rebecca peut faire des erreurs. Vérifiez les informations critiques.
               </p>
             </div>
           </motion.div>
@@ -153,16 +149,10 @@ export function RebeccaChat() {
         whileHover={{ scale: 1.05 }}
         whileTap={{ scale: 0.95 }}
         onClick={() => setIsOpen(!isOpen)}
-        className={cn(
-          'relative flex h-16 w-16 items-center justify-center rounded-full shadow-2xl transition-all duration-500',
-          isOpen ? 'text-navy rotate-90 bg-white' : 'bg-navy text-white',
-        )}
+        className="flex h-14 w-14 items-center justify-center rounded-full bg-blue-600 text-white shadow-xl transition-all hover:bg-blue-700"
       >
-        {isOpen ? <X className="h-6 w-6" /> : <MessageSquare className="h-6 w-6" />}
-        {!isOpen && (
-          <span className="bg-gold absolute -right-1 -top-1 h-5 w-5 animate-bounce rounded-full border-4 border-white" />
-        )}
+        {isOpen ? <X className="h-6 w-6" /> : <MessageCircle className="h-6 w-6" />}
       </motion.button>
     </div>
   );
-}
+};

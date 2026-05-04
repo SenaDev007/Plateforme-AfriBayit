@@ -425,6 +425,9 @@ model Surveyor {
   isAvailable   Boolean   @default(true)
   rating        Float     @default(0)
   reviewCount   Int       @default(0)
+  
+  // Section 8.3.2 - ProMatch IA
+  embedding    Unsupported("vector(1536)")?
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
 
@@ -539,6 +542,9 @@ model Property {
   reconstruction3dUrl String?
   
   notaryId            String?         // Linked notary for validation
+  
+  // Section 8.1.2 - AI RAG & Semantic Search
+  embedding           Unsupported("vector(1536)")? 
 
   owner           User            @relation(fields: [ownerId], references: [id])
   images          PropertyImage[]
@@ -842,6 +848,9 @@ model Artisan {
   yearsExp      Int       @default(0)
   location      String?   // Zone d'intervention
   projects      ArtisanProject[]
+  
+  // Section 8.3.2 - ProMatch IA
+  embedding     Unsupported("vector(1536)")?
 
   currency     Currency @default(XOF)
   phone        String
