@@ -59,14 +59,14 @@ export const api = {
       password: string;
       firstName: string;
       lastName: string;
-      phone?: string;
-      role?: string;
-      country?: string;
-      geoPreferences?: any;
-      budgetMin?: number;
-      budgetMax?: number;
-      objectives?: string;
-      aiAssistantEnabled?: boolean;
+      phone?: string | undefined;
+      role?: string | undefined;
+      country?: string | undefined;
+      geoPreferences?: any | undefined;
+      budgetMin?: number | undefined;
+      budgetMax?: number | undefined;
+      objectives?: string | undefined;
+      aiAssistantEnabled?: boolean | undefined;
     }) =>
       request<{ accessToken: string; refreshToken: string; user: unknown }>('/auth/register', {
         method: 'POST',
