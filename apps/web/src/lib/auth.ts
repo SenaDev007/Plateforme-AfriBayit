@@ -30,8 +30,8 @@ export const authConfig: NextAuthConfig = {
       id: 'apple',
       name: 'Apple',
       type: 'oauth',
-      clientId: process.env['APPLE_ID'],
-      clientSecret: process.env['APPLE_SECRET'],
+      clientId: process.env['APPLE_ID']!,
+      clientSecret: process.env['APPLE_SECRET']!,
       wellKnown: 'https://appleid.apple.com/.well-known/openid-configuration',
       checks: ['pkce', 'state'],
       profile(profile: any) {
