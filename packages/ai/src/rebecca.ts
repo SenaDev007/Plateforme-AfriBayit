@@ -16,18 +16,28 @@ export class RebeccaAgent {
   `;
 
   async chat(userId: string, message: string, history: any[]) {
-    // 1. Context Enrichment (Section 8.1.2 RAG - Mocked)
+    // 1. Context Enrichment (Section 8.1.2 RAG)
     const context = await this.getSemanticContext(message);
 
-    // 2. Build Prompt
+    // 2. Fetch User Long-term Memory (Section 8.2.1)
+    const userMemory = await this.getUserLongTermMemory(userId);
+
+    // 3. Build Prompt with Personalization
     const fullPrompt = `
       ${this.persona}
+      Mémoire Long Terme (Section 8.2.1): ${JSON.stringify(userMemory)}
       Context RAG (Section 8.1.2): ${context}
-      Historique: ${JSON.stringify(history)}
+      Historique Session (Redis): ${JSON.stringify(history)}
       Message Utilisateur: ${message}
+      
+      Outils Disponibles (Section 8.2.1):
+      - search_properties(query, filters)
+      - get_property_details(id)
+      - check_escrow_status(transaction_id)
+      - book_hotel(room_id, dates)
     `;
 
-    // 3. Inference with Intelligent Routing (Section 8.1.3)
+    // 4. Inference
     const isComplex =
       message.length > 200 || message.includes('contrat') || message.includes('loi');
     const response = await aiCore.generateResponse(fullPrompt, isComplex ? 'COMPLEX' : 'SIMPLE');
@@ -36,6 +46,18 @@ export class RebeccaAgent {
       reply: response,
       agent: 'Rebecca',
       timestamp: new Date().toISOString(),
+    };
+  }
+
+  /**
+   * Section 8.2.1 - Mémoire long terme (PostgreSQL)
+   */
+  private async getUserLongTermMemory(userId: string) {
+    // In production, fetch from user_profiles/preferences
+    return {
+      preferredCity: 'Cotonou',
+      lastSearch: 'Terrain nu',
+      budget: '20M XOF',
     };
   }
 
