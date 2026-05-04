@@ -10,3 +10,4 @@ export { MarketAnalysisService } from './market-analysis';
 export { RebeccaProactiveTriggers, ArtisanPortfolioVerifier } from './proactive-triggers';
 export { WhatsAppAdapter, SMSFallbackAdapter } from './channels';
 export { BlockchainService, RAGService, ImmersiveService } from './innovation';
+export { RebeccaSecurityGuard } from './rebecca-security';

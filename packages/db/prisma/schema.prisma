@@ -281,6 +281,9 @@ model User {
   reputationScore     Int             @default(0) // Section 5.7.2 (0-1000)
   reputationLevel     String          @default("DECOUVREUR") // DECOUVREUR, ACTEUR, EXPERT, AMBASSADEUR
 
+  // Subscriptions (Section 11.2.2)
+  subscriptions       Subscription[]
+
   @@index([email])
   @@index([phone])
   @@index([country])
@@ -1838,4 +1841,52 @@ model ListingAIScore {
   property            Property @relation(fields: [propertyId], references: [id])
 
   @@map("listing_ai_scores")
+}
+
+// ─── SECTION 11.2.2 — SUBSCRIPTION PLANS ──────────────────────────────────────
+
+model Subscription {
+  id            String   @id @default(cuid())
+  userId        String
+  planId        String   // HELM_SEED, HELM_GROW, HELM_LEAD, PMS_STARTER, etc.
+  status        String   @default("ACTIVE") // ACTIVE, PAUSED, CANCELLED, EXPIRED
+  priceXOF      Int
+  currency      String   @default("XOF")
+  billingCycle  String   @default("MONTHLY") // MONTHLY, ANNUAL
+  startDate     DateTime @default(now())
+  endDate       DateTime?
+  autoRenew     Boolean  @default(true)
+  tenantId      String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  user          User     @relation(fields: [userId], references: [id])
+
+  @@index([userId])
+  @@index([planId])
+  @@index([status])
+  @@map("subscriptions")
+}
+
+// ─── SECTION 10.7 — SECURITY INCIDENTS ────────────────────────────────────────
+
+model SecurityIncident {
+  id            String   @id @default(cuid())
+  type          String   // AUTH_FAILURE, CROSS_TENANT, SCRAPING, TRANSACTION_ANOMALY
+  severity      String   // CRITICAL, HIGH, MEDIUM, LOW
+  phase         String   @default("DETECTION") // DETECTION, CONTAINMENT, ANALYSIS, REMEDIATION
+  description   String
+  affectedUsers Int      @default(0)
+  actorIp       String?
+  actorId       String?
+  tenantId      String?
+  metadata      Json?
+  detectedAt    DateTime @default(now())
+  containedAt   DateTime?
+  resolvedAt    DateTime?
+
+  @@index([type])
+  @@index([severity])
+  @@index([detectedAt])
+  @@map("security_incidents")
 }

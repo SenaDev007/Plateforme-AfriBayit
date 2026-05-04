@@ -1,11 +1,22 @@
-import { Global, Module } from '@nestjs/common';
+import { Module, MiddlewareConsumer, NestModule } from '@nestjs/common';
 import { AuditService } from './audit.service';
 import { JwtBlacklistService } from './jwt-blacklist.service';
 import { TenantGuard } from './tenant.guard';
+import { RBACGuard } from './rbac.guard';
+import { IncidentResponseService } from './incident-response.service';
+import { AntiScrapingMiddleware } from './anti-scraping.middleware';
 
-@Global()
+/**
+ * Section 10 — Security Module
+ * Registers all security services, guards, and middleware.
+ */
 @Module({
-  providers: [AuditService, JwtBlacklistService, TenantGuard],
-  exports: [AuditService, JwtBlacklistService, TenantGuard],
+  providers: [AuditService, JwtBlacklistService, TenantGuard, RBACGuard, IncidentResponseService],
+  exports: [AuditService, JwtBlacklistService, TenantGuard, RBACGuard, IncidentResponseService],
 })
-export class SecurityModule {}
+export class SecurityModule implements NestModule {
+  configure(consumer: MiddlewareConsumer) {
+    // Section 10.2 — Anti-scraping on all public routes
+    consumer.apply(AntiScrapingMiddleware).forRoutes('*');
+  }
+}
