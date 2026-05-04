@@ -27,7 +27,7 @@ const buttonVariants = cva(
         ],
         /** Gold premium — upgrade / premium action */
         gold: [
-          'bg-gold text-navy font-semibold rounded-pill',
+          'bg-gold text-navy-deep font-semibold rounded-pill',
           'hover:bg-gold-400 active:bg-gold-600',
           'focus-visible:ring-gold',
           'shadow-gold hover:shadow-lg',

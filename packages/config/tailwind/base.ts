@@ -18,6 +18,7 @@ const config: Omit<Config, 'content'> = {
           700: '#001c51',
           800: '#001336',
           900: '#00091b',
+          deep: '#001F5B',
         },
         gold: {
           DEFAULT: '#D4AF37',
@@ -90,6 +91,19 @@ const config: Omit<Config, 'content'> = {
         sans: ['DM Sans', 'system-ui', 'sans-serif'],
         mono: ['DM Mono', 'Menlo', 'monospace'],
       },
+      fontSize: {
+        // Section 2.4 — Typographic Scale
+        'hero-mobile': ['48px', { lineHeight: '1.05', fontWeight: '900' }],
+        'hero-desktop': ['80px', { lineHeight: '1.05', fontWeight: '900' }],
+        'section-mobile': ['32px', { lineHeight: '1.1', fontWeight: '700' }],
+        'section-desktop': ['56px', { lineHeight: '1.1', fontWeight: '700' }],
+        'card-mobile': ['16px', { lineHeight: '1.3', fontWeight: '700' }],
+        'card-desktop': ['22px', { lineHeight: '1.3', fontWeight: '700' }],
+        'body-mobile': ['14px', { lineHeight: '1.7', fontWeight: '400' }],
+        'body-desktop': ['16px', { lineHeight: '1.7', fontWeight: '400' }],
+        'caption-mobile': ['11px', { lineHeight: '1.4', fontWeight: '500' }],
+        'caption-desktop': ['12px', { lineHeight: '1.4', fontWeight: '500' }],
+      },
       borderRadius: {
         sm: '4px',
         md: '8px',
@@ -106,29 +120,38 @@ const config: Omit<Config, 'content'> = {
         gold: '0 4px 20px rgba(212, 175, 55, 0.3)',
       },
       animation: {
-        'fade-up': 'fadeUp 0.6s cubic-bezier(0.16,1,0.3,1) forwards',
+        // Section 2.8 — Durations & Easing
+        'fade-up': 'fadeUp 0.5s cubic-bezier(0.16,1,0.3,1) forwards', // 500ms for cards/pages
         float: 'float 6s ease-in-out infinite',
         'float-delay': 'float 6s ease-in-out 2s infinite',
         shimmer: 'shimmer 2s linear infinite',
-        'slide-up': 'slideUp 0.4s cubic-bezier(0.16,1,0.3,1) forwards',
+        'slide-up': 'slideUp 0.28s cubic-bezier(0.16,1,0.3,1) forwards', // 280ms for transitions
+        'micro-interaction': 'micro 0.15s ease-out forwards', // 150ms
       },
       keyframes: {
         fadeUp: {
-          '0%': { opacity: '0', transform: 'translateY(24px)' },
+          '0%': { opacity: '0', transform: 'translateY(32px)' }, // 32px from spec
           '100%': { opacity: '1', transform: 'translateY(0)' },
         },
         float: {
-          '0%, 100%': { transform: 'translateY(0px)' },
-          '50%': { transform: 'translateY(-12px)' },
+          '0%, 100%': { transform: 'translateY(0px) rotate(0deg)' },
+          '50%': { transform: 'translateY(-12px) rotate(2deg)' }, // Rotation from spec
         },
         shimmer: {
           '0%': { backgroundPosition: '-200% 0' },
           '100%': { backgroundPosition: '200% 0' },
         },
         slideUp: {
-          '0%': { opacity: '0', transform: 'translateY(100%)' },
+          '0%': { opacity: '0', transform: 'translateY(40px)' }, // 40px from spec
           '100%': { opacity: '1', transform: 'translateY(0)' },
         },
+        micro: {
+          '0%': { transform: 'scale(1)' },
+          '100%': { transform: 'scale(1.02)' },
+        },
+      },
+      translate: {
+        'card-hover': '-6px',
       },
       screens: {
         xs: '375px',

@@ -22,7 +22,9 @@ import {
   Home,
 } from 'lucide-react';
 import { Button, Input } from '@afribayit/ui';
+import { signIn } from 'next-auth/react';
 import toast from 'react-hot-toast';
+import { api } from '@/lib/api';
 import { cn } from '@afribayit/ui/src/lib/cn';
 
 const STEPS = [
@@ -109,18 +111,57 @@ export function RegisterStepper(): React.ReactElement {
   const [selectedRole, setSelectedRole] = useState('BUYER');
 
   const form1 = useForm<Step1Data>({ resolver: zodResolver(step1Schema) });
-  const form2 = useForm<Step2Data>({ resolver: zodResolver(step2Schema) });
+  const form2 = useForm<Step2Data>({
+    resolver: zodResolver(step2Schema),
+    defaultValues: { country: 'BJ', role: 'BUYER' },
+  });
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [formData, setFormData] = useState<Partial<Step1Data & Step2Data>>({});
 
-  const onStep1 = async (_data: Step1Data): Promise<void> => {
+  const onStep1 = async (data: Step1Data): Promise<void> => {
+    setFormData((prev) => ({ ...prev, ...data }));
     setStep(2);
   };
 
-  const onStep2 = async (_data: Step2Data): Promise<void> => {
+  const onStep2 = async (data: Step2Data): Promise<void> => {
+    setFormData((prev) => ({ ...prev, ...data }));
     setStep(3);
   };
 
-  const onFinish = (): void => {
-    toast.success('Compte créé ! Bienvenue sur AfriBayit 🎉');
+  const onFinish = async (): Promise<void> => {
+    setIsSubmitting(true);
+    try {
+      const finalData = {
+        email: formData.email!,
+        password: formData.password!,
+        firstName: formData.firstName!,
+        lastName: formData.lastName!,
+        phone: formData.phone,
+        role: formData.role,
+        country: formData.country,
+      };
+
+      await api.auth.register(finalData);
+
+      toast.success('Compte créé ! Bienvenue sur AfriBayit 🎉');
+
+      // Auto sign-in after registration
+      const result = await signIn('credentials', {
+        email: finalData.email,
+        password: finalData.password,
+        redirect: false,
+      });
+
+      if (result?.ok) {
+        window.location.href = '/dashboard';
+      } else {
+        window.location.href = '/connexion';
+      }
+    } catch (error: any) {
+      toast.error(error.message || "Erreur lors de l'inscription");
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -393,6 +434,7 @@ export function RegisterStepper(): React.ReactElement {
                 size="lg"
                 className="shadow-navy/20 h-14 rounded-2xl text-base font-bold shadow-xl"
                 onClick={onFinish}
+                loading={isSubmitting}
               >
                 TERMINER L'INSCRIPTION
               </Button>

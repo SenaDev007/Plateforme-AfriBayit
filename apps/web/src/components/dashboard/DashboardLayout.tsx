@@ -87,7 +87,7 @@ export function DashboardLayout({
         )}
       >
         {/* Logo Section */}
-        <div className="flex h-24 items-center border-b border-white/5 px-8">
+        <div className="flex h-20 items-center border-b border-white/5 px-6 md:h-24 md:px-8">
           <Link href="/" className="group flex items-center gap-1.5">
             <div className="bg-gold/20 border-gold/30 flex h-8 w-8 items-center justify-center rounded-lg border">
               <div className="bg-gold h-4 w-4 rounded-sm" />
@@ -273,7 +273,7 @@ export function DashboardLayout({
       {/* Main Content */}
       <div className="flex min-w-0 flex-1 flex-col">
         {/* Top Header */}
-        <header className="border-charcoal-100 sticky top-0 z-40 flex h-24 items-center justify-between border-b bg-white/50 px-8 backdrop-blur-xl">
+        <header className="border-charcoal-100 sticky top-0 z-40 flex h-20 items-center justify-between border-b bg-white/50 px-4 backdrop-blur-xl md:h-24 md:px-8">
           {!hideSidebar && (
             <button
               onClick={() => setIsSidebarOpen(true)}
@@ -297,7 +297,7 @@ export function DashboardLayout({
               </p>
               <div className="flex items-center gap-2">
                 <Wallet className="text-navy h-4 w-4" />
-                <span className="font-serif text-lg font-bold">
+                <span className="font-serif text-base font-bold md:text-lg">
                   1 250 000{' '}
                   <span className="text-charcoal-400 font-sans text-xs font-medium">XOF</span>
                 </span>
@@ -317,7 +317,7 @@ export function DashboardLayout({
         </header>
 
         {/* Viewport */}
-        <main className="no-scrollbar flex-1 overflow-y-auto p-8 md:p-12">
+        <main className="no-scrollbar flex-1 overflow-y-auto p-4 sm:p-8 md:p-12">
           <AnimatePresence mode="wait">
             <motion.div
               key={pathname}

@@ -43,7 +43,10 @@ const FOOTER_LINKS: Record<string, { label: string; href: Route | string }[]> = 
 
 export function SiteFooter(): React.ReactElement {
   return (
-    <footer className="bg-[#050505] pb-12 pt-24 text-white/50" aria-labelledby="footer-heading">
+    <footer
+      className="bg-[#050505] pb-12 pt-16 text-white/50 md:pt-24"
+      aria-labelledby="footer-heading"
+    >
       <h2 id="footer-heading" className="sr-only">
         Pied de page
       </h2>

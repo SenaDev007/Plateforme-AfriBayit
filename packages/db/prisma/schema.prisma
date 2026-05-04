@@ -620,16 +620,25 @@ model HotelBooking {
 model Artisan {
   id           String   @id @default(cuid())
   userId       String   @unique
-  businessName String
-  profession   String
-  description  String   @db.Text
+  companyName  String
+  slug         String   @unique
+  category     String
+  bio          String   @db.Text
   country      Country
   city         String
+  district     String?
   portfolio    Json?    // Array of portfolio images
   certifications Json?
-  isVerified   Boolean  @default(false)
+  isCertified  Boolean  @default(false)
+  isAvailable  Boolean  @default(true)
+  isActive     Boolean  @default(true)
   rating       Float    @default(0)
   reviewCount  Int      @default(0)
+  jobsDone     Int      @default(0)
+  hourlyRate   Int?
+  currency     Currency @default(XOF)
+  phone        String
+  whatsapp     String?
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
 

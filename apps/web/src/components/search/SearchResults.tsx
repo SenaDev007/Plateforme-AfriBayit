@@ -173,7 +173,7 @@ export function SearchResults({ searchParams }: SearchResultsProps): React.React
             className={
               view === 'liste'
                 ? 'flex flex-col gap-6'
-                : 'grid grid-cols-1 gap-8 sm:grid-cols-2 xl:grid-cols-3'
+                : 'grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4'
             }
           >
             {results.length > 0 ? (

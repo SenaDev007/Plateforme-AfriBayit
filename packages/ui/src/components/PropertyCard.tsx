@@ -83,7 +83,7 @@ export function PropertyCard({
         'group relative flex flex-col overflow-hidden rounded-2xl bg-white',
         'border-charcoal-100 shadow-card border',
         'transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)]',
-        'hover:shadow-card-hover hover:-translate-y-2',
+        'hover:shadow-card-hover hover:translate-y-card-hover',
         compact ? 'max-w-[300px]' : 'w-full',
         className,
       )}
@@ -169,7 +169,7 @@ export function PropertyCard({
         <h3
           className={cn(
             'text-charcoal group-hover:text-navy font-serif font-bold leading-tight transition-colors',
-            compact ? 'text-base' : 'text-xl',
+            compact ? 'text-card-mobile' : 'text-card-mobile md:text-card-desktop',
           )}
         >
           {property.title}

@@ -57,13 +57,16 @@ function AnimatedNumber({
 
 export function StatsBar(): React.ReactElement {
   return (
-    <section aria-label="Statistiques AfriBayit" className="bg-navy relative overflow-hidden py-24">
+    <section
+      aria-label="Statistiques AfriBayit"
+      className="bg-navy relative overflow-hidden py-16 md:py-24"
+    >
       {/* Background decorative elements */}
       <div className="bg-gold/5 absolute right-0 top-0 h-full w-1/3 translate-x-1/2 rounded-full blur-[120px]" />
       <div className="bg-sky/5 absolute bottom-0 left-0 h-full w-1/4 -translate-x-1/2 rounded-full blur-[100px]" />
 
       <div className="relative z-10 mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div className="grid grid-cols-2 gap-y-16 lg:grid-cols-4 lg:gap-8">
+        <div className="grid grid-cols-2 gap-x-4 gap-y-12 lg:grid-cols-4 lg:gap-8">
           {STATS.map((stat, i) => (
             <motion.div
               key={stat.label}
@@ -73,7 +76,7 @@ export function StatsBar(): React.ReactElement {
               viewport={{ once: true }}
               transition={{ delay: i * 0.1, duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
             >
-              <div className="font-sans text-5xl font-black tracking-tighter text-white sm:text-6xl md:text-7xl">
+              <div className="font-sans text-4xl font-black tracking-tighter text-white sm:text-5xl md:text-7xl">
                 <AnimatedNumber
                   target={stat.value}
                   suffix={stat.suffix}
@@ -82,7 +85,7 @@ export function StatsBar(): React.ReactElement {
               </div>
               <div className="flex flex-col items-center">
                 <div className="bg-gold mb-3 h-0.5 w-8 opacity-50" />
-                <p className="text-gold text-xs font-medium uppercase tracking-[0.2em] sm:text-sm">
+                <p className="text-gold text-[10px] font-medium uppercase tracking-[0.1em] sm:text-xs sm:tracking-[0.2em] md:text-sm">
                   {stat.label}
                 </p>
               </div>

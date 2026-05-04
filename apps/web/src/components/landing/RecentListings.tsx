@@ -162,7 +162,7 @@ export function RecentListings(): React.ReactElement | null {
             </p>
             <h2
               id="recent-listings-title"
-              className="text-charcoal font-sans text-4xl font-black leading-tight tracking-tighter sm:text-5xl"
+              className="text-charcoal font-sans text-3xl font-black leading-tight tracking-tighter sm:text-4xl md:text-5xl"
             >
               Opportunités <span className="text-navy font-serif italic">Rares & Sécurisées</span>
             </h2>

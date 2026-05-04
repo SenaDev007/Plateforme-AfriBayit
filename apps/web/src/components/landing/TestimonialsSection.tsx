@@ -64,7 +64,7 @@ export function TestimonialsSection(): React.ReactElement {
             </p>
             <h2
               id="testimonials-title"
-              className="text-charcoal font-sans text-4xl font-black tracking-tighter sm:text-6xl lg:text-7xl"
+              className="text-charcoal font-sans text-3xl font-black tracking-tighter sm:text-5xl md:text-6xl lg:text-7xl"
             >
               Ils ont arrêté de rêver. <br />
               <span className="text-navy font-serif font-normal italic">Ils encaissent.</span>
@@ -76,7 +76,7 @@ export function TestimonialsSection(): React.ReactElement {
           {TESTIMONIALS.map((testimonial, i) => (
             <motion.blockquote
               key={testimonial.name}
-              className="bg-charcoal-50 hover:border-charcoal-100 flex flex-col gap-6 rounded-[32px] border border-transparent p-10 transition-all duration-500 hover:bg-white hover:shadow-2xl"
+              className="bg-charcoal-50 hover:border-charcoal-100 flex flex-col gap-6 rounded-[32px] border border-transparent p-6 transition-all duration-500 hover:bg-white hover:shadow-2xl md:p-10"
               initial={{ opacity: 0, y: 30 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}

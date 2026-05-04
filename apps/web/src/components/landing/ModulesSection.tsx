@@ -71,7 +71,7 @@ export function ModulesSection(): React.ReactElement {
           <p className="text-gold mb-4 text-[10px] font-bold uppercase tracking-[0.4em]">
             Le Bouclier Anti-Arnaques Définitif
           </p>
-          <h2 className="text-charcoal font-sans text-4xl font-black tracking-tighter md:text-6xl lg:text-7xl">
+          <h2 className="text-charcoal text-section-mobile md:text-section-desktop font-sans font-black tracking-tighter">
             Investissez en Afrique <br />
             <span className="font-serif font-normal italic">les Yeux Fermés.</span>
           </h2>
@@ -85,7 +85,7 @@ export function ModulesSection(): React.ReactElement {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ delay: i * 0.1, duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
-              className={`${m.span} group relative overflow-hidden rounded-[48px] ${m.color} border-charcoal-100/50 flex flex-col justify-between border p-12 transition-all duration-700 hover:shadow-[0_40px_80px_-15px_rgba(0,0,0,0.1)]`}
+              className={`${m.span} border-charcoal-100/50 group relative flex flex-col justify-between overflow-hidden rounded-[32px] border md:rounded-[48px] ${m.color} p-8 transition-all duration-700 hover:shadow-[0_40px_80px_-15px_rgba(0,0,0,0.1)] md:p-12`}
             >
               {m.image && (
                 <div className="absolute inset-0 z-0 opacity-20 transition-all duration-700 group-hover:scale-110 group-hover:opacity-40">
@@ -95,17 +95,19 @@ export function ModulesSection(): React.ReactElement {
 
               <div className="relative z-10">
                 <div
-                  className={`mb-10 flex h-16 w-16 items-center justify-center rounded-[24px] ${m.textColor === 'text-white' ? 'bg-white/10' : 'bg-navy/5'} backdrop-blur-sm`}
+                  className={`mb-6 flex h-12 w-12 items-center justify-center rounded-2xl md:mb-10 md:h-16 md:w-16 md:rounded-[24px] ${m.textColor === 'text-white' ? 'bg-white/10' : 'bg-navy/5'} backdrop-blur-sm`}
                 >
                   <m.icon
-                    className={`h-8 w-8 ${m.textColor === 'text-white' ? 'text-gold' : 'text-navy'}`}
+                    className={`h-6 w-6 md:h-8 md:w-8 ${m.textColor === 'text-white' ? 'text-gold' : 'text-navy'}`}
                   />
                 </div>
-                <h3 className={`mb-5 text-2xl font-bold tracking-tight ${m.textColor}`}>
+                <h3
+                  className={`mb-3 text-xl font-bold tracking-tight md:mb-5 md:text-2xl ${m.textColor}`}
+                >
                   {m.title}
                 </h3>
                 <p
-                  className={`text-base leading-relaxed ${m.textColor === 'text-white' ? 'opacity-50' : 'text-charcoal-400'}`}
+                  className={`text-sm leading-relaxed md:text-base ${m.textColor === 'text-white' ? 'opacity-50' : 'text-charcoal-400'}`}
                 >
                   {m.description}
                 </p>

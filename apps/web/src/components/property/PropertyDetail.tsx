@@ -114,7 +114,7 @@ export function PropertyDetail({ property }: PropertyDetailProps): React.ReactEl
   return (
     <article aria-label={property.title} className="bg-white pb-24 lg:pb-32">
       {/* Header Info (Breadcrumbs / Back button style) */}
-      <div className="bg-charcoal-900 pb-8 pt-32">
+      <div className="bg-charcoal-900 pb-8 pt-24 md:pt-32">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="flex flex-col justify-between gap-6 md:flex-row md:items-end">
             <div className="space-y-4">
@@ -134,7 +134,7 @@ export function PropertyDetail({ property }: PropertyDetailProps): React.ReactEl
                   </Badge>
                 )}
               </div>
-              <h1 className="font-serif text-3xl font-bold leading-tight text-white md:text-5xl">
+              <h1 className="font-serif text-2xl font-bold leading-tight text-white sm:text-3xl md:text-5xl">
                 {property.title}
               </h1>
               <p className="flex items-center gap-2 text-base text-white/50">
@@ -166,7 +166,7 @@ export function PropertyDetail({ property }: PropertyDetailProps): React.ReactEl
       {/* Gallery Section */}
       <section className="bg-charcoal-900 pb-16">
         <div className="mx-auto max-w-[1400px] px-4 sm:px-6">
-          <div className="grid aspect-[21/9] min-h-[500px] grid-cols-1 gap-4 md:grid-cols-4">
+          <div className="grid aspect-[21/9] min-h-[300px] grid-cols-1 gap-4 sm:min-h-[500px] md:grid-cols-4">
             {/* Main Large Image */}
             <div className="group relative overflow-hidden rounded-3xl md:col-span-3">
               <AnimatePresence mode="wait">

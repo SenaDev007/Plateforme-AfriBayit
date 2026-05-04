@@ -63,7 +63,7 @@ export function SearchBar({
             aria-selected={purpose === p.value}
             onClick={() => setPurpose(p.value)}
             className={cn(
-              'relative overflow-hidden rounded-t-xl px-6 py-3.5 text-sm font-medium transition-all duration-300',
+              'relative overflow-hidden rounded-t-xl px-6 py-3.5 text-sm font-medium transition-all duration-150 ease-out',
               purpose === p.value
                 ? 'text-navy bg-white'
                 : variant === 'hero'
@@ -164,7 +164,7 @@ export function SearchBar({
             className={cn(
               'flex w-full items-center justify-center gap-2',
               'bg-navy rounded-xl text-base font-semibold text-white',
-              'px-8 py-4 transition-all duration-300',
+              'px-8 py-4 transition-all duration-150 ease-out',
               'hover:bg-navy-600 hover:shadow-navy/30 hover:shadow-lg active:scale-95',
               'focus-visible:ring-gold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2',
             )}

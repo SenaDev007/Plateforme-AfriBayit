@@ -7,7 +7,7 @@ export function FinalCTA(): React.ReactElement {
   return (
     <section className="to-charcoal-50 overflow-hidden bg-gradient-to-b from-white py-24">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div className="bg-navy relative overflow-hidden rounded-[48px] p-8 shadow-[0_32px_64px_-16px_rgba(0,48,135,0.4)] md:p-20">
+        <div className="bg-navy relative overflow-hidden rounded-[32px] p-6 shadow-[0_32px_64px_-16px_rgba(0,48,135,0.4)] sm:p-10 md:rounded-[48px] md:p-20">
           {/* Background decoration */}
           <div className="bg-gold/10 absolute right-0 top-0 h-full w-1/2 -translate-y-1/3 translate-x-1/3 rounded-full blur-[120px]" />
           <div className="bg-sky/10 absolute bottom-0 left-0 h-full w-1/3 -translate-x-1/4 translate-y-1/4 rounded-full blur-[100px]" />
@@ -24,7 +24,7 @@ export function FinalCTA(): React.ReactElement {
                   <Zap className="fill-gold h-3 w-3" />
                   L'HÉSITATION COÛTE CHER.
                 </div>
-                <h2 className="font-sans text-5xl font-black leading-[1.1] tracking-tighter text-white md:text-7xl">
+                <h2 className="font-sans text-3xl font-black leading-[1.1] tracking-tighter text-white sm:text-5xl md:text-7xl">
                   Passez à l'action. <br />
                   <span className="text-gold font-serif font-normal italic">Blindez</span> votre
                   avenir.
@@ -35,18 +35,18 @@ export function FinalCTA(): React.ReactElement {
                 </p>
               </motion.div>
 
-              <div className="flex flex-wrap gap-4">
+              <div className="flex flex-col gap-4 sm:flex-row">
                 <motion.button
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
-                  className="bg-gold text-navy hover:bg-gold-400 shadow-gold/20 group flex items-center gap-3 rounded-full px-10 py-5 text-lg font-bold shadow-xl transition-all"
+                  className="bg-gold text-navy hover:bg-gold-400 shadow-gold/20 group flex items-center justify-center gap-3 rounded-full px-6 py-4 text-base font-bold shadow-xl transition-all md:px-10 md:py-5 md:text-lg"
                 >
                   J'intègre le système
                   <ArrowRight className="h-5 w-5 transition-transform group-hover:translate-x-2" />
                 </motion.button>
                 <motion.button
                   whileHover={{ scale: 1.05 }}
-                  className="rounded-full border border-white/20 bg-white/5 px-10 py-5 text-lg font-bold text-white backdrop-blur-md transition-all hover:bg-white/10"
+                  className="rounded-full border border-white/20 bg-white/5 px-6 py-4 text-center text-base font-bold text-white backdrop-blur-md transition-all hover:bg-white/10 md:px-10 md:py-5 md:text-lg"
                 >
                   Je me forme d'abord
                 </motion.button>

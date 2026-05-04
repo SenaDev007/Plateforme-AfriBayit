@@ -6,7 +6,13 @@
 
 @layer base {
   :root {
-    --radius: 0.5rem;
+    --radius-sm: 4px;
+    --radius-md: 8px;
+    --radius-lg: 16px;
+    --radius-xl: 24px;
+    --navy: #003087;
+    --gold: #d4af37;
+    --navy-deep: #001f5b;
     scroll-behavior: smooth;
   }
 
