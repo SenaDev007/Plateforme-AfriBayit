@@ -62,6 +62,11 @@ export const api = {
       phone?: string;
       role?: string;
       country?: string;
+      geoPreferences?: any;
+      budgetMin?: number;
+      budgetMax?: number;
+      objectives?: string;
+      aiAssistantEnabled?: boolean;
     }) =>
       request<{ accessToken: string; refreshToken: string; user: unknown }>('/auth/register', {
         method: 'POST',

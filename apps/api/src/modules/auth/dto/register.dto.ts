@@ -38,4 +38,25 @@ export class RegisterDto {
   @IsOptional()
   @IsEnum(Country)
   country?: Country;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  geoPreferences?: any;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  budgetMin?: number;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  budgetMax?: number;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsString()
+  objectives?: string;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  aiAssistantEnabled?: boolean;
 }

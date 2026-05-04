@@ -28,6 +28,7 @@ enum UserRole {
   NOTARY
   SURVEYOR
   AGENT
+  GUESTHOUSE_OWNER
 }
 
 enum KycLevel {
@@ -201,6 +202,15 @@ model User {
   totalEarnings   Float     @default(0)
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
+  
+  // Onboarding (Section 4.2)
+  onboardingStep      Int       @default(1)
+  onboardingCompleted Boolean   @default(false)
+  geoPreferences      Json?     // { countries: string[], cities: string[] }
+  budgetMin           Float?
+  budgetMax           Float?
+  objectives          String?
+  aiAssistantEnabled  Boolean   @default(false)
 
   // Relations
   accounts        Account[]

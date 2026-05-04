@@ -60,6 +60,12 @@ export class AuthService {
         ...(dto.phone !== undefined && { phone: dto.phone }),
         role: dto.role ?? 'BUYER',
         country: dto.country ?? 'BJ',
+        onboardingCompleted: true, // For now, we mark it true if they finish the stepper
+        geoPreferences: dto.geoPreferences,
+        budgetMin: dto.budgetMin,
+        budgetMax: dto.budgetMax,
+        objectives: dto.objectives,
+        aiAssistantEnabled: dto.aiAssistantEnabled ?? false,
       },
     });
 

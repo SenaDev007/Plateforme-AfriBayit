@@ -26,6 +26,26 @@ export const authConfig: NextAuthConfig = {
       clientId: process.env['FACEBOOK_CLIENT_ID']!,
       clientSecret: process.env['FACEBOOK_CLIENT_SECRET']!,
     }),
+    {
+      id: 'apple',
+      name: 'Apple',
+      type: 'oauth',
+      clientId: process.env['APPLE_ID'],
+      clientSecret: process.env['APPLE_SECRET'],
+      wellKnown: 'https://appleid.apple.com/.well-known/openid-configuration',
+      checks: ['pkce', 'state'],
+      profile(profile: any) {
+        return {
+          id: profile.sub,
+          name: profile.name?.firstName
+            ? `${profile.name.firstName} ${profile.name.lastName}`
+            : profile.email,
+          email: profile.email,
+          image: null,
+          role: 'BUYER',
+        };
+      },
+    },
     Credentials({
       credentials: {
         email: { label: 'Email', type: 'email' },

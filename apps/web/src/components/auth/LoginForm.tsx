@@ -253,9 +253,12 @@ export function LoginForm(): React.ReactElement {
       <div className="border-charcoal-100 mt-8 flex flex-col items-center gap-6 border-t pt-8">
         <p className="text-charcoal-400 text-sm font-medium">Ou continuez avec</p>
 
-        <div className="grid w-full grid-cols-2 gap-4">
-          <button className="bg-charcoal-50 hover:bg-charcoal-100 border-charcoal-100 text-charcoal flex items-center justify-center gap-3 rounded-2xl border py-3.5 text-sm font-bold transition-all">
-            <svg className="h-5 w-5" viewBox="0 0 24 24">
+        <div className="grid w-full grid-cols-1 gap-3 sm:grid-cols-3">
+          <button
+            onClick={() => signIn('google')}
+            className="bg-charcoal-50 hover:bg-charcoal-100 border-charcoal-100 text-charcoal flex items-center justify-center gap-3 rounded-2xl border py-3.5 text-[10px] font-bold transition-all"
+          >
+            <svg className="h-4 w-4" viewBox="0 0 24 24">
               <path
                 fill="#EA4335"
                 d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
@@ -275,11 +278,23 @@ export function LoginForm(): React.ReactElement {
             </svg>
             GOOGLE
           </button>
-          <button className="flex items-center justify-center gap-3 rounded-2xl bg-[#1877F2] py-3.5 text-sm font-bold text-white transition-all hover:bg-[#166FE5]">
-            <svg className="h-5 w-5" fill="currentColor" viewBox="0 0 24 24">
+          <button
+            onClick={() => signIn('facebook')}
+            className="flex items-center justify-center gap-3 rounded-2xl bg-[#1877F2] py-3.5 text-[10px] font-bold text-white transition-all hover:bg-[#166FE5]"
+          >
+            <svg className="h-4 w-4" fill="currentColor" viewBox="0 0 24 24">
               <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z" />
             </svg>
             FACEBOOK
+          </button>
+          <button
+            onClick={() => signIn('apple')}
+            className="flex items-center justify-center gap-3 rounded-2xl bg-black py-3.5 text-[10px] font-bold text-white transition-all hover:bg-black/90"
+          >
+            <svg className="h-4 w-4" fill="currentColor" viewBox="0 0 24 24">
+              <path d="M17.057 10.74c-.027-2.316 1.89-3.428 1.977-3.483-1.077-1.574-2.75-1.789-3.344-1.814-1.417-.144-2.766.832-3.483.832-.717 0-1.85-.815-3.04-.792-1.564.023-3.007.91-3.812 2.306-1.625 2.82-.416 6.994 1.157 9.266.77 1.11 1.684 2.356 2.88 2.311 1.154-.045 1.591-.744 2.986-.744 1.393 0 1.787.744 3.01.72 1.246-.021 2.046-1.135 2.812-2.254.886-1.293 1.252-2.545 1.272-2.613-.027-.014-2.45-.94-2.475-3.736zm-2.455-6.732c.636-.77 1.064-1.841.947-2.91-.92.037-2.032.612-2.69 1.383-.591.684-1.107 1.776-.967 2.825 1.026.08 2.073-.528 2.71-1.298z" />
+            </svg>
+            APPLE
           </button>
         </div>
 
