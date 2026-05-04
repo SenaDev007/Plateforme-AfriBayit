@@ -18,6 +18,7 @@ import {
   DollarSign,
   X,
   Loader2,
+  Shield,
 } from 'lucide-react';
 import { Input, Button, cn } from '@afribayit/ui';
 import { api } from '@/lib/api';
@@ -98,17 +99,31 @@ const step4Schema = z.object({
   negotiable: z.boolean().optional(),
 });
 
+const step5Schema = z.object({
+  legalDocuments: z
+    .array(
+      z.object({
+        type: z.string(),
+        url: z.string(),
+        status: z.string().default('PENDING'),
+      }),
+    )
+    .min(1, 'Au moins un document légal est requis'),
+});
+
 type Step1Data = z.infer<typeof step1Schema>;
 type Step2Data = z.infer<typeof step2Schema>;
 type Step3Data = z.infer<typeof step3Schema>;
 type Step4Data = z.infer<typeof step4Schema>;
+type Step5Data = z.infer<typeof step5Schema>;
 
-type FormData = Step1Data & Step2Data & Step3Data & Step4Data;
+type FormData = Step1Data & Step2Data & Step3Data & Step4Data & Step5Data;
 
 const STEPS = [
   { label: 'Type & objectif', icon: Home },
   { label: 'Détails', icon: CheckCircle2 },
   { label: 'Localisation', icon: MapPin },
+  { label: 'Documents', icon: Upload },
   { label: 'Prix & publication', icon: DollarSign },
 ];
 
@@ -201,6 +216,11 @@ export function PublishPropertyForm(): React.ReactElement {
   const handleStep3 = (data: Step3Data): void => {
     setFormData((prev) => ({ ...prev, ...data }));
     setStep(3);
+  };
+
+  const handleStepLegal = (docs: any[]): void => {
+    setFormData((prev) => ({ ...prev, legalDocuments: docs }));
+    setStep(4);
   };
 
   const handleStep4 = async (data: Step4Data): Promise<void> => {
@@ -652,8 +672,69 @@ export function PublishPropertyForm(): React.ReactElement {
           </motion.form>
         )}
 
-        {/* Step 3: Price & Publish */}
+        {/* Step 3: Legal Documents - Section 5.0.2 */}
         {step === 3 && (
+          <motion.div
+            key="step3"
+            initial={{ opacity: 0, x: 20 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: -20 }}
+            className="space-y-6"
+          >
+            <div>
+              <h2 className="text-charcoal mb-1 font-serif text-xl font-semibold">
+                Documents Légaux
+              </h2>
+              <p className="text-charcoal-400 text-sm">
+                Obligatoire pour validation (Section 5.0.2 du CDC).
+              </p>
+            </div>
+            <div className="bg-navy/5 border-navy/10 mb-6 flex gap-3 rounded-xl border p-4">
+              <Shield className="text-navy h-5 w-5 flex-shrink-0" />
+              <p className="text-charcoal-600 text-[10px] leading-relaxed">
+                Les documents requis dépendent du pays sélectionné.
+                {formData.country === 'BJ' && ' Pour le Bénin, un Titre Foncier ou ACD est requis.'}
+                {formData.country === 'CI' &&
+                  " Pour la Côte d'Ivoire, une Lettre d'Attribution ou ACD est requis."}
+              </p>
+            </div>
+
+            <div className="border-charcoal-200 hover:border-navy cursor-pointer space-y-3 rounded-[32px] border-2 border-dashed p-8 text-center transition-all">
+              <Upload className="text-charcoal-300 mx-auto h-8 w-8" />
+              <p className="text-charcoal text-sm font-bold">Glissez vos documents légaux ici</p>
+              <p className="text-charcoal-400 text-[10px]">
+                Titre foncier, ACD, Permis de construire (PDF/JPG)
+              </p>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() =>
+                  handleStepLegal([{ type: 'TITRE_FONCIER', url: 'temp', status: 'PENDING' }])
+                }
+              >
+                SIMULER UPLOAD
+              </Button>
+            </div>
+
+            <div className="flex gap-3">
+              <Button type="button" variant="ghost" onClick={() => setStep(2)} className="gap-1.5">
+                <ChevronLeft className="h-4 w-4" aria-hidden="true" /> Retour
+              </Button>
+              <Button
+                fullWidth
+                onClick={() =>
+                  handleStepLegal([{ type: 'TITRE_FONCIER', url: 'temp', status: 'PENDING' }])
+                }
+                className="gap-2"
+              >
+                Suivant <ChevronRight className="h-4 w-4" aria-hidden="true" />
+              </Button>
+            </div>
+          </motion.div>
+        )}
+
+        {/* Step 4: Price & Publish */}
+        {step === 4 && (
           <motion.form
             key="step3"
             initial={{ opacity: 0, x: 20 }}
@@ -737,7 +818,7 @@ export function PublishPropertyForm(): React.ReactElement {
             </div>
 
             <div className="flex gap-3">
-              <Button type="button" variant="ghost" onClick={() => setStep(2)} className="gap-1.5">
+              <Button type="button" variant="ghost" onClick={() => setStep(3)} className="gap-1.5">
                 <ChevronLeft className="h-4 w-4" aria-hidden="true" /> Retour
               </Button>
               <Button type="submit" fullWidth size="lg" disabled={isSubmitting}>

@@ -1,276 +1,140 @@
 'use client';
-import React, { useState, useEffect } from 'react';
-import Link from 'next/link';
-import { useSession } from 'next-auth/react';
 import { motion } from 'framer-motion';
-import {
-  FileCheck,
-  Clock,
-  CheckCircle2,
-  AlertCircle,
-  Gavel,
-  ExternalLink,
-  ShieldCheck,
-  Building2,
-  FileText,
-  User,
-  ArrowRight,
-  Loader2,
-} from 'lucide-react';
+import { FileText, Users, CreditCard, ShieldCheck, Clock, ArrowRight, PenTool } from 'lucide-react';
 import { Card, Badge, Button } from '@afribayit/ui';
-import { DashboardLayout } from '@/components/dashboard/DashboardLayout';
-import { api } from '@/lib/api';
-import { cn } from '@afribayit/ui/src/lib/cn';
-
-interface NotaryAssignment {
-  id: string;
-  status: 'ASSIGNED' | 'IN_PROGRESS' | 'SIGNED' | 'REGISTERED';
-  createdAt: string;
-  transaction: {
-    reference: string;
-    amount: string;
-    currency: string;
-    property: { title: string; city: string; country: string } | null;
-    buyer: { firstName: string; lastName: string };
-    seller: { firstName: string; lastName: string };
-  };
-}
 
 export default function NotaryDashboard() {
-  const { data: session } = useSession();
-  const token = (session?.accessToken as string | undefined) ?? null;
-  const [assignments, setAssignments] = useState<NotaryAssignment[]>([]);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    if (!token) return;
-    // Fetch assignments for the notary
-    // For now, using a mock if API fails, but the logic is ready
-    fetch(`${process.env.NEXT_PUBLIC_API_URL}/v1/notaries/me/assignments`, {
-      headers: { Authorization: `Bearer ${token}` },
-    })
-      .then((res) => res.json())
-      .then((data) => {
-        if (Array.isArray(data)) setAssignments(data);
-      })
-      .catch((err) => console.error(err))
-      .finally(() => setLoading(false));
-  }, [token]);
-
-  const updateStatus = async (id: string, status: string) => {
-    if (!token) return;
-    try {
-      await fetch(`${process.env.NEXT_PUBLIC_API_URL}/v1/notaries/assignments/${id}/status`, {
-        method: 'PATCH',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({ status }),
-      });
-      // Refresh
-      setAssignments((prev) =>
-        prev.map((a) => (a.id === id ? { ...a, status: status as any } : a)),
-      );
-    } catch (err) {
-      console.error(err);
-    }
-  };
-
-  const getStatusIcon = (status: string) => {
-    switch (status) {
-      case 'ASSIGNED':
-        return <Clock className="text-gold h-5 w-5" />;
-      case 'IN_PROGRESS':
-        return <Loader2 className="text-navy h-5 w-5 animate-spin" />;
-      case 'SIGNED':
-        return <FileCheck className="h-5 w-5 text-emerald-500" />;
-      case 'REGISTERED':
-        return <ShieldCheck className="text-navy h-5 w-5" />;
-      default:
-        return <AlertCircle className="text-charcoal-300 h-5 w-5" />;
-    }
-  };
-
   return (
-    <DashboardLayout>
-      <div className="flex flex-col gap-10">
-        {/* Header */}
-        <div className="flex flex-col justify-between gap-6 md:flex-row md:items-end">
-          <div>
-            <p className="text-navy mb-2 text-[10px] font-bold uppercase tracking-[0.3em]">
-              Office Notarial Digital
-            </p>
-            <h1 className="text-charcoal font-serif text-3xl font-bold md:text-5xl">
-              Dossiers Juridiques
-            </h1>
-          </div>
-          <div className="border-charcoal-100 flex rounded-2xl border bg-white p-2 shadow-sm">
-            <div className="border-charcoal-100 border-r px-6 py-2 text-center">
-              <p className="text-charcoal-400 mb-1 text-[10px] font-bold uppercase">En attente</p>
-              <p className="text-navy font-serif text-xl font-bold">
-                {assignments.filter((a) => a.status === 'ASSIGNED').length}
-              </p>
-            </div>
-            <div className="px-6 py-2 text-center">
-              <p className="text-charcoal-400 mb-1 text-[10px] font-bold uppercase">Terminés</p>
-              <p className="font-serif text-xl font-bold text-emerald-600">
-                {assignments.filter((a) => a.status === 'REGISTERED').length}
-              </p>
-            </div>
-          </div>
+    <div className="space-y-10 py-10">
+      <div className="flex items-end justify-between">
+        <div>
+          <p className="text-gold mb-2 text-[10px] font-bold uppercase tracking-[0.3em]">
+            Office Notarial — Espace Certifié
+          </p>
+          <h1 className="text-charcoal font-serif text-4xl font-bold">Espace Notaire</h1>
         </div>
+        <Badge variant="success" className="rounded-full px-4 py-1.5">
+          NOTAIRE CERTIFIÉ AFRIBAYIT
+        </Badge>
+      </div>
 
-        {/* Assignments List */}
-        <div className="grid gap-6">
-          {loading ? (
-            <div className="flex justify-center py-20">
-              <Loader2 className="text-navy h-10 w-10 animate-spin" />
+      <div className="grid grid-cols-1 gap-6 md:grid-cols-4">
+        {[
+          { label: 'Dossiers Actifs', value: '12', icon: FileText, color: 'navy' },
+          { label: 'Signatures en attente', value: '5', icon: PenTool, color: 'gold' },
+          { label: 'Escrow Sécurisé', value: '145M FCFA', icon: CreditCard, color: 'navy' },
+          { label: 'Actes Authentifiés', value: '128', icon: ShieldCheck, color: 'gold' },
+        ].map((stat, i) => (
+          <Card key={i} className="border-charcoal-100 rounded-[32px] p-6">
+            <div
+              className={`mb-4 flex h-12 w-12 items-center justify-center rounded-2xl ${
+                stat.color === 'navy' ? 'bg-navy/5 text-navy' : 'bg-gold/10 text-gold'
+              }`}
+            >
+              <stat.icon className="h-6 w-6" />
             </div>
-          ) : assignments.length > 0 ? (
-            assignments.map((assignment) => (
-              <motion.div
-                key={assignment.id}
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                className="border-charcoal-100 overflow-hidden rounded-[32px] border bg-white shadow-sm transition-all duration-500 hover:shadow-xl"
+            <p className="text-charcoal text-3xl font-bold">{stat.value}</p>
+            <p className="text-charcoal-400 text-[10px] font-bold uppercase tracking-widest">
+              {stat.label}
+            </p>
+          </Card>
+        ))}
+      </div>
+
+      <div className="grid grid-cols-1 gap-8 lg:grid-cols-3">
+        <Card className="space-y-6 rounded-[40px] p-8 lg:col-span-2">
+          <h3 className="text-charcoal font-serif text-2xl font-bold">
+            Dossiers de Transaction — État Escrow
+          </h3>
+          <div className="space-y-4">
+            {[
+              {
+                id: 'TRX-9921',
+                client: 'Koffi Mensah',
+                property: 'Villa Cocody',
+                amount: '85M FCFA',
+                status: 'NOTARY_IN_PROGRESS',
+                timer: '12j restants',
+              },
+              {
+                id: 'TRX-8842',
+                client: 'Sarah Kone',
+                property: 'Appart. Plateau',
+                amount: '45M FCFA',
+                status: 'FUNDED',
+                timer: 'Assignation reçue',
+              },
+            ].map((tx) => (
+              <div
+                key={tx.id}
+                className="bg-charcoal-50 border-charcoal-100 group flex items-center justify-between rounded-[32px] border p-6 transition-all hover:bg-white hover:shadow-xl"
               >
-                <div className="flex flex-col gap-10 p-8 md:p-10 lg:flex-row">
-                  {/* Left: Status & Info */}
-                  <div className="flex flex-col gap-6 lg:w-1/3">
-                    <div className="flex items-center gap-4">
-                      <div className="bg-charcoal-50 flex h-14 w-14 items-center justify-center rounded-2xl">
-                        {getStatusIcon(assignment.status)}
-                      </div>
-                      <div>
-                        <Badge className="mb-1">{assignment.status.replace('_', ' ')}</Badge>
-                        <p className="text-charcoal-400 text-xs font-bold uppercase tracking-widest">
-                          Réf: {assignment.transaction.reference}
-                        </p>
-                      </div>
-                    </div>
-
-                    <div className="space-y-4">
-                      <div className="text-charcoal flex items-center gap-3">
-                        <Building2 className="text-navy/40 h-5 w-5" />
-                        <span className="text-sm font-bold">
-                          {assignment.transaction.property?.title || 'Bien non spécifié'}
-                        </span>
-                      </div>
-                      <div className="text-charcoal-400 flex items-center gap-3">
-                        <Clock className="text-navy/20 h-5 w-5" />
-                        <span className="text-xs font-medium">
-                          Reçu le {new Date(assignment.createdAt).toLocaleDateString('fr-FR')}
-                        </span>
-                      </div>
-                    </div>
+                <div className="flex items-center gap-4">
+                  <div className="text-navy flex h-12 w-12 items-center justify-center rounded-full bg-white font-bold shadow-sm">
+                    {tx.client[0]}
                   </div>
-
-                  {/* Middle: Parties */}
-                  <div className="border-charcoal-50 flex flex-col gap-6 border-y py-6 lg:w-1/3 lg:border-x lg:border-y-0 lg:px-10 lg:py-0">
-                    <p className="text-charcoal-300 text-[10px] font-bold uppercase tracking-[0.2em]">
-                      Parties Contractantes
+                  <div>
+                    <div className="flex items-center gap-2">
+                      <span className="text-charcoal font-bold">{tx.client}</span>
+                      <Badge variant="outline" className="text-[8px]">
+                        {tx.id}
+                      </Badge>
+                    </div>
+                    <p className="text-charcoal-400 text-xs">
+                      {tx.property} • {tx.amount}
                     </p>
-                    <div className="space-y-6">
-                      <div className="flex items-center gap-4">
-                        <div className="bg-navy/5 text-navy flex h-10 w-10 items-center justify-center rounded-full text-xs font-bold italic">
-                          A
-                        </div>
-                        <div>
-                          <p className="text-charcoal text-xs font-bold">
-                            {assignment.transaction.buyer.firstName}{' '}
-                            {assignment.transaction.buyer.lastName}
-                          </p>
-                          <p className="text-charcoal-400 text-[10px] font-bold uppercase tracking-widest">
-                            Acheteur
-                          </p>
-                        </div>
-                      </div>
-                      <div className="flex items-center gap-4">
-                        <div className="bg-gold/10 text-gold flex h-10 w-10 items-center justify-center rounded-full text-xs font-bold italic">
-                          V
-                        </div>
-                        <div>
-                          <p className="text-charcoal text-xs font-bold">
-                            {assignment.transaction.seller.firstName}{' '}
-                            {assignment.transaction.seller.lastName}
-                          </p>
-                          <p className="text-charcoal-400 text-[10px] font-bold uppercase tracking-widest">
-                            Vendeur
-                          </p>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Right: Actions */}
-                  <div className="flex flex-col justify-between gap-6 lg:w-1/3">
-                    <div>
-                      <p className="text-charcoal-300 mb-4 text-[10px] font-bold uppercase tracking-[0.2em]">
-                        Actions de Validation
-                      </p>
-                      <div className="space-y-3">
-                        {assignment.status === 'ASSIGNED' && (
-                          <Button
-                            onClick={() => updateStatus(assignment.id, 'IN_PROGRESS')}
-                            className="bg-navy h-12 w-full rounded-xl text-[11px] font-bold uppercase tracking-widest"
-                          >
-                            OUVRIR LE DOSSIER
-                          </Button>
-                        )}
-                        {assignment.status === 'IN_PROGRESS' && (
-                          <Button
-                            onClick={() => updateStatus(assignment.id, 'SIGNED')}
-                            className="h-12 w-full rounded-xl bg-emerald-600 text-[11px] font-bold uppercase tracking-widest"
-                          >
-                            CONFIRMER SIGNATURE ACTE
-                          </Button>
-                        )}
-                        {assignment.status === 'SIGNED' && (
-                          <Button
-                            onClick={() => updateStatus(assignment.id, 'REGISTERED')}
-                            className="bg-navy flex h-12 w-full items-center justify-center gap-2 rounded-xl text-[11px] font-bold uppercase tracking-widest"
-                          >
-                            <ShieldCheck className="h-4 w-4" />
-                            ANCRER SUR POLYGON (ANDF)
-                          </Button>
-                        )}
-                        {assignment.status === 'REGISTERED' && (
-                          <div className="flex items-center gap-3 rounded-xl border border-emerald-100 bg-emerald-50 p-4">
-                            <CheckCircle2 className="h-5 w-5 text-emerald-500" />
-                            <span className="text-xs font-bold uppercase tracking-widest text-emerald-700">
-                              DOSSIER CLÔTURÉ
-                            </span>
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                    <Link
-                      href="#"
-                      className="text-navy hover:text-gold flex items-center gap-2 self-end text-[10px] font-bold uppercase tracking-widest transition-colors"
-                    >
-                      VOIR DOCUMENTS <ExternalLink className="h-3 w-3" />
-                    </Link>
                   </div>
                 </div>
-              </motion.div>
-            ))
-          ) : (
-            <div className="border-charcoal-100 space-y-6 rounded-[40px] border bg-white p-20 text-center">
-              <div className="bg-charcoal-50 text-charcoal-200 mx-auto flex h-20 w-20 items-center justify-center rounded-3xl">
-                <Gavel className="h-10 w-10" />
+                <div className="flex items-center gap-6">
+                  <div className="text-right">
+                    <Badge variant={tx.status === 'FUNDED' ? 'success' : 'warning'}>
+                      {tx.status}
+                    </Badge>
+                    <p className="text-gold mt-1 text-[10px] font-bold uppercase">{tx.timer}</p>
+                  </div>
+                  <Button variant="ghost" size="sm" className="h-10 w-10 rounded-full p-0">
+                    <ArrowRight className="h-4 w-4" />
+                  </Button>
+                </div>
               </div>
-              <h3 className="text-charcoal font-serif text-2xl font-bold">
-                Aucun dossier en attente
-              </h3>
-              <p className="text-charcoal-400 mx-auto max-w-sm text-sm">
-                Votre file d'attente est vide. Les nouveaux dossiers vous seront attribués
-                automatiquement via notre système sécurisé.
+            ))}
+          </div>
+        </Card>
+
+        <div className="space-y-8">
+          <Card className="bg-navy space-y-6 rounded-[40px] p-8 text-white">
+            <h3 className="font-serif text-xl font-bold">Rédaction Assistée IA</h3>
+            <p className="text-charcoal-300 text-xs leading-relaxed">
+              Modèles d'actes authentiques conformes au droit OHADA et à la réforme foncière
+              béninoise de 2023.
+            </p>
+            <Button
+              fullWidth
+              className="bg-gold hover:bg-gold-600 h-14 rounded-2xl border-none font-bold text-white"
+            >
+              OUVRIR L'ÉDITEUR IA
+            </Button>
+          </Card>
+
+          <Card className="border-charcoal-100 space-y-6 rounded-[40px] p-8">
+            <h3 className="text-charcoal font-serif text-xl font-bold">Ancrage Polygon</h3>
+            <div className="space-y-4">
+              <div className="flex items-center gap-3">
+                <div className="bg-emerald h-2 w-2 animate-pulse rounded-full" />
+                <span className="text-charcoal text-xs font-bold uppercase tracking-widest">
+                  Hash de l'acte certifié
+                </span>
+              </div>
+              <div className="bg-charcoal-50 text-charcoal-400 break-all rounded-lg p-3 font-mono text-[10px]">
+                0x71C7656EC7ab88b098defB751B7401B5f6d8976F
+              </div>
+              <p className="text-charcoal-400 text-[10px] italic">
+                L'acte signé sera ancré sur la blockchain Polygon pour une opposabilité universelle.
               </p>
             </div>
-          )}
+          </Card>
         </div>
       </div>
-    </DashboardLayout>
+    </div>
   );
 }

@@ -1,7 +1,7 @@
 'use client';
 
 import * as React from 'react';
-import { Search, MapPin, Home, ChevronDown } from 'lucide-react';
+import { Search, MapPin, Home, ChevronDown, Sparkles } from 'lucide-react';
 import { cn } from '../lib/cn';
 
 type SearchPurpose = 'SALE' | 'RENT' | 'SHORT_TERM_RENT';
@@ -98,14 +98,15 @@ export function SearchBar({
             type="search"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            placeholder="Mot-clé, référence, quartier…"
+            placeholder="IA Search: 'Villa 4 chambres à Cotonou, budget 50M'..."
             aria-label="Mots-clés"
             className={cn(
-              'text-charcoal w-full bg-transparent py-4 pl-12 pr-4 text-base',
+              'text-charcoal w-full bg-transparent py-4 pl-12 pr-4 text-base italic',
               'border-charcoal-100 md:border-r',
               'placeholder:text-charcoal-300 focus:outline-none',
             )}
           />
+          <Sparkles className="text-gold pointer-events-none absolute right-4 h-4 w-4 animate-pulse" />
         </div>
 
         {/* City */}
