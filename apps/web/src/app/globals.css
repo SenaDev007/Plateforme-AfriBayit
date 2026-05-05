@@ -66,25 +66,79 @@
 }
 
 @layer components {
-  /* Glassmorphism utility */
-  .glass {
-    @apply backdrop-blur-glass shadow-glass border border-white/40 bg-white/80;
-  }
-  .glass-dark {
-    @apply bg-charcoal-900/60 backdrop-blur-glass shadow-glass border border-white/10;
+  /* ... existing components ... */
+
+  /* Interactive Menu Styles — Module M1 */
+  .menu {
+    --component-active-color: var(--gold);
+    --component-inactive-color: rgba(255, 255, 255, 0.4);
+    --component-bg: rgba(0, 48, 135, 0.95);
+
+    @apply rounded-pill shadow-glass-lg backdrop-blur-glass flex items-center justify-around border border-white/10 p-2;
+    width: fit-content;
+    min-width: 340px;
+    height: 64px;
   }
 
-  /* Gold gradient text */
-  .text-gradient-gold {
-    @apply from-gold-300 via-gold to-gold-600 bg-gradient-to-r bg-clip-text text-transparent;
+  .menu__item {
+    @apply relative flex flex-1 flex-col items-center justify-center transition-all duration-300;
+    --lineWidth: 0px;
   }
 
-  /* Section reveal animation */
-  .reveal {
-    @apply translate-y-6 opacity-0;
+  .menu__item.active {
+    @apply flex-[1.5];
   }
-  .reveal.visible {
-    @apply translate-y-0 opacity-100 transition-all duration-700 ease-[cubic-bezier(0.16,1,0.3,1)];
+
+  .menu__icon {
+    @apply transition-all duration-300;
+    color: var(--component-inactive-color);
+  }
+
+  .menu__item.active .menu__icon {
+    @apply mb-1 -translate-y-1;
+    color: var(--component-active-color);
+    animation: iconBounce 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  }
+
+  .menu__text {
+    @apply font-sans text-[10px] font-bold uppercase tracking-widest opacity-0 transition-all duration-300;
+    color: white;
+    height: 0;
+    overflow: hidden;
+  }
+
+  .menu__text.active {
+    @apply h-auto opacity-100;
+  }
+
+  /* Underline animation */
+  .menu__item::after {
+    content: '';
+    @apply bg-gold absolute -bottom-1 h-1 rounded-full opacity-0 transition-all duration-300;
+    width: var(--lineWidth);
+  }
+
+  .menu__item.active::after {
+    @apply opacity-100;
+  }
+}
+
+@keyframes iconBounce {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  20% {
+    transform: translateY(-0.4em) scale(1.1);
+  }
+  40% {
+    transform: translateY(0);
+  }
+  60% {
+    transform: translateY(-0.15em);
+  }
+  80% {
+    transform: translateY(0);
   }
 }
 
