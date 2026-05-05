@@ -55,12 +55,12 @@ function extendMaterial<T extends THREE.Material = THREE.Material>(
     envMap?: THREE.Texture;
     envMapIntensity?: number;
   };
-
-  if (defaults.color) uniforms.diffuse.value = defaults.color;
-  if ('roughness' in defaults) uniforms.roughness.value = defaults.roughness;
-  if ('metalness' in defaults) uniforms.metalness.value = defaults.metalness;
-  if ('envMap' in defaults) uniforms.envMap.value = defaults.envMap;
-  if ('envMapIntensity' in defaults) uniforms.envMapIntensity.value = defaults.envMapIntensity;
+  if (defaults.color && uniforms.diffuse) uniforms.diffuse.value = defaults.color;
+  if ('roughness' in defaults && uniforms.roughness) uniforms.roughness.value = defaults.roughness;
+  if ('metalness' in defaults && uniforms.metalness) uniforms.metalness.value = defaults.metalness;
+  if ('envMap' in defaults && uniforms.envMap) uniforms.envMap.value = defaults.envMap;
+  if ('envMapIntensity' in defaults && uniforms.envMapIntensity)
+    uniforms.envMapIntensity.value = defaults.envMapIntensity;
 
   Object.entries(cfg.uniforms ?? {}).forEach(([key, u]) => {
     uniforms[key] =
