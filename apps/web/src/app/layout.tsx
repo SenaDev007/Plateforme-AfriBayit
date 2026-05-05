@@ -44,6 +44,8 @@ import { CustomCursor } from '@/components/visual/CustomCursor';
 import QueryProvider from '@/providers/QueryProvider';
 import GraphQLProvider from '@/providers/GraphQLProvider';
 
+import { ThemeProvider } from '@/providers/ThemeProvider';
+
 export default async function RootLayout({
   children,
 }: Readonly<{
@@ -56,28 +58,30 @@ export default async function RootLayout({
     <html lang={locale} suppressHydrationWarning>
       <body>
         <NextIntlClientProvider locale={locale} messages={messages}>
-          <QueryProvider>
-            <GraphQLProvider>
-              <CustomCursor />
-              {children}
-              <Toaster
-                position="top-right"
-                toastOptions={{
-                  duration: 4000,
-                  style: {
-                    background: '#2C2E2F',
-                    color: '#fff',
-                    borderRadius: '16px',
-                    fontSize: '14px',
-                  },
-                  success: { iconTheme: { primary: '#00A651', secondary: '#fff' } },
-                  error: { iconTheme: { primary: '#D93025', secondary: '#fff' } },
-                }}
-              />
-              <RebeccaChat />
-              <MobileTabBar />
-            </GraphQLProvider>
-          </QueryProvider>
+          <ThemeProvider attribute="class" defaultTheme="dark" enableSystem={false}>
+            <QueryProvider>
+              <GraphQLProvider>
+                <CustomCursor />
+                {children}
+                <Toaster
+                  position="top-right"
+                  toastOptions={{
+                    duration: 4000,
+                    style: {
+                      background: '#2C2E2F',
+                      color: '#fff',
+                      borderRadius: '16px',
+                      fontSize: '14px',
+                    },
+                    success: { iconTheme: { primary: '#00A651', secondary: '#fff' } },
+                    error: { iconTheme: { primary: '#D93025', secondary: '#fff' } },
+                  }}
+                />
+                <RebeccaChat />
+                <MobileTabBar />
+              </GraphQLProvider>
+            </QueryProvider>
+          </ThemeProvider>
         </NextIntlClientProvider>
       </body>
     </html>

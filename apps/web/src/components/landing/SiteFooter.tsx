@@ -1,149 +1,236 @@
 'use client';
-import type React from 'react';
+
+import React from 'react';
 import Link from 'next/link';
-import type { Route } from 'next';
+import { useTheme } from 'next-themes';
 import {
+  Sun,
+  Moon,
+  ChevronUp,
   Mail,
-  Phone,
-  MapPin,
   Instagram,
-  Twitter,
   Linkedin,
   Facebook,
-  ArrowRight,
+  Youtube,
+  Heart,
+  Twitter,
+  MessageCircle,
 } from 'lucide-react';
-import { motion } from 'framer-motion';
+import { cn } from '@/lib/utils';
 
-const FOOTER_LINKS: Record<string, { label: string; href: Route | string }[]> = {
-  Plateforme: [
-    { label: 'Acheter', href: '/recherche?but=SALE' },
-    { label: 'Louer', href: '/recherche?but=RENT' },
-    { label: 'Hôtels & Résidences', href: '/hotels' },
-    { label: 'Investissement', href: '/investissement' },
-  ],
-  Écosystème: [
-    { label: 'Artisans BTP', href: '/artisans' },
-    { label: 'AfriBayit Academy', href: '/formation' },
-    { label: 'Communauté', href: '/communaute' },
-    { label: 'GeoTrust', href: '/geotrust' },
-  ],
-  Pays: [
-    { label: '🇧🇯 Bénin', href: 'https://bj.afribayit.com' },
-    { label: "🇨🇮 Côte d'Ivoire", href: 'https://ci.afribayit.com' },
-    { label: '🇧🇫 Burkina Faso', href: 'https://bf.afribayit.com' },
-    { label: '🇹🇬 Togo', href: 'https://tg.afribayit.com' },
-  ],
-  Légal: [
-    { label: 'Conditions Générales', href: '/cgu' },
-    { label: 'Confidentialité', href: '/confidentialite' },
-    { label: 'Sécurité & Escrow', href: '/securite' },
-    { label: 'Support & Contact', href: '/contact' },
+// ============================================================================
+// THEME TOGGLE & SCROLL TOP
+// ============================================================================
+
+function handleScrollTop() {
+  window.scroll({
+    top: 0,
+    behavior: 'smooth',
+  });
+}
+
+const ThemeToggle = () => {
+  const { setTheme, theme } = useTheme();
+
+  return (
+    <div className="flex items-center justify-center">
+      <div className="flex items-center rounded-full border border-white/10 bg-white/5 p-1 backdrop-blur-sm">
+        <button
+          onClick={() => setTheme('light')}
+          className={cn(
+            'rounded-full p-2 transition-all',
+            theme === 'light' ? 'bg-gold text-navy' : 'text-white/40 hover:text-white',
+          )}
+        >
+          <Sun className="h-4 w-4" strokeWidth={1.5} />
+          <span className="sr-only">Clair</span>
+        </button>
+
+        <button
+          type="button"
+          onClick={handleScrollTop}
+          className="hover:text-gold mx-2 text-white/40 transition-colors"
+        >
+          <ChevronUp className="h-4 w-4" />
+          <span className="sr-only">Haut</span>
+        </button>
+
+        <button
+          onClick={() => setTheme('dark')}
+          className={cn(
+            'rounded-full p-2 transition-all',
+            theme === 'dark' ? 'bg-gold text-navy' : 'text-white/40 hover:text-white',
+          )}
+        >
+          <Moon className="h-4 w-4" strokeWidth={1.5} />
+          <span className="sr-only">Sombre</span>
+        </button>
+      </div>
+    </div>
+  );
+};
+
+// ============================================================================
+// NAVIGATION DATA
+// ============================================================================
+
+const NAVIGATION = {
+  categories: [
+    {
+      id: 'platform',
+      name: 'Plateforme',
+      sections: [
+        {
+          id: 'services',
+          name: 'Services',
+          items: [
+            { name: 'Acheter', href: '/recherche?but=SALE' },
+            { name: 'Louer', href: '/recherche?but=RENT' },
+            { name: 'Investir', href: '/investissement' },
+            { name: 'Hôtels', href: '/hotels' },
+          ],
+        },
+        {
+          id: 'trust',
+          name: 'Confiance',
+          items: [
+            { name: 'Audit Foncier', href: '/audit' },
+            { name: 'Séquestre', href: '/securite' },
+            { name: 'GeoTrust', href: '/geotrust' },
+            { name: 'Notaires', href: '/notaires' },
+          ],
+        },
+        {
+          id: 'countries',
+          name: 'Pays',
+          items: [
+            { name: 'Bénin', href: 'https://bj.afribayit.com' },
+            { name: "Côte d'Ivoire", href: 'https://ci.afribayit.com' },
+            { name: 'Sénégal', href: 'https://sn.afribayit.com' },
+            { name: 'Togo', href: 'https://tg.afribayit.com' },
+          ],
+        },
+        {
+          id: 'company',
+          name: 'Compagnie',
+          items: [
+            { name: 'À Propos', href: '/about' },
+            { name: 'Blog', href: '/blog' },
+            { name: 'Carrières', href: '/jobs' },
+            { name: 'Contact', href: '/contact' },
+          ],
+        },
+        {
+          id: 'legal',
+          name: 'Légal',
+          items: [
+            { name: 'CGU', href: '/terms' },
+            { name: 'Confidentialité', href: '/privacy' },
+            { name: 'Cookies', href: '/cookies' },
+          ],
+        },
+      ],
+    },
   ],
 };
 
-export function SiteFooter(): React.ReactElement {
+const SOCIAL_LINKS = [
+  { icon: Mail, href: 'mailto:contact@afribayit.com', label: 'Email' },
+  { icon: Twitter, href: 'https://x.com/afribayit', label: 'X' },
+  { icon: Instagram, href: 'https://instagram.com/afribayit', label: 'Instagram' },
+  { icon: MessageCircle, href: 'https://wa.me/afribayit', label: 'WhatsApp' },
+  { icon: Linkedin, href: 'https://linkedin.com/company/afribayit', label: 'LinkedIn' },
+  { icon: Facebook, href: 'https://facebook.com/afribayit', label: 'Facebook' },
+  { icon: Youtube, href: 'https://youtube.com/@afribayit', label: 'YouTube' },
+];
+
+const socialItemClass =
+  'hover:-translate-y-1 border border-white/10 rounded-xl p-2.5 transition-all hover:border-gold/50 hover:bg-gold/5 text-white/40 hover:text-gold';
+
+// ============================================================================
+// MAIN FOOTER COMPONENT
+// ============================================================================
+
+export function SiteFooter() {
   return (
-    <footer
-      className="bg-[#050505] pb-12 pt-16 text-white/50 md:pt-24"
-      aria-labelledby="footer-heading"
-    >
-      <h2 id="footer-heading" className="sr-only">
-        Pied de page
-      </h2>
-
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div className="grid grid-cols-1 gap-16 lg:grid-cols-12 lg:gap-8">
-          {/* Brand & Newsletter (Left Col) */}
-          <div className="flex flex-col justify-between lg:col-span-4">
-            <div>
-              <Link href="/" className="mb-6 inline-flex items-center gap-1">
-                <span className="font-sans text-2xl font-black tracking-tighter text-white">
-                  Afri
-                </span>
-                <span className="text-gold font-serif text-2xl font-normal italic">Bayit.</span>
-              </Link>
-              <p className="mb-10 max-w-xs text-xs font-light leading-relaxed text-white/40">
-                La super-app immobilière redéfinissant la confiance et la transparence sur le
-                continent africain.
-              </p>
-            </div>
-
-            <div>
-              <p className="mb-4 text-[10px] font-bold uppercase tracking-widest text-white">
-                Newsletter VIP
-              </p>
-              <form className="relative max-w-xs">
-                <input
-                  type="email"
-                  placeholder="votre@email.com"
-                  className="focus:border-gold w-full border-b border-white/20 bg-transparent py-2 pl-0 pr-8 text-xs text-white placeholder-white/30 transition-colors focus:outline-none"
-                />
-                <button
-                  type="button"
-                  className="hover:text-gold absolute right-0 top-1/2 -translate-y-1/2 text-white/40 transition-colors"
-                >
-                  <ArrowRight className="h-4 w-4" />
-                </button>
-              </form>
-            </div>
+    <footer className="bg-navy-deep border-t border-white/10 px-4 py-16">
+      {/* Brand Section */}
+      <div className="relative mx-auto grid max-w-7xl items-center justify-center gap-12 border-b border-white/5 pb-16 md:flex md:gap-16">
+        <Link href="/" className="flex items-center justify-center">
+          <div className="flex items-center gap-1">
+            <span className="font-sans text-2xl font-black tracking-tighter text-white">Afri</span>
+            <span className="text-gold font-serif text-2xl font-normal italic">Bayit.</span>
           </div>
+        </Link>
+        <p className="max-w-2xl text-center text-xs font-light leading-relaxed text-white/40 md:text-left">
+          AfriBayit est la plateforme de référence pour l&apos;investissement immobilier sécurisé en
+          Afrique de l&apos;Ouest. Nous combinons technologie de pointe, expertise juridique et
+          accompagnement local pour transformer vos idées en actifs immobiliers tangibles. Notre
+          mission est de démocratiser l&apos;accès à la propriété avec une transparence totale et
+          une sécurité sans compromis.
+        </p>
+      </div>
 
-          {/* Links (Right Cols) */}
-          <div className="grid grid-cols-2 gap-8 md:grid-cols-4 lg:col-span-8">
-            {Object.entries(FOOTER_LINKS).map(([category, links]) => (
-              <div key={category}>
-                <h3 className="mb-6 text-[10px] font-bold uppercase tracking-widest text-white">
-                  {category}
-                </h3>
-                <ul className="space-y-4">
-                  {links.map((link) => (
-                    <li key={link.href}>
-                      <Link
-                        href={link.href as Route}
-                        className="text-xs font-light text-white/40 transition-colors hover:text-white"
-                      >
-                        {link.label}
-                      </Link>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            ))}
-          </div>
+      {/* Navigation Links */}
+      <div className="mx-auto max-w-7xl px-6 py-16">
+        <div className="grid grid-cols-2 gap-12 leading-6 sm:grid-cols-3 lg:grid-cols-5">
+          {NAVIGATION.categories[0].sections.map((section) => (
+            <div key={section.id}>
+              <h3 className="text-gold mb-6 text-[10px] font-bold uppercase tracking-[0.3em]">
+                {section.name}
+              </h3>
+              <ul role="list" className="flex flex-col space-y-4">
+                {section.items.map((item) => (
+                  <li key={item.name}>
+                    <Link
+                      href={item.href}
+                      className="hover:text-gold text-xs font-medium text-white/40 transition-colors"
+                    >
+                      {item.name}
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ))}
         </div>
+      </div>
 
-        {/* Divider */}
-        <div className="my-16 h-px w-full bg-white/5" />
-
-        {/* Bottom Bar */}
-        <div className="flex flex-col items-center justify-between gap-6 md:flex-row">
-          <div className="flex items-center gap-6 text-[10px] uppercase tracking-widest text-white/30">
-            <span>© {new Date().getFullYear()} AfriBayit Inc.</span>
-            <span className="hidden md:inline">|</span>
-            <span className="hidden md:inline">YEHI OR Tech</span>
-          </div>
-
-          <div className="flex gap-6">
-            <a
-              href="mailto:contact@afribayit.com"
-              className="text-white/40 transition-colors hover:text-white"
+      {/* Socials & Theme */}
+      <div className="flex flex-col items-center justify-center gap-8 border-t border-white/5 py-8">
+        <div className="flex flex-wrap items-center justify-center gap-4">
+          {SOCIAL_LINKS.map((social, index) => (
+            <Link
+              key={index}
+              aria-label={social.label}
+              href={social.href}
+              rel="noreferrer"
+              target="_blank"
+              className={socialItemClass}
             >
-              <Mail className="h-4 w-4" />
-              <span className="sr-only">Email</span>
-            </a>
-            <a href="tel:+22997000000" className="text-white/40 transition-colors hover:text-white">
-              <Phone className="h-4 w-4" />
-              <span className="sr-only">Phone</span>
-            </a>
-            {[Instagram, Twitter, Linkedin].map((Icon, i) => (
-              <a key={i} href="#" className="text-white/40 transition-colors hover:text-white">
-                <Icon className="h-4 w-4" />
-                <span className="sr-only">Social</span>
-              </a>
-            ))}
-          </div>
+              <social.icon strokeWidth={1.5} className="h-5 w-5" />
+            </Link>
+          ))}
+        </div>
+        <ThemeToggle />
+      </div>
+
+      {/* Bottom Copyright */}
+      <div className="mx-auto mt-10 flex flex-col items-center justify-center text-[10px] uppercase tracking-widest text-white/20">
+        <div className="flex flex-wrap items-center justify-center gap-2">
+          <span> © {new Date().getFullYear()} </span>
+          <span>Fait avec</span>
+          <Heart className="text-gold mx-1 h-3 w-3 animate-pulse" />
+          <span> par </span>
+          <span className="hover:text-gold cursor-pointer font-bold text-white transition-colors">
+            YEHI OR Tech
+          </span>
+          <span className="mx-2 hidden sm:inline">•</span>
+          <span className="italic text-white/40">L&apos;excellence à votre service</span>
         </div>
       </div>
     </footer>
   );
 }
+
+export default SiteFooter;
