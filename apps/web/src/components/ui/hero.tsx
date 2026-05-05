@@ -5,6 +5,7 @@ import Image from 'next/image';
 import { motion } from 'framer-motion';
 import { SearchBar } from '@afribayit/ui';
 import { Shield, CheckCircle, Globe } from 'lucide-react';
+import { CountrySelector } from '@/components/navigation/CountrySelector';
 
 /**
  * Premium Hero Section — Section 2.7 & M1
@@ -35,11 +36,15 @@ export default function HeroGlobe() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
         >
-          <div className="border-gold/30 bg-gold/10 mb-8 inline-flex items-center gap-3 rounded-full border px-5 py-2 backdrop-blur-md">
-            <span className="bg-gold h-2 w-2 animate-pulse rounded-full" />
-            <p className="text-gold text-caption-mobile md:text-caption-desktop font-sans font-bold uppercase tracking-[0.3em]">
-              L&apos;EXCELLENCE IMMOBILIÈRE EN AFRIQUE
-            </p>
+          {/* Top Badges Row */}
+          <div className="mb-8 flex flex-col items-center justify-center gap-4 sm:flex-row">
+            <div className="border-gold/30 bg-gold/10 inline-flex items-center gap-3 rounded-full border px-5 py-2 backdrop-blur-md">
+              <span className="bg-gold h-2 w-2 animate-pulse rounded-full" />
+              <p className="text-gold text-caption-mobile md:text-caption-desktop font-sans font-bold uppercase tracking-[0.3em]">
+                L&apos;EXCELLENCE IMMOBILIÈRE EN AFRIQUE
+              </p>
+            </div>
+            <CountrySelector />
           </div>
 
           <h1 className="text-hero-mobile md:text-hero-desktop mx-auto mb-8 max-w-5xl font-serif font-bold tracking-tight text-white">

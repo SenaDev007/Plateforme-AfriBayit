@@ -6,10 +6,13 @@ import { Menu, X, Globe, ChevronDown } from 'lucide-react';
 import { cn } from '../lib/cn';
 
 const COUNTRIES = [
-  { code: 'bj', label: 'Bénin', flag: '🇧🇯' },
-  { code: 'ci', label: "Côte d'Ivoire", flag: '🇨🇮' },
-  { code: 'bf', label: 'Burkina Faso', flag: '🇧🇫' },
-  { code: 'tg', label: 'Togo', flag: '🇹🇬' },
+  { code: 'bj', label: 'Bénin', flag: '🇧🇯', domain: 'bj.afribayit.com' },
+  { code: 'ci', label: "Côte d'Ivoire", flag: '🇨🇮', domain: 'ci.afribayit.com' },
+  { code: 'sn', label: 'Sénégal', flag: '🇸🇳', domain: 'sn.afribayit.com' },
+  { code: 'tg', label: 'Togo', flag: '🇹🇬', domain: 'tg.afribayit.com' },
+  { code: 'bf', label: 'Burkina Faso', flag: '🇧🇫', domain: 'bf.afribayit.com' },
+  { code: 'cm', label: 'Cameroun', flag: '🇨🇲', domain: 'cm.afribayit.com' },
+  { code: 'ng', label: 'Nigeria', flag: '🇳🇬', domain: 'ng.afribayit.com' },
 ];
 
 interface NavLink {
@@ -161,36 +164,34 @@ export function Navbar({
             </button>
 
             {isCountryOpen && (
-              <ul
-                role="listbox"
+              <motion.div
+                initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                animate={{ opacity: 1, y: 0, scale: 1 }}
                 className={cn(
-                  'absolute right-0 mt-2 w-44 rounded-xl bg-white',
-                  'border-charcoal-100 shadow-glass-lg z-10 overflow-hidden border py-2',
+                  'absolute right-0 mt-3 w-56 overflow-hidden rounded-2xl border',
+                  'bg-navy/95 shadow-glass-lg backdrop-blur-glass z-50 border-white/10',
                 )}
               >
-                {COUNTRIES.map((country) => (
-                  <li
-                    key={country.code}
-                    role="option"
-                    aria-selected={country.code === currentCountry}
-                  >
+                <div className="py-2">
+                  {COUNTRIES.map((country) => (
                     <button
+                      key={country.code}
                       onClick={() => {
                         onCountryChange?.(country.code);
                         setIsCountryOpen(false);
                       }}
                       className={cn(
-                        'flex w-full items-center gap-3 px-4 py-2.5 text-sm',
-                        'hover:bg-navy/5 text-charcoal transition-colors',
-                        country.code === currentCountry && 'text-navy bg-navy/5 font-medium',
+                        'flex w-full items-center gap-3 px-5 py-3 text-sm transition-all duration-300',
+                        'text-white/80 hover:bg-white/10 hover:text-white',
+                        country.code === currentCountry && 'text-gold bg-white/5 font-bold',
                       )}
                     >
-                      <span className="text-lg leading-none">{country.flag}</span>
-                      <span>{country.label}</span>
+                      <span className="text-xl leading-none">{country.flag}</span>
+                      <span className="font-sans">{country.label}</span>
                     </button>
-                  </li>
-                ))}
-              </ul>
+                  ))}
+                </div>
+              </motion.div>
             )}
           </div>
 
