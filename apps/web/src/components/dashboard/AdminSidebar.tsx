@@ -32,21 +32,24 @@ export function AdminSidebar() {
       </div>
 
       <nav className="flex-1 space-y-2 p-4">
-        {NAV_ITEMS.map((item) => (
-          <Link
-            key={item.href}
-            href={item.href}
-            className={cn(
-              'flex items-center gap-3 rounded-lg px-4 py-3 transition-colors',
-              pathname === item.href
-                ? 'bg-blue-600 text-white'
-                : 'text-slate-400 hover:bg-slate-800 hover:text-white',
-            )}
-          >
-            <item.icon size={20} />
-            <span className="font-medium">{item.label}</span>
-          </Link>
-        ))}
+        {NAV_ITEMS.map((item) => {
+          const Icon = item.icon as any;
+          return (
+            <Link
+              key={item.href}
+              href={item.href}
+              className={cn(
+                'flex items-center gap-3 rounded-lg px-4 py-3 transition-colors',
+                pathname === item.href
+                  ? 'bg-blue-600 text-white'
+                  : 'text-slate-400 hover:bg-slate-800 hover:text-white',
+              )}
+            >
+              <Icon size={20} />
+              <span className="font-medium">{item.label}</span>
+            </Link>
+          );
+        })}
       </nav>
 
       <div className="border-t border-slate-800 p-4 text-center text-xs text-slate-500">
