@@ -10,6 +10,7 @@ const NAV_LINKS = [
   { label: 'Investir', href: '/investissement' },
   { label: 'Artisans', href: '/artisans' },
   { label: 'Académie', href: '/formation' },
+  { label: 'Communauté', href: '/communaute' },
 ];
 
 const COUNTRY_DOMAINS: Record<string, string> = {

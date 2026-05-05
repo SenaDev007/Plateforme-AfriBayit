@@ -3,18 +3,7 @@
 import React, { useState, useRef, useEffect, useMemo } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import {
-  Home,
-  Compass,
-  Search,
-  Heart,
-  User,
-  Shield,
-  CreditCard,
-  MessageCircle,
-  Trophy,
-  LineChart,
-} from 'lucide-react';
+import { Home, Search, Heart, User, PlusCircle } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 type IconComponentType = React.ElementType<{ className?: string }>;
@@ -33,10 +22,9 @@ export interface InteractiveMenuProps {
 
 const defaultItems: InteractiveMenuItem[] = [
   { label: 'Accueil', icon: Home, href: '/' },
-  { label: 'Portefeuille', icon: LineChart, href: '/dashboard/portefeuille' },
-  { label: 'Séquestre', icon: CreditCard, href: '/dashboard/transactions' },
-  { label: 'Messages', icon: MessageCircle, href: '/dashboard/messages' },
-  { label: 'Récompenses', icon: Trophy, href: '/dashboard/recompenses' },
+  { label: 'Recherche', icon: Search, href: '/recherche' },
+  { label: 'Publier', icon: PlusCircle, href: '/publier' },
+  { label: 'Favoris', icon: Heart, href: '/favoris' },
   { label: 'Profil', icon: User, href: '/dashboard' },
 ];
 
