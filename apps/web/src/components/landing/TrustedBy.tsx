@@ -5,32 +5,32 @@ import { motion } from 'framer-motion';
 const PARTNERS = [
   {
     name: 'BCEAO',
-    logo: 'https://upload.wikimedia.org/wikipedia/fr/0/0e/Logo_BCEAO.svg',
+    logo: 'https://www.google.com/s2/favicons?domain=bceao.int&sz=128',
     fullName: "Banque Centrale des États de l'Afrique de l'Ouest",
   },
   {
     name: 'BOAD',
-    logo: 'https://www.boad.org/wp-content/uploads/2019/07/Logo-BOAD-2019.png',
+    logo: 'https://www.google.com/s2/favicons?domain=boad.org&sz=128',
     fullName: 'Banque Ouest Africaine de Développement',
   },
   {
     name: 'ECOBANK',
-    logo: 'https://upload.wikimedia.org/wikipedia/en/thumb/0/0d/Ecobank_Logo.svg/512px-Ecobank_Logo.svg.png',
+    logo: 'https://logo.clearbit.com/ecobank.com',
     fullName: 'The Pan-African Bank',
   },
   {
     name: 'ORABANK',
-    logo: 'https://www.orabank.net/sites/default/files/logo_orabank_0.png',
+    logo: 'https://logo.clearbit.com/orabank.net',
     fullName: 'Un Partenaire à votre Écoute',
   },
   {
     name: 'CORIS BANK',
-    logo: 'https://www.coris-bank.com/wp-content/uploads/2021/04/Logo-Coris-Bank-International.png',
+    logo: 'https://logo.clearbit.com/coris-bank.com',
     fullName: 'La Banque Autrement',
   },
   {
     name: 'FEDA PAY',
-    logo: 'https://fedapay.com/assets/images/fedapay-logo.png',
+    logo: 'https://logo.clearbit.com/fedapay.com',
     fullName: 'Passerelle de Paiement Sécurisée',
   },
 ];
