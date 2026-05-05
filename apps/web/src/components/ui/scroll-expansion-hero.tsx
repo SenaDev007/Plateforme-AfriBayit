@@ -66,11 +66,13 @@ const ScrollExpandMedia = ({
     };
 
     const handleTouchStart = (e: TouchEvent) => {
-      setTouchStartY(e.touches[0].clientY);
+      if (e.touches && e.touches[0]) {
+        setTouchStartY(e.touches[0].clientY);
+      }
     };
 
     const handleTouchMove = (e: TouchEvent) => {
-      if (!touchStartY) return;
+      if (!touchStartY || !e.touches || !e.touches[0]) return;
 
       const touchY = e.touches[0].clientY;
       const deltaY = touchStartY - touchY;
