@@ -205,7 +205,7 @@ export function SiteFooter() {
               <Link
                 key={index}
                 aria-label={social.label}
-                href={social.href}
+                href={social.href as any}
                 rel="noreferrer"
                 target="_blank"
                 className={socialItemClass}
