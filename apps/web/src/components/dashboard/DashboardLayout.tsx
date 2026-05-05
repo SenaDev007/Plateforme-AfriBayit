@@ -134,6 +134,7 @@ export function DashboardLayout({
           </p>
           {NAV_ITEMS.map((item) => {
             const isActive = pathname === item.href;
+            const Icon = item.icon as any;
             return (
               <Link
                 key={item.href}
@@ -145,7 +146,7 @@ export function DashboardLayout({
                     : 'text-white/50 hover:bg-white/5 hover:text-white',
                 )}
               >
-                <item.icon
+                <Icon
                   className={cn(
                     'h-5 w-5',
                     isActive ? 'text-navy' : 'transition-transform group-hover:scale-110',
