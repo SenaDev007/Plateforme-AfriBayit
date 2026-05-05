@@ -98,7 +98,9 @@ export const InteractiveMenu: React.FC<InteractiveMenuProps> = ({
             className={cn('menu__item', isActive && 'active')}
           >
             <div
-              ref={(el) => (itemRefs.current[index] = el)}
+              ref={(el) => {
+                itemRefs.current[index] = el;
+              }}
               className="flex w-full flex-col items-center justify-center"
             >
               <div className="menu__icon">
@@ -106,7 +108,9 @@ export const InteractiveMenu: React.FC<InteractiveMenuProps> = ({
               </div>
               <strong
                 className={cn('menu__text', isActive && 'active')}
-                ref={(el) => (textRefs.current[index] = el)}
+                ref={(el) => {
+                  textRefs.current[index] = el;
+                }}
               >
                 {item.label}
               </strong>
