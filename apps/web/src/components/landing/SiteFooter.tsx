@@ -224,12 +224,7 @@ export function SiteFooter() {
           <span> © {new Date().getFullYear()} </span>
           <span>Fait avec</span>
           <Heart className="text-gold mx-1 h-3 w-3 animate-pulse" />
-          <span> par </span>
-          <span className="hover:text-gold cursor-pointer font-bold text-white transition-colors">
-            YEHI OR Tech
-          </span>
-          <span className="mx-2 hidden sm:inline">•</span>
-          <span className="italic text-white/40">L&apos;excellence à votre service</span>
+          <span> pour l'Afrique</span>
         </div>
       </div>
     </footer>
