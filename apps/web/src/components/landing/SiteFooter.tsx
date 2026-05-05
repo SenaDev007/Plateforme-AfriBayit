@@ -174,7 +174,7 @@ export function SiteFooter() {
       {/* Navigation Links */}
       <div className="mx-auto max-w-7xl px-6 py-16">
         <div className="grid grid-cols-2 gap-12 leading-6 sm:grid-cols-3 lg:grid-cols-5">
-          {NAVIGATION.categories[0].sections.map((section) => (
+          {NAVIGATION.categories[0]?.sections.map((section) => (
             <div key={section.id}>
               <h3 className="text-gold mb-6 text-[10px] font-bold uppercase tracking-[0.3em]">
                 {section.name}
@@ -199,18 +199,21 @@ export function SiteFooter() {
       {/* Socials & Theme */}
       <div className="flex flex-col items-center justify-center gap-8 border-t border-white/5 py-8">
         <div className="flex flex-wrap items-center justify-center gap-4">
-          {SOCIAL_LINKS.map((social, index) => (
-            <Link
-              key={index}
-              aria-label={social.label}
-              href={social.href}
-              rel="noreferrer"
-              target="_blank"
-              className={socialItemClass}
-            >
-              <social.icon strokeWidth={1.5} className="h-5 w-5" />
-            </Link>
-          ))}
+          {SOCIAL_LINKS.map((social, index) => {
+            const Icon = social.icon as any;
+            return (
+              <Link
+                key={index}
+                aria-label={social.label}
+                href={social.href}
+                rel="noreferrer"
+                target="_blank"
+                className={socialItemClass}
+              >
+                <Icon strokeWidth={1.5} className="h-5 w-5" />
+              </Link>
+            );
+          })}
         </div>
         <ThemeToggle />
       </div>
