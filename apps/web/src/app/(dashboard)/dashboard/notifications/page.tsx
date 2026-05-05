@@ -35,7 +35,7 @@ function NotificationItem({
   notif: AppNotification;
   onMarkRead: (id: string) => void;
 }): React.ReactElement {
-  const Icon = TYPE_ICONS[notif.type] ?? Bell;
+  const Icon = (TYPE_ICONS[notif.type] ?? Bell) as any;
   return (
     <div
       className={`flex gap-4 rounded-xl border p-4 transition-all ${
