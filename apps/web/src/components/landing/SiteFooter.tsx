@@ -183,7 +183,7 @@ export function SiteFooter() {
                 {section.items.map((item) => (
                   <li key={item.name}>
                     <Link
-                      href={item.href}
+                      href={item.href as any}
                       className="hover:text-gold text-xs font-medium text-white/40 transition-colors"
                     >
                       {item.name}
