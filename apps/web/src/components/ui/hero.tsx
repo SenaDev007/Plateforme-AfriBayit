@@ -64,9 +64,7 @@ export default function HeroGlobe() {
 
           <div className="mb-16 flex flex-col items-center justify-center gap-6 sm:flex-row">
             <Link
-              href="/recherche"
-              as
-              any
+              href={'/recherche' as any}
               className="neumorphic-button rounded-pill border-gold/30 bg-navy text-caption-mobile md:text-caption-desktop shadow-gold hover:border-gold/50 group relative w-full overflow-hidden border px-10 py-5 font-sans font-bold uppercase tracking-widest text-white transition-all duration-300 sm:w-auto"
             >
               Explorer le Catalogue
