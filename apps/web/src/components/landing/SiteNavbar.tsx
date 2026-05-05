@@ -9,6 +9,7 @@ const NAV_LINKS = [
   { label: 'Louer', href: '/recherche?but=RENT' },
   { label: 'Investir', href: '/investissement' },
   { label: 'Artisans', href: '/artisans' },
+  { label: 'Hôtels', href: '/hotels' },
   { label: 'Académie', href: '/formation' },
   { label: 'Communauté', href: '/communaute' },
 ];

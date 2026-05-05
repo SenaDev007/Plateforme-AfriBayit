@@ -5,7 +5,7 @@ import { SearchResults } from '@/components/search/SearchResults';
 import { SearchFilters } from '@/components/search/SearchFilters';
 import { PropertyCardSkeleton } from '@afribayit/ui';
 import { SiteNavbar } from '@/components/landing/SiteNavbar';
-import { motion } from 'framer-motion';
+import { SiteFooter } from '@/components/landing/SiteFooter';
 
 export const metadata: Metadata = {
   title: 'Recherche de propriétés',
@@ -48,15 +48,31 @@ export default async function SearchPage({
     <div className="min-h-screen bg-[#FDFDFD]">
       <SiteNavbar />
 
-      <header className="bg-navy pb-16 pt-32">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <div className="flex flex-col gap-2">
-            <h1 className="font-serif text-3xl font-bold leading-tight text-white md:text-5xl">
+      <header className="bg-navy relative overflow-hidden pb-24 pt-36">
+        {/* Background decorative elements */}
+        <div className="pointer-events-none absolute inset-0">
+          <div className="bg-gold/10 absolute right-0 top-0 h-[600px] w-[600px] -translate-y-1/3 translate-x-1/3 rounded-full blur-[120px]" />
+          <div className="absolute bottom-0 left-0 h-[400px] w-[400px] -translate-x-1/4 translate-y-1/4 rounded-full bg-white/5 blur-[100px]" />
+        </div>
+
+        <div className="relative z-10 mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          <div className="flex flex-col gap-6">
+            <div className="text-gold inline-flex w-fit items-center gap-2 rounded-full border border-white/20 bg-white/10 px-4 py-1.5 text-xs font-bold uppercase tracking-[0.2em] backdrop-blur-md">
+              <span className="relative flex h-2 w-2">
+                <span className="bg-gold absolute inline-flex h-full w-full animate-ping rounded-full opacity-75"></span>
+                <span className="bg-gold relative inline-flex h-2 w-2 rounded-full"></span>
+              </span>
+              100% des biens vérifiés
+            </div>
+
+            <h1 className="font-serif text-4xl font-bold leading-tight text-white md:text-6xl">
               Découvrez des <span className="text-gold italic">propriétés d'exception</span>
             </h1>
-            <p className="max-w-xl text-sm font-light text-white/60 md:text-base">
-              Explorez notre catalogue rigoureusement sélectionné et vérifié à travers le Bénin, la
-              Côte d'Ivoire, le Burkina Faso et le Togo.
+
+            <p className="max-w-2xl text-base font-light leading-relaxed text-white/80 md:text-lg">
+              Explorez notre catalogue rigoureusement sélectionné et vérifié. Chaque propriété passe
+              par notre processus strict de conformité foncière au Bénin, en Côte d'Ivoire, au
+              Sénégal et au Togo.
             </p>
           </div>
         </div>
@@ -79,6 +95,8 @@ export default async function SearchPage({
           </main>
         </div>
       </div>
+
+      <SiteFooter />
     </div>
   );
 }

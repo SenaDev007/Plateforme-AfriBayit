@@ -6,12 +6,15 @@ import { BookOpen, Clock, Users, Star, Play, Award, ArrowRight } from 'lucide-re
 import { Badge, Button } from '@afribayit/ui';
 import { motion } from 'framer-motion';
 import { cn } from '@afribayit/ui/src/lib/cn';
+import { SiteNavbar } from '@/components/landing/SiteNavbar';
+import { SiteFooter } from '@/components/landing/SiteFooter';
 
 const API_URL = process.env['NEXT_PUBLIC_API_URL'] ?? 'http://localhost:4000';
 
 export const metadata: Metadata = {
-  title: 'Formation Immobilière',
-  description: "Formez-vous à l'investissement immobilier en Afrique avec les experts AfriBayit.",
+  title: 'Académie AfriBayit | Formations Immobilières',
+  description:
+    "Formez-vous à l'investissement immobilier en Afrique avec les experts AfriBayit. Droit foncier, gestion locative, rendement — formations certifiantes en ligne.",
 };
 
 import { api } from '@/lib/api';
@@ -106,7 +109,8 @@ export default async function FormationPage(): Promise<React.ReactElement> {
   }
 
   return (
-    <div className="min-h-screen bg-[#FDFDFD]">
+    <div className="min-h-screen bg-white">
+      <SiteNavbar />
       <header className="bg-navy pb-20 pt-32">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="flex flex-col gap-4 text-center md:text-left">
@@ -192,6 +196,8 @@ export default async function FormationPage(): Promise<React.ReactElement> {
           </div>
         </div>
       </div>
+
+      <SiteFooter />
     </div>
   );
 }

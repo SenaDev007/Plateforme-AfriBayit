@@ -15,6 +15,8 @@ import {
 } from 'lucide-react';
 import { Badge, Button } from '@afribayit/ui';
 import { cn } from '@afribayit/ui/src/lib/cn';
+import { SiteNavbar } from '@/components/landing/SiteNavbar';
+import { SiteFooter } from '@/components/landing/SiteFooter';
 
 export const metadata: Metadata = {
   title: 'Communauté AfriBayit',
@@ -171,7 +173,8 @@ export default async function CommunautePage({ searchParams }: Props): Promise<R
   ]);
 
   return (
-    <div className="min-h-screen bg-[#FDFDFD]">
+    <div className="min-h-screen bg-white">
+      <SiteNavbar />
       <header className="bg-navy relative overflow-hidden pb-20 pt-32">
         {/* Background Pattern */}
         <div className="pointer-events-none absolute inset-0 opacity-10">
@@ -360,6 +363,8 @@ export default async function CommunautePage({ searchParams }: Props): Promise<R
           </aside>
         </div>
       </div>
+
+      <SiteFooter />
     </div>
   );
 }
