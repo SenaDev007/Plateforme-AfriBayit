@@ -49,7 +49,7 @@ export function BottomNavBar({ className, stickyBottom = true }: BottomNavBarPro
           pathname === item.href || (item.href !== '/' && pathname.startsWith(item.href));
 
         return (
-          <Link key={item.label} href={item.href}>
+          <Link key={item.label} href={item.href as any}>
             <motion.div
               whileTap={{ scale: 0.95 }}
               className={cn(
