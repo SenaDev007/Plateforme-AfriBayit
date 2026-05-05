@@ -1,6 +1,6 @@
 import type React from 'react';
 import type { Metadata } from 'next';
-import HeroGlobe from '@/components/ui/hero';
+import ScrollExpandMedia from '@/components/ui/scroll-expansion-hero';
 import { StatsBar } from '@/components/landing/StatsBar';
 import { RecentListings } from '@/components/landing/RecentListings';
 import { ModulesSection } from '@/components/landing/ModulesSection';
@@ -18,16 +18,27 @@ export const metadata: Metadata = {
 
 export default function HomePage(): React.ReactElement {
   return (
-    <div className="min-h-screen bg-white">
+    <div className="bg-navy min-h-screen">
       <SiteNavbar />
       <main id="main-content">
-        <HeroGlobe />
-        <TrustedBy />
-        <StatsBar />
-        <RecentListings />
-        <ModulesSection />
-        <TestimonialsSection />
-        <FinalCTA />
+        <ScrollExpandMedia
+          mediaType="image"
+          mediaSrc="https://images.unsplash.com/photo-1613490493576-7fde63acd811?q=80&w=2071&auto=format&fit=crop"
+          bgImageSrc="https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=1964&auto=format&fit=crop"
+          title="AfriBayit Réinventé"
+          date="L'Excellence Africaine"
+          scrollToExpand="Faites défiler pour explorer"
+          textBlend
+        >
+          <div className="bg-white">
+            <TrustedBy />
+            <StatsBar />
+            <RecentListings />
+            <ModulesSection />
+            <TestimonialsSection />
+            <FinalCTA />
+          </div>
+        </ScrollExpandMedia>
       </main>
       <SiteFooter />
     </div>
