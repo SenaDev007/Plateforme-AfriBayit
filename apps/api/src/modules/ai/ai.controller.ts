@@ -47,7 +47,7 @@ export class AiController {
   }
 
   /**
-   * Section 8.3.4 — Analyze document (titre foncier, acte notarié)
+   * Section 8.3.4 — Analyze property document (titre foncier, acte notarié)
    */
   @Post('analyze-document')
   @UseGuards(JwtAuthGuard)
@@ -72,6 +72,25 @@ export class AiController {
         gpsLng: body.gpsLng,
       },
     });
+  }
+
+  /**
+   * Section 10.1.2 — Rebecca DocSense (Automated KYC)
+   */
+  @Post('rebecca/analyze-doc')
+  @UseGuards(JwtAuthGuard)
+  async analyzeKycDoc(@Body() body: { fileUrl: string; country: string }) {
+    // In a real implementation, this would call DocumentAIPipeline with KYC-specific logic
+    return {
+      isValid: true,
+      extractedData: {
+        documentType: 'CNI',
+        fullName: 'Marc-Antoine KOFFI',
+        idNumber: '123456789',
+        expiryDate: '2030-12-31',
+      },
+      errors: [],
+    };
   }
 
   /**

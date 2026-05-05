@@ -255,13 +255,40 @@ export function DashboardOverview(): React.ReactElement {
               NOUVELLE ANNONCE
             </Button>
           )}
-          {session?.user?.role === 'ARTISAN' && (
-            <Button className="bg-emerald shadow-emerald/20 h-14 rounded-full px-8 text-xs font-bold uppercase tracking-widest text-white shadow-lg">
-              PUBLIER RÉALISATION
-            </Button>
-          )}
         </div>
       </motion.div>
+
+      {/* KYC Alert Banner — Section 10.1.2 */}
+      {stats.reputation < 50 && (
+        <motion.div
+          variants={itemVariants}
+          className="border-gold/30 bg-gold/5 flex flex-col items-center justify-between gap-6 rounded-[32px] border p-8 md:flex-row"
+        >
+          <div className="flex items-center gap-6">
+            <div className="bg-gold/20 flex h-14 w-14 items-center justify-center rounded-2xl">
+              <ShieldCheck className="text-gold h-8 w-8" />
+            </div>
+            <div>
+              <h3 className="text-charcoal text-lg font-bold">
+                Complétez votre Vérification Institutionnelle
+              </h3>
+              <p className="text-charcoal-400 text-sm">
+                Votre score est actuellement de{' '}
+                <span className="text-gold font-bold">{stats.reputation.toFixed(1)}/100</span>.
+                Passez au niveau supérieur pour débloquer les transactions par Escrow.
+              </p>
+            </div>
+          </div>
+          <Link href="/dashboard/profil?tab=kyc" className="w-full md:w-auto">
+            <Button
+              variant="gold"
+              className="h-12 w-full rounded-xl px-10 text-xs font-bold uppercase tracking-widest text-white"
+            >
+              VÉRIFIER MON IDENTITÉ
+            </Button>
+          </Link>
+        </motion.div>
+      )}
 
       {/* Stats Grid */}
       <motion.div

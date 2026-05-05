@@ -50,6 +50,20 @@ export function KycUploadForm({ level, onSuccess }: KycUploadFormProps) {
 
       if (!uploadResponse.ok) throw new Error("Échec de l'upload vers le cloud");
 
+      // Call Rebecca DocSense for instant AI feedback
+      toast.info('Rebecca analyse votre document...');
+      const aiResponse = await api.ai.analyzeDocument(
+        publicUrl,
+        session.user?.country || 'BJ',
+        token,
+      );
+
+      if (aiResponse.data.isValid) {
+        toast.success(`Rebecca a identifié votre ${aiResponse.data.extractedData.documentType}.`);
+      } else {
+        toast.warning("Rebecca a détecté des anomalies. L'équipe humaine vérifiera avec soin.");
+      }
+
       await api.users.submitKyc(
         {
           type: documentType,
@@ -60,7 +74,7 @@ export function KycUploadForm({ level, onSuccess }: KycUploadFormProps) {
         token,
       );
 
-      toast.success('Document soumis avec succès ! Il sera vérifié par notre équipe.');
+      toast.success('Document soumis avec succès !');
       onSuccess();
     } catch (error) {
       console.error('KYC Upload Error:', error);

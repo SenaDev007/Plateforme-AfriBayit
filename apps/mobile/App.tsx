@@ -8,53 +8,10 @@ import {
   TouchableOpacity,
   SafeAreaView,
 } from 'react-native';
-import { COLORS, SPACING } from './constants/Theme';
+import RootNavigator from './src/navigation/RootNavigator';
 
 export default function App() {
-  return (
-    <SafeAreaView style={styles.container}>
-      <StatusBar barStyle="light-content" />
-
-      {/* Header / Logo */}
-      <View style={styles.header}>
-        <View style={styles.logoContainer}>
-          <View style={styles.logoIcon}>
-            <Text style={styles.logoIconText}>AF</Text>
-          </View>
-          <Text style={styles.logoText}>
-            Afri<Text style={styles.logoTextGold}>Bayit</Text>
-          </Text>
-        </View>
-      </View>
-
-      {/* Hero Section */}
-      <View style={styles.hero}>
-        <View style={styles.badgeContainer}>
-          <View style={styles.badgeDot} />
-          <Text style={styles.badgeText}>L'EXCELLENCE IMMOBILIÈRE</Text>
-        </View>
-
-        <Text style={styles.heroTitle}>
-          L'Immobilier{'\n'}
-          <Text style={styles.heroTitleItalic}>Réinventé.</Text>
-        </Text>
-
-        <Text style={styles.heroSubtitle}>
-          Découvrez la première super-app immobilière africaine ultra-sécurisée.
-        </Text>
-
-        <TouchableOpacity style={styles.button}>
-          <Text style={styles.buttonText}>EXPLORER LE CATALOGUE</Text>
-        </TouchableOpacity>
-      </View>
-
-      {/* Footer / Status */}
-      <View style={styles.footer}>
-        <Text style={styles.footerText}>APPLICATION MOBILE — VERSION BÊTA</Text>
-        <Text style={styles.copyrightText}>© 2026 AFRIBAYIT TECHNOLOGIES</Text>
-      </View>
-    </SafeAreaView>
-  );
+  return <RootNavigator />;
 }
 
 const styles = StyleSheet.create({

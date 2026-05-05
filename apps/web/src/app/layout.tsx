@@ -40,6 +40,7 @@ export const viewport: Viewport = {
 
 import { RebeccaChat } from '@/components/ai/RebeccaChat';
 import { MobileTabBar } from '@/components/navigation/MobileTabBar';
+import { CustomCursor } from '@/components/visual/CustomCursor';
 import QueryProvider from '@/providers/QueryProvider';
 import GraphQLProvider from '@/providers/GraphQLProvider';
 
@@ -57,6 +58,7 @@ export default async function RootLayout({
         <NextIntlClientProvider locale={locale} messages={messages}>
           <QueryProvider>
             <GraphQLProvider>
+              <CustomCursor />
               {children}
               <Toaster
                 position="top-right"

@@ -315,6 +315,43 @@ export const api = {
     leaveGroup: (id: string, token: string) =>
       request<unknown>(`/community/groups/${id}/leave`, { method: 'DELETE', token }),
   },
+  ai: {
+    chat: (message: string, context?: Record<string, unknown>, token?: string) =>
+      request<{ response: string; suggestions: string[]; tools_called: any[] }>(
+        '/ai/rebecca/chat',
+        {
+          method: 'POST',
+          body: { message, context },
+          ...(token ? { token } : {}),
+        },
+      ),
+    analyzeDocument: (fileUrl: string, country: string, token: string) =>
+      request<{ isValid: boolean; extractedData: any; errors: string[] }>(
+        '/ai/rebecca/analyze-doc',
+        {
+          method: 'POST',
+          body: { fileUrl, country },
+          token,
+        },
+      ),
+    getMarketTrends: (city: string, type: string) =>
+      request<{ priceHistory: any[]; prediction: string }>(`/ai/market-trends/${city}/${type}`),
+  },
+  compliance: {
+    getLegalRequirements: (country: string) =>
+      request<{ documents: any[]; authorities: any[]; reforms: any[] }>(
+        `/compliance/legal-framework/${country}`,
+      ),
+    validateDocument: (country: string, docType: string, token: string) =>
+      request<{ status: 'ACCEPTED' | 'REJECTED' | 'CONDITIONAL'; message: string }>(
+        '/compliance/validate',
+        {
+          method: 'POST',
+          body: { country, docType },
+          token,
+        },
+      ),
+  },
 } as const;
 
 export { ApiError };
