@@ -1,124 +1,69 @@
 'use client';
 import type React from 'react';
 import { motion } from 'framer-motion';
-import { ArrowRight, ShieldCheck, Globe, Zap } from 'lucide-react';
+import { ArrowRight, CheckCircle } from 'lucide-react';
 
 export function FinalCTA(): React.ReactElement {
   return (
-    <section className="to-charcoal-50 overflow-hidden bg-gradient-to-b from-white py-24">
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div className="bg-navy relative overflow-hidden rounded-[32px] p-6 shadow-[0_32px_64px_-16px_rgba(0,48,135,0.4)] sm:p-10 md:rounded-[48px] md:p-20">
-          {/* Background decoration */}
-          <div className="bg-gold/10 absolute right-0 top-0 h-full w-1/2 -translate-y-1/3 translate-x-1/3 rounded-full blur-[120px]" />
-          <div className="bg-sky/10 absolute bottom-0 left-0 h-full w-1/3 -translate-x-1/4 translate-y-1/4 rounded-full blur-[100px]" />
+    <section className="bg-navy relative overflow-hidden py-32">
+      {/* Decorative gradient overlay */}
+      <div className="pointer-events-none absolute inset-0 z-0 opacity-50 mix-blend-overlay">
+        <div className="from-gold/20 via-navy/5 absolute left-1/2 top-1/2 h-[800px] w-[800px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] to-transparent blur-3xl" />
+      </div>
 
-          <div className="relative z-10 grid items-center gap-16 lg:grid-cols-2">
-            <div className="space-y-10">
-              <motion.div
-                initial={{ opacity: 0, x: -30 }}
-                whileInView={{ opacity: 1, x: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.8 }}
-              >
-                <div className="bg-gold/20 text-gold mb-6 inline-flex items-center gap-2 rounded-full px-4 py-2 text-xs font-bold uppercase tracking-widest">
-                  <Zap className="fill-gold h-3 w-3" />
-                  L'HÉSITATION COÛTE CHER.
-                </div>
-                <h2 className="font-sans text-3xl font-black leading-[1.1] tracking-tighter text-white sm:text-5xl md:text-7xl">
-                  Passez à l'action. <br />
-                  <span className="text-gold font-serif font-normal italic">Blindez</span> votre
-                  avenir.
-                </h2>
-                <p className="mt-6 max-w-lg text-lg font-light leading-relaxed text-white/70 md:text-xl">
-                  L'immobilier africain n'attend pas. Les meilleures parcelles sont sécurisées en ce
-                  moment même par ceux qui ont le système. Ne restez pas sur la touche.
-                </p>
-              </motion.div>
+      {/* Gold top border line */}
+      <div className="bg-gold/30 absolute inset-x-0 top-0 mx-auto h-px max-w-7xl" />
 
-              <div className="flex flex-col gap-4 sm:flex-row">
-                <motion.button
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                  className="bg-gold text-navy hover:bg-gold-400 shadow-gold/20 group flex items-center justify-center gap-3 rounded-full px-6 py-4 text-base font-bold shadow-xl transition-all md:px-10 md:py-5 md:text-lg"
-                >
-                  J'intègre le système
-                  <ArrowRight className="h-5 w-5 transition-transform group-hover:translate-x-2" />
-                </motion.button>
-                <motion.button
-                  whileHover={{ scale: 1.05 }}
-                  className="rounded-full border border-white/20 bg-white/5 px-6 py-4 text-center text-base font-bold text-white backdrop-blur-md transition-all hover:bg-white/10 md:px-10 md:py-5 md:text-lg"
-                >
-                  Je me forme d'abord
-                </motion.button>
-              </div>
+      <div className="relative z-10 mx-auto max-w-3xl px-4 text-center sm:px-6 lg:px-8">
+        <motion.div
+          initial={{ opacity: 0, scale: 0.95 }}
+          whileInView={{ opacity: 1, scale: 1 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.8, ease: 'easeOut' }}
+        >
+          <h2 className="mb-6 font-serif text-4xl font-bold tracking-tight text-white sm:text-5xl lg:text-6xl">
+            L'immobilier africain change. <br />
+            <span className="text-gold italic">Vous pouvez regarder. Ou en faire partie.</span>
+          </h2>
 
-              <div className="flex flex-wrap gap-x-10 gap-y-4 border-t border-white/10 pt-10">
-                <div className="flex items-center gap-3 text-sm font-medium text-white/60">
-                  <ShieldCheck className="text-gold h-6 w-6" />
-                  Transaction Escrow Sécurisée
-                </div>
-                <div className="flex items-center gap-3 text-sm font-medium text-white/60">
-                  <Globe className="text-gold h-6 w-6" />
-                  Support Multi-Pays 24/7
-                </div>
-              </div>
+          <p className="mx-auto mb-12 max-w-2xl text-lg leading-relaxed text-white/80">
+            Rejoignez les milliers d'acheteurs, vendeurs et professionnels qui font confiance à
+            AfriBayit pour chaque transaction. Inscription gratuite. Aucune carte requise.
+          </p>
+
+          <div className="mb-12 flex flex-col items-center justify-center gap-6 sm:flex-row">
+            <a
+              href="/recherche"
+              className="bg-gold text-navy shadow-gold/20 group relative inline-flex items-center justify-center overflow-hidden rounded-full px-10 py-5 font-bold shadow-lg transition-all hover:scale-105"
+            >
+              <span className="relative z-10 flex items-center gap-2">
+                Trouver mon bien
+                <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
+              </span>
+            </a>
+            <a
+              href="/publier"
+              className="group relative inline-flex items-center justify-center overflow-hidden rounded-full border-2 border-white/40 bg-transparent px-10 py-5 font-bold text-white transition-all hover:border-white hover:bg-white/5"
+            >
+              Publier une annonce
+            </a>
+          </div>
+
+          <div className="flex flex-col items-center justify-center gap-6 text-sm font-medium text-white/60 sm:flex-row">
+            <div className="flex items-center gap-2">
+              <CheckCircle className="text-gold h-4 w-4" />
+              Aucune commission à l'inscription
             </div>
-
-            {/* App Mockup side */}
-            <div className="relative flex justify-center lg:justify-end">
-              <motion.div
-                className="bg-charcoal-900 border-charcoal-800 relative hidden aspect-[9/18.5] w-full max-w-[320px] overflow-hidden rounded-[3.5rem] border-[10px] shadow-2xl sm:block"
-                initial={{ y: 150, opacity: 0 }}
-                whileInView={{ y: 0, opacity: 1 }}
-                viewport={{ once: true }}
-                transition={{ delay: 0.2, duration: 1, ease: [0.16, 1, 0.3, 1] }}
-              >
-                {/* Speaker Notch */}
-                <div className="bg-charcoal-800 absolute left-1/2 top-0 z-20 h-7 w-1/3 -translate-x-1/2 rounded-b-2xl" />
-
-                {/* Screen Content Mockup */}
-                <div className="space-y-6 p-6 pt-14">
-                  <div className="flex items-center justify-between">
-                    <div className="bg-gold/20 h-8 w-8 rounded-lg" />
-                    <div className="h-4 w-20 rounded-full bg-white/10" />
-                  </div>
-                  <div className="from-navy/40 to-charcoal-800 h-44 w-full rounded-2xl bg-gradient-to-br" />
-                  <div className="space-y-3">
-                    <div className="h-4 w-3/4 rounded-full bg-white/20" />
-                    <div className="h-4 w-1/2 rounded-full bg-white/10" />
-                  </div>
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="h-24 w-full rounded-2xl bg-white/5" />
-                    <div className="h-24 w-full rounded-2xl bg-white/5" />
-                  </div>
-                  <div className="bg-gold mt-4 h-14 w-full rounded-xl" />
-                </div>
-
-                {/* Shine overlay */}
-                <div className="pointer-events-none absolute inset-0 bg-gradient-to-tr from-white/10 via-transparent to-transparent" />
-              </motion.div>
-
-              {/* Secondary Floating Card */}
-              <motion.div
-                className="absolute -left-10 bottom-20 hidden max-w-[200px] rounded-2xl bg-white p-6 shadow-2xl lg:block"
-                initial={{ x: -50, opacity: 0 }}
-                whileInView={{ x: 0, opacity: 1 }}
-                viewport={{ once: true }}
-                transition={{ delay: 0.5 }}
-              >
-                <div className="mb-3 flex items-center gap-3">
-                  <div className="flex h-10 w-10 items-center justify-center rounded-full bg-emerald-100">
-                    <ShieldCheck className="h-5 w-5 text-emerald-600" />
-                  </div>
-                  <span className="text-charcoal text-xs font-bold">Titre Vérifié</span>
-                </div>
-                <p className="text-charcoal-400 text-[10px] leading-tight">
-                  Document certifié par l'ANDF Bénin via GeoTrust.
-                </p>
-              </motion.div>
+            <div className="flex items-center gap-2">
+              <CheckCircle className="text-gold h-4 w-4" />
+              Vérification gratuite
+            </div>
+            <div className="flex items-center gap-2">
+              <CheckCircle className="text-gold h-4 w-4" />
+              Données sécurisées
             </div>
           </div>
-        </div>
+        </motion.div>
       </div>
     </section>
   );

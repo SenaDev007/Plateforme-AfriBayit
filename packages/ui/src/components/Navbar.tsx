@@ -31,6 +31,7 @@ interface NavbarProps {
   onLogin?: () => void;
   onRegister?: () => void;
   onLogout?: () => void;
+  onPublish?: () => void;
   className?: string;
   transparentOnTop?: boolean;
 }
@@ -44,6 +45,7 @@ export function Navbar({
   userAvatar,
   onLogin,
   onRegister,
+  onPublish,
   className,
   transparentOnTop = false,
 }: NavbarProps): React.ReactElement {
@@ -221,21 +223,21 @@ export function Navbar({
                     : 'text-white/90 hover:text-white',
                 )}
               >
-                Connexion
+                Se connecter
               </button>
-              <button
-                onClick={onRegister}
-                className={cn(
-                  'rounded-pill px-5 py-2.5 text-sm font-medium transition-all duration-300',
-                  'focus-visible:ring-gold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2',
-                  'hover:scale-105 active:scale-95',
-                  isScrolled
-                    ? 'bg-navy hover:bg-navy-600 text-white shadow-md'
-                    : 'bg-gold text-navy hover:bg-gold-400 shadow-[0_0_20px_rgba(212,175,55,0.4)]',
-                )}
-              >
-                S'inscrire
-              </button>
+              {onPublish && (
+                <button
+                  onClick={onPublish}
+                  className={cn(
+                    'rounded-pill px-5 py-2.5 text-sm font-bold transition-all duration-300',
+                    'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2',
+                    'hover:scale-105 active:scale-95',
+                    'bg-gold text-navy hover:bg-gold-400 shadow-[0_0_20px_rgba(212,175,55,0.4)]',
+                  )}
+                >
+                  Publier une annonce &rarr;
+                </button>
+              )}
             </div>
           )}
 
@@ -281,14 +283,16 @@ export function Navbar({
                   onClick={onLogin}
                   className="text-navy border-navy rounded-pill hover:bg-navy/5 w-full border py-3 text-sm font-medium transition-colors"
                 >
-                  Connexion
+                  Se connecter
                 </button>
-                <button
-                  onClick={onRegister}
-                  className="bg-navy rounded-pill hover:bg-navy-600 w-full py-3 text-sm font-medium text-white transition-colors"
-                >
-                  S'inscrire
-                </button>
+                {onPublish && (
+                  <button
+                    onClick={onPublish}
+                    className="bg-gold text-navy hover:bg-gold-400 rounded-pill w-full py-3 text-sm font-bold transition-colors"
+                  >
+                    Publier une annonce &rarr;
+                  </button>
+                )}
               </div>
             )}
           </div>

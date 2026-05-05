@@ -7,12 +7,9 @@ import { Navbar } from '@afribayit/ui';
 const NAV_LINKS = [
   { label: 'Acheter', href: '/recherche?but=SALE' },
   { label: 'Louer', href: '/recherche?but=RENT' },
-  { label: 'Hôtels', href: '/hotels' },
+  { label: 'Investir', href: '/investissement' },
   { label: 'Artisans', href: '/artisans' },
-  { label: 'Formation', href: '/formation' },
-  { label: 'GeoTrust', href: '/dashboard/geotrust' },
-  { label: 'Notaires', href: '/dashboard/notaire' },
-  { label: 'Ambassadeurs', href: '/dashboard/ambassadeur' },
+  { label: 'Académie', href: '/formation' },
 ];
 
 const COUNTRY_DOMAINS: Record<string, string> = {
@@ -43,12 +40,17 @@ export function SiteNavbar(): React.ReactElement {
     router.push('/inscription');
   };
 
+  const handlePublish = (): void => {
+    router.push('/publier' as any);
+  };
+
   return (
     <Navbar
       links={NAV_LINKS}
       onCountryChange={handleCountryChange}
       onLogin={handleLogin}
       onRegister={handleRegister}
+      onPublish={handlePublish}
       transparentOnTop
     />
   );

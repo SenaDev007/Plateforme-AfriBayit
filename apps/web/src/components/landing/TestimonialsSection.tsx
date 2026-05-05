@@ -2,29 +2,29 @@
 import type React from 'react';
 
 import { motion } from 'framer-motion';
-import { Star, Quote } from 'lucide-react';
+import { Star, Quote, CheckCircle } from 'lucide-react';
 
 const TESTIMONIALS = [
   {
-    name: 'Aminata Koné',
-    role: 'Investisseuse · Abidjan, CI',
+    name: 'Aïcha K.',
+    role: 'Cotonou — Acheteuse appartement 3 pièces',
     avatar: 'https://images.unsplash.com/photo-1531123897727-8f129e16fd3c?q=80&w=200',
     rating: 5,
-    text: "Avant AfriBayit, j'avais peur d'investir au pays à cause des litiges. Aujourd'hui, je suis multi-propriétaire à Cocody, titres fonciers en main. Leur séquestre offre une garantie de 100%. Tolérance zéro pour l'improvisation.",
+    text: "J'avais peur d'envoyer de l'argent sans voir le bien en vrai. L'escrow m'a rassuré dès le départ. La transaction s'est faite en 11 jours. Propre, clair, sans stress.",
   },
   {
-    name: 'Dr. Samuel Mensah',
-    role: 'Diaspora · Paris / Accra',
-    avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?q=80&w=200',
+    name: 'Kofi A.',
+    role: 'Abidjan — Vendeur terrain Cocody',
+    avatar: 'https://images.unsplash.com/photo-1506803682983-e5e11c521199?q=80&w=200',
     rating: 5,
-    text: "Gérer mon patrimoine depuis l'Europe était un cauchemar. Avec AfriBayit, je pilote plus d'un million d'euros d'actifs depuis mon smartphone. C'est le standard institutionnel, enfin disponible pour nous.",
+    text: "J'ai listé mon terrain en 20 minutes. En 3 semaines j'avais un acheteur sérieux. Vérification faite par l'équipe, signature chez le notaire partenaire. Je recommande à tous mes contacts.",
   },
   {
-    name: 'Fatouma Touré',
-    role: 'Opératrice Hospitality · Cotonou',
+    name: 'Mamadou S.',
+    role: 'Ouagadougou — Client Artisans BTP',
     avatar: 'https://images.unsplash.com/photo-1523824921871-d6f1a15151f1?q=80&w=200',
     rating: 5,
-    text: "En 3 mois sur le module Hospitality, j'ai explosé ma rentabilité. Mon taux d'occupation est à 92%, je reçois mes fonds directement sur Mobile Money. C'est simple : ça tourne, et ça encaisse.",
+    text: "Je cherchais un plombier qualifié pour ma villa en construction. En 48h j'avais 4 devis comparatifs de professionnels certifiés. C'est une autre façon de travailler.",
   },
 ];
 
@@ -48,8 +48,8 @@ export function TestimonialsSection(): React.ReactElement {
       aria-labelledby="testimonials-title"
       className="relative overflow-hidden bg-white py-32"
     >
-      {/* Decorative quotes background */}
-      <Quote className="text-charcoal-50 absolute left-10 top-10 -z-0 h-64 w-64 opacity-50" />
+      {/* Decorative background */}
+      <div className="bg-navy/[0.02] absolute inset-0" />
 
       <div className="relative z-10 mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="mb-20 text-center">
@@ -59,15 +59,12 @@ export function TestimonialsSection(): React.ReactElement {
             viewport={{ once: true }}
             transition={{ duration: 0.6 }}
           >
-            <p className="text-gold mb-4 text-sm font-bold uppercase tracking-[0.2em]">
-              Résultats Prouvés
-            </p>
             <h2
               id="testimonials-title"
-              className="text-charcoal font-sans text-3xl font-black tracking-tighter sm:text-5xl md:text-6xl lg:text-7xl"
+              className="text-navy font-serif text-3xl font-bold tracking-tight sm:text-5xl lg:text-6xl"
             >
-              Ils ont arrêté de rêver. <br />
-              <span className="text-navy font-serif font-normal italic">Ils encaissent.</span>
+              Ils ont sécurisé leur transaction. <br className="hidden sm:block" />
+              <span className="text-gold italic">Ils en parlent.</span>
             </h2>
           </motion.div>
         </div>
@@ -76,7 +73,7 @@ export function TestimonialsSection(): React.ReactElement {
           {TESTIMONIALS.map((testimonial, i) => (
             <motion.blockquote
               key={testimonial.name}
-              className="bg-charcoal-50 hover:border-charcoal-100 flex flex-col gap-6 rounded-[32px] border border-transparent p-6 transition-all duration-500 hover:bg-white hover:shadow-2xl md:p-10"
+              className="hover:border-gold/30 border-charcoal-100/50 flex flex-col gap-6 rounded-[32px] border bg-white p-6 transition-all duration-500 hover:shadow-[0_20px_40px_-15px_rgba(212,175,55,0.15)] md:p-10"
               initial={{ opacity: 0, y: 30 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
@@ -87,44 +84,57 @@ export function TestimonialsSection(): React.ReactElement {
                 <Quote className="text-gold/20 h-8 w-8" />
               </div>
 
-              <p className="text-charcoal-600 text-lg font-light italic leading-relaxed">
+              <p className="text-charcoal-600 flex-grow text-lg font-light italic leading-relaxed">
                 "{testimonial.text}"
               </p>
 
-              <footer className="border-charcoal-100/50 mt-auto flex items-center gap-4 border-t pt-6">
+              <div className="text-navy/60 bg-navy/5 mb-2 flex w-fit items-center gap-2 rounded-full px-3 py-1.5 text-xs font-bold">
+                <CheckCircle className="text-gold h-3.5 w-3.5" />
+                Transaction vérifiée AfriBayit
+              </div>
+
+              <footer className="border-charcoal-100/50 flex items-center gap-4 border-t pt-6">
                 <img
                   src={testimonial.avatar}
                   alt={testimonial.name}
-                  className="h-14 w-14 rounded-2xl object-cover shadow-md"
+                  className="ring-gold/20 h-12 w-12 rounded-full object-cover shadow-sm ring-2"
                 />
                 <div>
-                  <p className="text-charcoal text-base font-bold">{testimonial.name}</p>
-                  <p className="text-gold text-xs font-medium uppercase tracking-wider">
-                    {testimonial.role}
-                  </p>
+                  <p className="text-navy text-sm font-bold">{testimonial.name}</p>
+                  <p className="text-charcoal-400 text-xs font-medium">{testimonial.role}</p>
                 </div>
               </footer>
             </motion.blockquote>
           ))}
         </div>
 
-        {/* Global Rating Badge */}
+        {/* Global Stats Badge */}
         <motion.div
-          className="mt-20 flex flex-col items-center gap-4"
-          initial={{ opacity: 0 }}
-          whileInView={{ opacity: 1 }}
+          className="mx-auto mt-24 w-fit"
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
         >
-          <div className="bg-navy flex items-center gap-2 rounded-full px-6 py-3 text-white shadow-xl">
-            <div className="flex -space-x-2">
-              {[1, 2, 3, 4].map((i) => (
-                <div
-                  key={i}
-                  className="border-navy bg-charcoal-200 h-8 w-8 rounded-full border-2"
-                />
-              ))}
+          <div className="bg-navy border-gold/20 flex flex-wrap items-center justify-center gap-x-8 gap-y-4 rounded-full border px-8 py-6 shadow-xl">
+            <div className="flex items-center gap-2">
+              <span className="text-gold font-mono text-lg font-bold">4 200</span>
+              <span className="text-sm font-medium text-white/80">annonces actives</span>
             </div>
-            <span className="text-sm font-bold">4.9/5 basé sur 2,500+ avis</span>
+            <div className="hidden h-5 w-px bg-white/20 sm:block" />
+            <div className="flex items-center gap-2">
+              <span className="text-gold font-mono text-lg font-bold">98%</span>
+              <span className="text-sm font-medium text-white/80">de satisfaction</span>
+            </div>
+            <div className="hidden h-5 w-px bg-white/20 sm:block" />
+            <div className="flex items-center gap-2">
+              <span className="text-gold font-mono text-lg font-bold">0 FCFA</span>
+              <span className="text-sm font-medium text-white/80">perdu via l'escrow</span>
+            </div>
+            <div className="hidden h-5 w-px bg-white/20 md:block" />
+            <div className="flex items-center gap-2">
+              <span className="text-gold font-mono text-lg font-bold">4</span>
+              <span className="text-sm font-medium text-white/80">pays desservis</span>
+            </div>
           </div>
         </motion.div>
       </div>

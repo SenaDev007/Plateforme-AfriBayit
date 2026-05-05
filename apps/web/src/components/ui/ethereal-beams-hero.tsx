@@ -532,53 +532,56 @@ export default function EtherealBeamsHero() {
 
             {/* Main Heading */}
             <h1 className="text-hero-mobile md:text-hero-desktop mb-6 font-serif font-bold tracking-tight text-white">
-              Investissez dans{' '}
+              L'Afrique mérite un marché immobilier{' '}
               <span className="from-gold-300 via-gold to-gold-600 bg-gradient-to-r bg-clip-text text-transparent">
-                l&apos;Avenir
-              </span>{' '}
-              de l&apos;Afrique
+                digne de ce nom.
+              </span>
             </h1>
 
             {/* Subtitle */}
-            <p className="mx-auto mb-12 max-w-3xl font-sans text-lg leading-8 text-white/80 sm:text-xl lg:text-2xl">
-              La plateforme immobilière de confiance au Bénin, Côte d&apos;Ivoire, Sénégal et Togo.
-              Transactions sécurisées, audits fonciers et gestion de patrimoine.
+            <p className="mx-auto mb-12 max-w-3xl font-sans text-lg leading-8 text-white/80 sm:text-xl">
+              AfriBayit sécurise chaque transaction. Vérifie chaque bien.{' '}
+              <br className="hidden sm:block" />
+              Connecte les acheteurs, les vendeurs et les artisans au même endroit.
             </p>
 
             {/* Integrated Search Bar — Section M1 */}
-            <div className="shadow-glass-lg backdrop-blur-glass mx-auto mb-16 max-w-3xl transform rounded-[32px] border border-white/10 bg-white/5 p-2 transition-all duration-500 hover:border-white/20 hover:bg-white/10 md:rounded-[40px] md:p-3">
+            <div className="shadow-glass-lg backdrop-blur-glass mx-auto mb-12 max-w-3xl transform rounded-[32px] border border-white/10 bg-white/5 p-2 transition-all duration-500 hover:border-white/20 hover:bg-white/10 md:rounded-[40px] md:p-3">
               <SearchBar onSearch={() => {}} variant="hero" />
             </div>
 
-            {/* Features Row */}
-            <div className="mx-auto grid max-w-3xl grid-cols-1 gap-8 border-t border-white/10 pt-8 sm:grid-cols-3">
-              <div className="flex flex-col items-center">
-                <div className="bg-gold/10 border-gold/20 mb-4 flex h-10 w-10 items-center justify-center rounded-xl border">
-                  <Shield className="text-gold h-5 w-5" />
-                </div>
-                <div className="mb-1 text-xl font-bold text-white">100% Sécurisé</div>
-                <div className="text-xs uppercase tracking-tighter text-white/40">
-                  Audits Fonciers
-                </div>
+            {/* Stats bar */}
+            <div className="mx-auto mb-10 flex max-w-4xl flex-wrap justify-center gap-x-8 gap-y-4 text-sm md:text-base">
+              <div className="flex items-center gap-2">
+                <span className="font-mono font-bold text-white">4 200+</span>
+                <span className="text-white/60">biens vérifiés</span>
               </div>
-              <div className="flex flex-col items-center border-x border-white/10 px-4">
-                <div className="bg-gold/10 border-gold/20 mb-4 flex h-10 w-10 items-center justify-center rounded-xl border">
-                  <CheckCircle className="text-gold h-5 w-5" />
-                </div>
-                <div className="mb-1 text-xl font-bold text-white">Actes Notariés</div>
-                <div className="text-xs uppercase tracking-tighter text-white/40">
-                  Garantie Juridique
-                </div>
+              <div className="bg-gold/50 hidden h-5 w-px sm:block" />
+              <div className="flex items-center gap-2">
+                <span className="font-mono font-bold text-white">2 800+</span>
+                <span className="text-white/60">transactions sécurisées</span>
               </div>
-              <div className="flex flex-col items-center">
-                <div className="bg-gold/10 border-gold/20 mb-4 flex h-10 w-10 items-center justify-center rounded-xl border">
-                  <Star className="text-gold h-5 w-5" />
-                </div>
-                <div className="mb-1 text-xl font-bold text-white">Accompagnement</div>
-                <div className="text-xs uppercase tracking-tighter text-white/40">
-                  Conciergerie Premium
-                </div>
+              <div className="bg-gold/50 hidden h-5 w-px sm:block" />
+              <div className="flex items-center gap-2">
+                <span className="font-mono font-bold text-white">4</span>
+                <span className="text-white/60">pays</span>
               </div>
+              <div className="bg-gold/50 hidden h-5 w-px sm:block" />
+              <div className="flex items-center gap-2">
+                <span className="font-mono font-bold text-white">98%</span>
+                <span className="text-white/60">d'avis positifs</span>
+              </div>
+            </div>
+
+            {/* CTA secondaire */}
+            <div className="flex justify-center">
+              <a
+                href="/publier"
+                className="hover:border-gold hover:text-gold group relative inline-flex items-center justify-center overflow-hidden rounded-full border border-white/40 bg-transparent px-8 py-4 font-medium text-white transition-all"
+              >
+                <span className="relative z-10">Publier mon bien gratuitement</span>
+                <div className="absolute inset-0 -bottom-2 -top-2 -translate-x-full skew-x-12 bg-gradient-to-r from-transparent via-white/10 to-transparent transition-transform duration-1000 ease-out group-hover:translate-x-full" />
+              </a>
             </div>
           </div>
         </div>
