@@ -1,6 +1,6 @@
 import type React from 'react';
 import type { Metadata } from 'next';
-import EtherealBeamsHero from '@/components/ui/ethereal-beams-hero';
+import { GlowyWavesHero } from '@/components/ui/glowy-waves-hero-shadcnui';
 import { TrustedBy } from '@/components/landing/TrustedBy';
 import { TrustSection } from '@/components/landing/TrustSection';
 import { ModulesSection } from '@/components/landing/ModulesSection';
@@ -24,7 +24,7 @@ export default function HomePage(): React.ReactElement {
     <div className="min-h-screen bg-white">
       <SiteNavbar />
       <main id="main-content">
-        <EtherealBeamsHero />
+        <GlowyWavesHero />
         <TrustedBy />
         <TrustSection />
         <ModulesSection />

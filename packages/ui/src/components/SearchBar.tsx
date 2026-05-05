@@ -1,7 +1,7 @@
 'use client';
 
 import * as React from 'react';
-import { Search, MapPin, Home, ChevronDown, Sparkles } from 'lucide-react';
+import { Search, MapPin, Home, ChevronDown, Mic, MicOff } from 'lucide-react';
 import { cn } from '../lib/cn';
 
 type SearchPurpose = 'SALE' | 'RENT' | 'SHORT_TERM_RENT';
@@ -47,6 +47,51 @@ export function SearchBar({
   const [city, setCity] = React.useState('');
   const [type, setType] = React.useState('');
 
+  // Voice search state
+  const [isListening, setIsListening] = React.useState(false);
+  const [recognition, setRecognition] = React.useState<any>(null);
+
+  React.useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const win = window as any;
+      const SpeechRecognition = win.SpeechRecognition || win.webkitSpeechRecognition;
+      if (SpeechRecognition) {
+        const rec = new SpeechRecognition();
+        rec.continuous = false;
+        rec.interimResults = false;
+        rec.lang = 'fr-FR';
+
+        rec.onresult = (event: any) => {
+          const transcript = event.results[0][0].transcript;
+          setQuery((prev) => (prev ? prev + ' ' + transcript : transcript));
+          setIsListening(false);
+        };
+
+        rec.onerror = () => {
+          setIsListening(false);
+        };
+
+        rec.onend = () => {
+          setIsListening(false);
+        };
+
+        setRecognition(rec);
+      }
+    }
+  }, []);
+
+  const toggleListening = () => {
+    if (!recognition) return;
+
+    if (isListening) {
+      recognition.stop();
+      setIsListening(false);
+    } else {
+      recognition.start();
+      setIsListening(true);
+    }
+  };
+
   const handleSubmit = (e: React.FormEvent): void => {
     e.preventDefault();
     onSearch?.({ query, city, purpose, type });
@@ -60,6 +105,7 @@ export function SearchBar({
           <button
             key={p.value}
             role="tab"
+            type="button"
             aria-selected={purpose === p.value}
             onClick={() => setPurpose(p.value)}
             className={cn(
@@ -83,13 +129,13 @@ export function SearchBar({
         role="search"
         aria-label="Rechercher une propriété"
         className={cn(
-          'flex flex-col gap-0 rounded-b-2xl rounded-tr-2xl bg-white md:flex-row',
+          'flex flex-col items-center gap-0 rounded-b-2xl rounded-tr-2xl bg-white md:flex-row',
           'shadow-navy-900/30 shadow-2xl',
           compact ? 'p-2' : 'p-3',
         )}
       >
         {/* Keyword */}
-        <div className="group relative flex flex-1 items-center">
+        <div className="border-charcoal-100 group relative flex w-full flex-1 items-center border-b md:border-b-0 md:border-r">
           <Search
             className="text-charcoal-300 group-focus-within:text-gold pointer-events-none absolute left-4 h-5 w-5 transition-colors"
             aria-hidden="true"
@@ -98,19 +144,32 @@ export function SearchBar({
             type="search"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            placeholder="IA Search: 'Villa 4 chambres à Cotonou, budget 50M'..."
+            placeholder="IA: 'Villa 4 chambres à Cotonou'..."
             aria-label="Mots-clés"
             className={cn(
-              'text-charcoal w-full bg-transparent py-4 pl-12 pr-4 text-base italic',
-              'border-charcoal-100 md:border-r',
+              'text-charcoal w-full bg-transparent py-4 pl-12 pr-12 text-base italic',
               'placeholder:text-charcoal-300 focus:outline-none',
             )}
           />
-          <Sparkles className="text-gold pointer-events-none absolute right-4 h-4 w-4 animate-pulse" />
+          {recognition && (
+            <button
+              type="button"
+              onClick={toggleListening}
+              className={cn(
+                'absolute right-4 rounded-full p-2 transition-all',
+                isListening
+                  ? 'animate-pulse bg-red-100 text-red-500'
+                  : 'bg-charcoal-50 text-charcoal-400 hover:bg-gold/10 hover:text-gold',
+              )}
+              title="Recherche vocale"
+            >
+              {isListening ? <Mic className="h-4 w-4" /> : <MicOff className="h-4 w-4" />}
+            </button>
+          )}
         </div>
 
         {/* City */}
-        <div className="group relative flex items-center md:w-56">
+        <div className="border-charcoal-100 group relative flex w-full items-center border-b md:w-56 md:border-b-0 md:border-r">
           <MapPin
             className="text-charcoal-300 group-focus-within:text-gold pointer-events-none absolute left-4 h-5 w-5 transition-colors"
             aria-hidden="true"
@@ -123,14 +182,13 @@ export function SearchBar({
             aria-label="Ville"
             className={cn(
               'text-charcoal w-full bg-transparent py-4 pl-12 pr-4 text-base',
-              'border-charcoal-100 md:border-r',
               'placeholder:text-charcoal-300 focus:outline-none',
             )}
           />
         </div>
 
         {/* Property type */}
-        <div className="group relative flex items-center md:w-48">
+        <div className="group relative flex w-full items-center md:w-48">
           <Home
             className="text-charcoal-300 group-focus-within:text-gold pointer-events-none absolute left-4 h-5 w-5 transition-colors"
             aria-hidden="true"
@@ -158,7 +216,10 @@ export function SearchBar({
 
         {/* Submit */}
         <div
-          className={cn('mt-2 flex items-center md:ml-2 md:mt-0', compact ? '' : 'min-w-[150px]')}
+          className={cn(
+            'mt-2 flex w-full items-center md:ml-2 md:mt-0 md:w-auto',
+            compact ? '' : 'min-w-[150px]',
+          )}
         >
           <button
             type="submit"
