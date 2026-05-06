@@ -145,6 +145,21 @@ export default function ParametresPage(): React.ReactElement {
                       },
                     ],
                   },
+                  {
+                    group: 'SMS (Obligatoire 5.8.1)',
+                    items: [
+                      {
+                        key: 'smsTransaction',
+                        label: 'Transactions SMS',
+                        desc: 'Confirmations de paiement et séquestre',
+                      },
+                      {
+                        key: 'smsSecurity',
+                        label: 'Sécurité SMS',
+                        desc: 'Alertes de connexion et codes OTP',
+                      },
+                    ],
+                  },
                 ] as const
               ).map(({ group, items }) => (
                 <fieldset key={group}>
@@ -153,7 +168,8 @@ export default function ParametresPage(): React.ReactElement {
                   </legend>
                   <div className="space-y-3">
                     {items.map(({ key, label, desc }) => {
-                      const isCritical = key === 'smsTransaction' || key === 'smsSecurity';
+                      const isCritical =
+                        (key as string) === 'smsTransaction' || (key as string) === 'smsSecurity';
                       return (
                         <label
                           key={key}
@@ -338,9 +354,9 @@ export default function ParametresPage(): React.ReactElement {
                         desc: 'Confirmation de virement vers votre compte',
                       },
                       {
-                        key: 'whatsappKyc',
-                        label: "Vérification d'identité (KYC)",
-                        desc: "Résultat de l'examen de vos documents",
+                        key: 'whatsappRebecca',
+                        label: 'Rebecca IA & Compliance',
+                        desc: 'Mises à jour de vérification et conseils personnalisés',
                       },
                       {
                         key: 'whatsappNewMessage',
