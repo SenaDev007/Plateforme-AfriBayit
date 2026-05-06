@@ -11,9 +11,9 @@ export function RebeccaSection() {
         <div className="grid grid-cols-1 gap-16 lg:grid-cols-2 lg:items-center">
           {/* Text Content */}
           <div>
-            <div className="border-navy/20 bg-navy/5 mb-8 inline-flex items-center gap-2 rounded-full border px-4 py-1.5">
-              <Bot className="text-navy h-4 w-4" />
-              <span className="text-navy text-[10px] font-bold uppercase tracking-[0.2em]">
+            <div className="border-sky/20 bg-sky/5 mb-8 inline-flex items-center gap-2 rounded-full border px-4 py-1.5">
+              <Bot className="text-sky h-4 w-4" />
+              <span className="text-sky text-[10px] font-bold uppercase tracking-[0.2em]">
                 Votre assistant immobilier 24/7
               </span>
             </div>
@@ -31,7 +31,7 @@ export function RebeccaSection() {
             </div>
 
             <div className="border-charcoal-100 relative mb-10 rounded-2xl border bg-white p-6 shadow-sm">
-              <Sparkles className="text-gold fill-gold/20 absolute right-0 top-0 -mr-3 -mt-3 h-8 w-8" />
+              <Sparkles className="text-sky fill-sky/10 absolute right-0 top-0 -mr-3 -mt-3 h-8 w-8" />
               <p className="text-charcoal-700 italic">
                 Rebecca analyse le marché en temps réel et vous donne une réponse honnête. Pas une
                 réponse générique. Une réponse basée sur les données AfriBayit de votre zone.
@@ -55,7 +55,7 @@ export function RebeccaSection() {
             transition={{ duration: 0.8 }}
             className="relative"
           >
-            <div className="from-gold/20 to-navy/10 absolute inset-0 -m-8 rounded-full bg-gradient-to-tr opacity-50 blur-3xl" />
+            <div className="from-sky/20 to-navy/10 absolute inset-0 -m-8 rounded-full bg-gradient-to-tr opacity-50 blur-3xl" />
 
             <div className="border-charcoal-100 relative flex h-[500px] flex-col overflow-hidden rounded-3xl border bg-white shadow-2xl">
               {/* Header */}

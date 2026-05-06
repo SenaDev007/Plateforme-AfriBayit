@@ -62,7 +62,7 @@ export function StatsBar(): React.ReactElement {
       className="bg-gold relative overflow-hidden py-16 md:py-24"
     >
       {/* Background decorative elements */}
-      <div className="bg-navy-deep/5 absolute right-0 top-0 h-full w-1/3 translate-x-1/2 rounded-full blur-[120px]" />
+      <div className="bg-navy/5 absolute right-0 top-0 h-full w-1/3 translate-x-1/2 rounded-full blur-[120px]" />
       <div className="absolute bottom-0 left-0 h-full w-1/4 -translate-x-1/2 rounded-full bg-white/10 blur-[100px]" />
 
       <div className="relative z-10 mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
@@ -76,7 +76,7 @@ export function StatsBar(): React.ReactElement {
               viewport={{ once: true }}
               transition={{ delay: i * 0.1, duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
             >
-              <div className="text-navy-deep font-sans text-4xl font-black tracking-tighter sm:text-5xl md:text-7xl">
+              <div className="text-navy font-sans text-4xl font-black tracking-tighter sm:text-5xl md:text-7xl">
                 <AnimatedNumber
                   target={stat.value}
                   suffix={stat.suffix}
@@ -84,8 +84,8 @@ export function StatsBar(): React.ReactElement {
                 />
               </div>
               <div className="flex flex-col items-center">
-                <div className="bg-navy-deep mb-3 h-0.5 w-8 opacity-20" />
-                <p className="text-navy-deep/80 text-[10px] font-bold uppercase tracking-[0.1em] sm:text-xs sm:tracking-[0.2em] md:text-sm">
+                <div className="bg-navy mb-3 h-0.5 w-8 opacity-20" />
+                <p className="text-navy/80 text-[10px] font-bold uppercase tracking-[0.1em] sm:text-xs sm:tracking-[0.2em] md:text-sm">
                   {stat.label}
                 </p>
               </div>

@@ -5,9 +5,9 @@ const config: Omit<Config, 'content'> = {
   theme: {
     extend: {
       colors: {
-        // Brand palette
+        // AfriBayit Visual Identity & Design System
         navy: {
-          DEFAULT: '#003087',
+          DEFAULT: '#003087', // Authority & Trust — Primary
           50: '#e6edf7',
           100: '#ccdaef',
           200: '#99b5df',
@@ -18,10 +18,9 @@ const config: Omit<Config, 'content'> = {
           700: '#001c51',
           800: '#001336',
           900: '#00091b',
-          deep: '#001F5B',
         },
         gold: {
-          DEFAULT: '#D4AF37',
+          DEFAULT: '#D4AF37', // Exclusivity & Premium — Badges, Highlights
           50: '#fdf8e7',
           100: '#fbf1cf',
           200: '#f7e39f',
@@ -34,7 +33,7 @@ const config: Omit<Config, 'content'> = {
           900: '#2a230b',
         },
         sky: {
-          DEFAULT: '#009CDE',
+          DEFAULT: '#009CDE', // Innovation & Accents — Icons, Secondaries
           50: '#e6f5fc',
           100: '#ccebf9',
           200: '#99d7f3',
@@ -47,7 +46,7 @@ const config: Omit<Config, 'content'> = {
           900: '#001f2c',
         },
         emerald: {
-          DEFAULT: '#00A651',
+          DEFAULT: '#00A651', // Validation & Success — Certifications
           50: '#e6f7ee',
           100: '#ccefdd',
           200: '#99dfbb',
@@ -60,7 +59,7 @@ const config: Omit<Config, 'content'> = {
           900: '#002110',
         },
         danger: {
-          DEFAULT: '#D93025',
+          DEFAULT: '#D93025', // Alerte & Attention — Errors, Urgency
           50: '#fce9e8',
           100: '#f9d3d1',
           200: '#f3a7a3',
@@ -73,7 +72,7 @@ const config: Omit<Config, 'content'> = {
           900: '#2b0907',
         },
         charcoal: {
-          DEFAULT: '#2C2E2F',
+          DEFAULT: '#2C2E2F', // Neutre & Premium — Body Text, Subtle Backgrounds
           50: '#f5f5f5',
           100: '#ebebeb',
           200: '#d7d7d7',

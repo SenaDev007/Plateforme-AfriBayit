@@ -30,7 +30,8 @@ const SERVICES = [
     textColor: 'text-charcoal',
     span: 'col-span-1',
     cta: 'Trouver un logement',
-    href: '/location',
+    href: '/recherche?but=RENT',
+    accentColor: 'text-sky',
   },
   {
     id: '03',
@@ -44,6 +45,7 @@ const SERVICES = [
     span: 'col-span-1',
     cta: 'Voir les opportunités',
     href: '/investissement',
+    accentColor: 'text-sky',
   },
   {
     id: '04',
@@ -65,7 +67,7 @@ const SERVICES = [
     description:
       'Hôtels locaux référencés, guesthouses vérifiées. Réservation sécurisée. Annulation flexible.',
     icon: Hotel,
-    color: 'bg-charcoal-900',
+    color: 'bg-navy',
     textColor: 'text-white',
     span: 'col-span-1',
     cta: 'Réserver',
@@ -122,7 +124,7 @@ export function ModulesSection(): React.ReactElement {
                     className={`flex h-10 w-10 items-center justify-center rounded-xl ${s.textColor === 'text-white' ? 'bg-white/10' : 'bg-navy/5'} backdrop-blur-sm`}
                   >
                     <s.icon
-                      className={`h-5 w-5 ${s.textColor === 'text-white' ? 'text-gold' : 'text-navy'}`}
+                      className={`h-5 w-5 ${s.textColor === 'text-white' ? 'text-gold' : s.accentColor || 'text-navy'}`}
                     />
                   </div>
                   <span

@@ -1,8 +1,9 @@
 'use client';
-import type React from 'react';
-
-import { useState } from 'react';
+import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useRouter } from 'next/navigation';
+import { useSession } from 'next-auth/react';
+import toast from 'react-hot-toast';
 import {
   MapPin,
   BedDouble,
@@ -18,7 +19,11 @@ import {
   Star,
   ChevronLeft,
   ChevronRight,
-  Maximize2,
+  X,
+  Lock,
+  ShieldCheck,
+  Copy,
+  MessageCircle,
 } from 'lucide-react';
 import { Badge, Button, Card } from '@afribayit/ui';
 import { cn } from '@afribayit/ui/src/lib/cn';
@@ -29,7 +34,6 @@ interface PropertyImage {
   url: string;
   alt: string;
 }
-
 interface Agent {
   name: string;
   avatar: string | null;
@@ -39,7 +43,6 @@ interface Agent {
   reviewCount: number;
   isVerified: boolean;
 }
-
 interface PropertyDetailData {
   id: string;
   slug: string;
@@ -65,27 +68,8 @@ interface PropertyDetailData {
   isFeatured: boolean;
   images: PropertyImage[];
   agent: Agent;
-  droneMapping?:
-    | {
-        orthophotoUrl: string;
-        polygonData: any;
-        area: number;
-      }
-    | null
-    | undefined;
-  blockchainProof?:
-    | {
-        hash: string;
-        txHash: string;
-        network: string;
-        timestamp: string;
-      }
-    | null
-    | undefined;
-}
-
-interface PropertyDetailProps {
-  property: PropertyDetailData;
+  droneMapping?: { orthophotoUrl: string; polygonData: any; area: number } | null;
+  blockchainProof?: { hash: string; txHash: string; network: string; timestamp: string } | null;
 }
 
 function formatPrice(amount: number, currency: string): string {
@@ -96,9 +80,37 @@ function formatPrice(amount: number, currency: string): string {
   return new Intl.NumberFormat('fr-FR', { style: 'currency', currency }).format(amount);
 }
 
-export function PropertyDetail({ property }: PropertyDetailProps): React.ReactElement {
+export function PropertyDetail({ property }: { property: PropertyDetailData }): React.ReactElement {
+  const router = useRouter();
+  const { data: session } = useSession();
   const [activeImage, setActiveImage] = useState(0);
   const [favorited, setFavorited] = useState(false);
+  const [lightboxOpen, setLightboxOpen] = useState(false);
+  const [shareOpen, setShareOpen] = useState(false);
+  const [copied, setCopied] = useState(false);
+
+  const handleStartPurchase = () => {
+    if (!session) {
+      toast.error("Veuillez vous connecter pour initier l'achat.");
+      router.push('/connexion');
+      return;
+    }
+
+    // Check KYC status (Simulated via reputation or flag)
+    const isKYCVerified = (session.user as any)?.reputationScore >= 50;
+
+    if (!isKYCVerified) {
+      toast("Une vérification d'identité est requise pour les transactions Escrow.", {
+        icon: '🛡️',
+        duration: 5000,
+      });
+      router.push('/verifier-identite' as any);
+      return;
+    }
+
+    toast.success('Initialisation du moteur SecureTrade...');
+    router.push(`/dashboard/payer/${property.id}`);
+  };
 
   const purposeLabel: Record<string, string> = {
     SALE: 'À vendre',
@@ -107,17 +119,122 @@ export function PropertyDetail({ property }: PropertyDetailProps): React.ReactEl
     INVESTMENT: 'Investissement',
   };
 
-  const nextImage = () => setActiveImage((prev) => (prev + 1) % property.images.length);
-  const prevImage = () =>
-    setActiveImage((prev) => (prev - 1 + property.images.length) % property.images.length);
+  const next = () => setActiveImage((p) => (p + 1) % property.images.length);
+  const prev = () =>
+    setActiveImage((p) => (p - 1 + property.images.length) % property.images.length);
+
+  const handleCopy = () => {
+    navigator.clipboard.writeText(window.location.href);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
 
   return (
     <article aria-label={property.title} className="bg-white pb-24 lg:pb-32">
-      {/* Header Info (Breadcrumbs / Back button style) */}
-      <div className="bg-charcoal-900 pb-8 pt-24 md:pt-32">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+      {/* LIGHTBOX MODAL */}
+      <AnimatePresence>
+        {lightboxOpen && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[100] flex items-center justify-center bg-black/95 p-4"
+          >
+            <button
+              onClick={() => setLightboxOpen(false)}
+              className="absolute right-6 top-6 z-10 flex h-12 w-12 items-center justify-center rounded-full bg-white/10 text-white hover:bg-white/20"
+            >
+              <X className="h-6 w-6" />
+            </button>
+            <button
+              onClick={prev}
+              className="absolute left-4 flex h-12 w-12 items-center justify-center rounded-full bg-white/10 text-white hover:bg-white/20"
+            >
+              <ChevronLeft className="h-6 w-6" />
+            </button>
+            <motion.img
+              key={activeImage}
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              src={property.images[activeImage]?.url}
+              alt={property.images[activeImage]?.alt}
+              className="max-h-[85vh] max-w-[90vw] rounded-2xl object-contain shadow-2xl"
+            />
+            <button
+              onClick={next}
+              className="absolute right-4 flex h-12 w-12 items-center justify-center rounded-full bg-white/10 text-white hover:bg-white/20"
+            >
+              <ChevronRight className="h-6 w-6" />
+            </button>
+            <div className="absolute bottom-6 text-sm font-bold text-white/50">
+              {activeImage + 1} / {property.images.length}
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* SHARE MODAL */}
+      <AnimatePresence>
+        {shareOpen && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 flex items-end justify-center bg-black/60 sm:items-center"
+            onClick={() => setShareOpen(false)}
+          >
+            <motion.div
+              initial={{ y: 50, opacity: 0 }}
+              animate={{ y: 0, opacity: 1 }}
+              exit={{ y: 50, opacity: 0 }}
+              onClick={(e) => e.stopPropagation()}
+              className="w-full max-w-md rounded-t-[32px] bg-white p-8 shadow-2xl sm:rounded-[32px]"
+            >
+              <h3 className="text-navy mb-6 font-serif text-2xl font-bold">Partager ce bien</h3>
+              <div className="flex flex-col gap-3">
+                <button
+                  onClick={handleCopy}
+                  className="border-charcoal-100 hover:bg-charcoal-50 flex items-center gap-4 rounded-2xl border p-4 transition-all"
+                >
+                  <div className="bg-navy/5 flex h-10 w-10 items-center justify-center rounded-xl">
+                    <Copy className="text-navy h-5 w-5" />
+                  </div>
+                  <span className="text-charcoal font-bold">
+                    {copied ? '✓ Lien copié !' : 'Copier le lien'}
+                  </span>
+                </button>
+                <a
+                  href={`https://wa.me/?text=${encodeURIComponent(property.title + ' - ' + (typeof window !== 'undefined' ? window.location.href : ''))}`}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="border-charcoal-100 hover:bg-charcoal-50 flex items-center gap-4 rounded-2xl border p-4 transition-all"
+                >
+                  <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-green-50">
+                    <MessageCircle className="h-5 w-5 text-green-600" />
+                  </div>
+                  <span className="text-charcoal font-bold">WhatsApp</span>
+                </a>
+              </div>
+              <button
+                onClick={() => setShareOpen(false)}
+                className="border-charcoal-200 text-charcoal-500 hover:bg-charcoal-50 mt-6 w-full rounded-full border py-3 text-sm font-bold"
+              >
+                Fermer
+              </button>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* HEADER */}
+      <div className="bg-charcoal-900 relative overflow-hidden pb-8 pt-24 md:pt-32">
+        <div className="pointer-events-none absolute inset-0">
+          <div className="bg-gold/10 absolute right-0 top-0 h-96 w-96 -translate-y-1/3 translate-x-1/3 rounded-full blur-[100px]" />
+        </div>
+        <div className="relative z-10 mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="flex flex-col justify-between gap-6 md:flex-row md:items-end">
             <div className="space-y-4">
+              {/* Trust badges */}
               <div className="flex flex-wrap gap-2">
                 <Badge variant="gold" className="px-4 py-1.5 font-bold uppercase tracking-wider">
                   {property.type}
@@ -126,19 +243,21 @@ export function PropertyDetail({ property }: PropertyDetailProps): React.ReactEl
                   {purposeLabel[property.purpose]}
                 </Badge>
                 {property.isVerified && (
-                  <Badge
-                    variant="success"
-                    className="bg-emerald/20 border-none px-4 py-1.5 text-emerald-400"
-                  >
-                    ✓ VÉRIFIÉ
-                  </Badge>
+                  <div className="flex items-center gap-1.5 rounded-full border border-emerald-500/30 bg-emerald-500/10 px-4 py-1.5 text-xs font-bold text-emerald-400">
+                    <ShieldCheck className="h-3.5 w-3.5" /> VÉRIFIÉ AFRIBAYIT
+                  </div>
+                )}
+                {property.droneMapping && (
+                  <div className="border-gold/30 bg-gold/10 text-gold flex items-center gap-1.5 rounded-full border px-4 py-1.5 text-xs font-bold">
+                    <Shield className="h-3.5 w-3.5" /> GÉOTRUST DRONE
+                  </div>
                 )}
               </div>
               <h1 className="font-serif text-2xl font-bold leading-tight text-white sm:text-3xl md:text-5xl">
                 {property.title}
               </h1>
               <p className="flex items-center gap-2 text-base text-white/50">
-                <MapPin className="text-gold h-5 w-5" aria-hidden="true" />
+                <MapPin className="text-gold h-5 w-5" />
                 {property.address ??
                   `${property.district ?? ''} ${property.city}, ${property.country}`.trim()}
               </p>
@@ -149,13 +268,16 @@ export function PropertyDetail({ property }: PropertyDetailProps): React.ReactEl
                 className={cn(
                   'flex h-12 w-12 items-center justify-center rounded-full border border-white/10 transition-all',
                   favorited
-                    ? 'bg-danger border-danger text-white'
+                    ? 'border-red-400/40 bg-red-500/20 text-red-400'
                     : 'text-white/60 hover:bg-white/5',
                 )}
               >
                 <Heart className={cn('h-5 w-5', favorited && 'fill-current')} />
               </button>
-              <button className="flex h-12 w-12 items-center justify-center rounded-full border border-white/10 text-white/60 transition-all hover:bg-white/5">
+              <button
+                onClick={() => setShareOpen(true)}
+                className="flex h-12 w-12 items-center justify-center rounded-full border border-white/10 text-white/60 transition-all hover:bg-white/5"
+              >
                 <Share2 className="h-5 w-5" />
               </button>
             </div>
@@ -163,53 +285,52 @@ export function PropertyDetail({ property }: PropertyDetailProps): React.ReactEl
         </div>
       </div>
 
-      {/* Gallery Section */}
+      {/* GALLERY */}
       <section className="bg-charcoal-900 pb-16">
         <div className="mx-auto max-w-[1400px] px-4 sm:px-6">
           <div className="grid aspect-[21/9] min-h-[300px] grid-cols-1 gap-4 sm:min-h-[500px] md:grid-cols-4">
-            {/* Main Large Image */}
-            <div className="group relative overflow-hidden rounded-3xl md:col-span-3">
+            <div
+              className="group relative cursor-pointer overflow-hidden rounded-3xl md:col-span-3"
+              onClick={() => setLightboxOpen(true)}
+            >
               <AnimatePresence mode="wait">
                 <motion.img
                   key={activeImage}
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                   exit={{ opacity: 0 }}
-                  transition={{ duration: 0.5 }}
+                  transition={{ duration: 0.4 }}
                   src={property.images[activeImage]?.url}
                   alt={property.images[activeImage]?.alt}
                   className="h-full w-full object-cover"
                 />
               </AnimatePresence>
-
-              {/* Navigation arrows overlay */}
               <div className="absolute inset-x-4 top-1/2 flex -translate-y-1/2 justify-between opacity-0 transition-opacity group-hover:opacity-100">
                 <button
-                  onClick={prevImage}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    prev();
+                  }}
                   className="flex h-12 w-12 items-center justify-center rounded-full bg-black/50 text-white backdrop-blur-md hover:bg-black/70"
                 >
                   <ChevronLeft className="h-6 w-6" />
                 </button>
                 <button
-                  onClick={nextImage}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    next();
+                  }}
                   className="flex h-12 w-12 items-center justify-center rounded-full bg-black/50 text-white backdrop-blur-md hover:bg-black/70"
                 >
                   <ChevronRight className="h-6 w-6" />
                 </button>
               </div>
-
-              {/* Photo count / Maximize */}
-              <div className="absolute bottom-6 right-6 flex gap-3">
-                <span className="rounded-full bg-black/50 px-4 py-2 text-xs font-bold text-white backdrop-blur-md">
-                  {activeImage + 1} / {property.images.length} PHOTOS
+              <div className="absolute bottom-6 right-6">
+                <span className="rounded-full bg-black/60 px-4 py-2 text-xs font-bold text-white backdrop-blur-md">
+                  {activeImage + 1} / {property.images.length} · Cliquer pour agrandir
                 </span>
-                <button className="flex h-10 w-10 items-center justify-center rounded-full bg-black/50 text-white backdrop-blur-md hover:bg-black/70">
-                  <Maximize2 className="h-4 w-4" />
-                </button>
               </div>
             </div>
-
-            {/* Sidebar Thumbnails (Desktop) */}
             <div className="custom-scrollbar hidden flex-col gap-4 overflow-y-auto pr-2 md:flex">
               {property.images.map((img, idx) => (
                 <button
@@ -230,15 +351,40 @@ export function PropertyDetail({ property }: PropertyDetailProps): React.ReactEl
         </div>
       </section>
 
-      {/* Content Layout */}
+      {/* TRUST BAR */}
+      <div className="border-charcoal-100 bg-charcoal-50 border-b">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          <div className="flex flex-wrap items-center justify-center gap-8 py-5 md:justify-start">
+            {[
+              { icon: ShieldCheck, label: 'Titre foncier vérifié IA', color: 'text-emerald-600' },
+              { icon: Lock, label: 'Transaction escrow sécurisée', color: 'text-navy' },
+              { icon: Shield, label: 'KYC propriétaire validé', color: 'text-gold' },
+            ].map((t) => (
+              <div
+                key={t.label}
+                className="text-charcoal-600 flex items-center gap-2 text-sm font-medium"
+              >
+                <t.icon className={cn('h-4 w-4', t.color)} />
+                {t.label}
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      {/* CONTENT LAYOUT */}
       <div className="mx-auto max-w-7xl px-4 pt-16 sm:px-6 lg:px-8">
         <div className="grid gap-16 lg:grid-cols-3">
-          {/* Main Info */}
+          {/* MAIN */}
           <div className="space-y-12 lg:col-span-2">
-            {/* Key Specifications Grid */}
+            {/* Specs */}
             <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
               {[
-                { label: 'Surface', value: `${property.surface} m²`, icon: Expand },
+                {
+                  label: 'Surface',
+                  value: property.surface ? `${property.surface} m²` : null,
+                  icon: Expand,
+                },
                 { label: 'Chambres', value: property.bedrooms, icon: BedDouble },
                 { label: 'Douches', value: property.bathrooms, icon: Bath },
                 { label: 'Construction', value: property.yearBuilt ?? 'Récent', icon: Calendar },
@@ -267,7 +413,7 @@ export function PropertyDetail({ property }: PropertyDetailProps): React.ReactEl
               </div>
             </div>
 
-            {/* Features / Amenities */}
+            {/* Features */}
             {property.features && property.features.length > 0 && (
               <div className="space-y-6">
                 <h2 className="text-charcoal font-serif text-3xl font-bold">
@@ -277,7 +423,7 @@ export function PropertyDetail({ property }: PropertyDetailProps): React.ReactEl
                   {property.features.map((feature) => (
                     <div key={feature} className="group flex items-center gap-3">
                       <div className="flex h-8 w-8 items-center justify-center rounded-full bg-emerald-50 transition-all group-hover:bg-emerald-500 group-hover:text-white">
-                        <CheckCircle2 className="h-4 w-4" />
+                        <CheckCircle2 className="h-4 w-4 text-emerald-600 group-hover:text-white" />
                       </div>
                       <span className="text-charcoal-700 font-medium">{feature}</span>
                     </div>
@@ -286,7 +432,7 @@ export function PropertyDetail({ property }: PropertyDetailProps): React.ReactEl
               </div>
             )}
 
-            {/* GeoTrust Map Section */}
+            {/* GeoTrust */}
             {(property.droneMapping || property.latitude) && (
               <div className="space-y-6">
                 <div className="flex items-center justify-between">
@@ -299,8 +445,7 @@ export function PropertyDetail({ property }: PropertyDetailProps): React.ReactEl
                       variant="gold"
                       className="gap-2 px-4 py-1.5 font-bold uppercase tracking-widest"
                     >
-                      <Shield className="h-4 w-4" />
-                      VÉRIFIÉ PAR DRONE
+                      <Shield className="h-4 w-4" /> VÉRIFIÉ PAR DRONE
                     </Badge>
                   )}
                 </div>
@@ -311,66 +456,63 @@ export function PropertyDetail({ property }: PropertyDetailProps): React.ReactEl
                   orthophotoUrl={property.droneMapping?.orthophotoUrl ?? null}
                   polygonData={property.droneMapping?.polygonData ?? null}
                 />
-                <div className="mt-6 grid grid-cols-1 gap-6 md:grid-cols-2">
-                  {property.droneMapping && (
-                    <Card className="bg-charcoal-50 border-charcoal-100/50 flex items-center gap-4 p-6">
-                      <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-white shadow-sm">
-                        <Expand className="text-navy h-6 w-6" />
-                      </div>
-                      <div>
-                        <p className="text-charcoal-400 text-[10px] font-bold uppercase tracking-widest">
-                          Surface Certifiée
-                        </p>
-                        <p className="text-charcoal text-lg font-bold">
-                          {property.droneMapping.area.toLocaleString()} m²
-                        </p>
-                      </div>
-                    </Card>
-                  )}
-                  {property.blockchainProof && (
-                    <Card className="bg-navy flex items-center gap-4 border-none p-6 text-white">
-                      <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-white/10">
-                        <Shield className="text-gold h-6 w-6" />
-                      </div>
-                      <div>
-                        <p className="text-[10px] font-bold uppercase tracking-widest text-white/50">
-                          Ancrage Blockchain
-                        </p>
-                        <p className="max-w-[150px] truncate font-mono text-xs">
-                          {property.blockchainProof.txHash}
-                        </p>
-                      </div>
-                    </Card>
-                  )}
-                </div>
+                {(property.droneMapping || property.blockchainProof) && (
+                  <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+                    {property.droneMapping && (
+                      <Card className="bg-charcoal-50 border-charcoal-100/50 flex items-center gap-4 p-6">
+                        <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-white shadow-sm">
+                          <Expand className="text-navy h-6 w-6" />
+                        </div>
+                        <div>
+                          <p className="text-charcoal-400 text-[10px] font-bold uppercase tracking-widest">
+                            Surface Certifiée
+                          </p>
+                          <p className="text-charcoal text-lg font-bold">
+                            {property.droneMapping.area.toLocaleString()} m²
+                          </p>
+                        </div>
+                      </Card>
+                    )}
+                    {property.blockchainProof && (
+                      <Card className="bg-navy flex items-center gap-4 border-none p-6 text-white">
+                        <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-white/10">
+                          <Shield className="text-gold h-6 w-6" />
+                        </div>
+                        <div>
+                          <p className="text-[10px] font-bold uppercase tracking-widest text-white/50">
+                            Ancrage Blockchain
+                          </p>
+                          <p className="max-w-[150px] truncate font-mono text-xs">
+                            {property.blockchainProof.txHash}
+                          </p>
+                        </div>
+                      </Card>
+                    )}
+                  </div>
+                )}
               </div>
             )}
           </div>
 
-          {/* Sidebar - Price & Contact */}
+          {/* SIDEBAR */}
           <aside className="space-y-8">
-            {/* Sticky Price Card */}
             <div className="sticky top-24 space-y-6">
+              {/* Price & Escrow Box */}
               <motion.div
                 className="border-charcoal-100 shadow-navy/5 relative overflow-hidden rounded-[32px] border bg-white p-8 shadow-2xl"
                 initial={{ y: 20, opacity: 0 }}
                 animate={{ y: 0, opacity: 1 }}
               >
-                {/* Background accent */}
                 <div className="bg-gold/5 absolute right-0 top-0 h-32 w-32 rounded-full blur-3xl" />
-
                 <div className="relative z-10 space-y-6">
                   <div className="flex items-center justify-between">
                     <span className="text-charcoal-400 text-xs font-bold uppercase tracking-[0.2em]">
                       PRIX DIRECT PROPRIÉTAIRE
                     </span>
                     {property.isVerified && (
-                      <Badge
-                        variant="success"
-                        className="border-none bg-emerald-50 text-emerald-600"
-                      >
-                        Escrow OK
-                      </Badge>
+                      <div className="flex items-center gap-1.5 rounded-full bg-emerald-50 px-3 py-1 text-xs font-bold text-emerald-600">
+                        <Lock className="h-3 w-3" /> Escrow prêt
+                      </div>
                     )}
                   </div>
                   <div className="space-y-1">
@@ -382,12 +524,33 @@ export function PropertyDetail({ property }: PropertyDetailProps): React.ReactEl
                     </p>
                   </div>
 
-                  <div className="flex flex-col gap-3 pt-4">
+                  {/* Escrow workflow mini */}
+                  <div className="bg-navy/5 space-y-2 rounded-2xl p-4">
+                    <p className="text-navy/60 text-[10px] font-bold uppercase tracking-widest">
+                      Processus SecureTrade
+                    </p>
+                    <div className="text-charcoal-500 flex items-center gap-2 text-xs">
+                      {['Dépôt fonds', 'Vérif. titre', 'Libération'].map((step, i) => (
+                        <React.Fragment key={step}>
+                          <span className="flex items-center gap-1">
+                            <ShieldCheck className="h-3 w-3 text-emerald-500" />
+                            {step}
+                          </span>
+                          {i < 2 && (
+                            <ChevronRight className="text-charcoal-300 h-3 w-3 flex-shrink-0" />
+                          )}
+                        </React.Fragment>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div className="flex flex-col gap-3">
                     <Button
                       size="lg"
                       className="shadow-navy/20 h-14 rounded-full text-base font-bold shadow-lg"
+                      onClick={handleStartPurchase}
                     >
-                      INITIER L'ACHAT SÉCURISÉ
+                      INITIER L&apos;ACHAT SÉCURISÉ
                     </Button>
                     <Button
                       variant="outline"
@@ -397,19 +560,10 @@ export function PropertyDetail({ property }: PropertyDetailProps): React.ReactEl
                       FAIRE UNE OFFRE
                     </Button>
                   </div>
-
-                  <div className="border-charcoal-100 flex items-center gap-3 border-t pt-4">
-                    <div className="bg-navy/5 flex h-10 w-10 items-center justify-center rounded-full">
-                      <Shield className="text-navy h-5 w-5" />
-                    </div>
-                    <p className="text-charcoal-500 text-[11px] leading-snug">
-                      Votre transaction est protégée par notre protocole **SecureTrade Escrow**.
-                    </p>
-                  </div>
                 </div>
               </motion.div>
 
-              {/* Tax Calculator Integration */}
+              {/* Tax Calculator */}
               {(property.purpose === 'SALE' || property.purpose === 'INVESTMENT') && (
                 <TaxCalculator
                   price={property.price}
@@ -418,10 +572,10 @@ export function PropertyDetail({ property }: PropertyDetailProps): React.ReactEl
                 />
               )}
 
-              {/* Agent Profile */}
+              {/* Agent Card */}
               <div className="bg-charcoal-50 border-charcoal-100/50 space-y-6 rounded-[32px] border p-8">
                 <h3 className="text-charcoal flex items-center gap-2 font-bold">
-                  <div className="h-2 w-2 rounded-full bg-emerald-500" />
+                  <div className="h-2 w-2 animate-pulse rounded-full bg-emerald-500" />
                   Conseiller Dédié
                 </h3>
                 <div className="flex items-center gap-4">
@@ -456,7 +610,6 @@ export function PropertyDetail({ property }: PropertyDetailProps): React.ReactEl
                     </div>
                   </div>
                 </div>
-
                 <div className="grid grid-cols-2 gap-3">
                   <a
                     href={`tel:${property.agent.phone}`}
@@ -479,8 +632,8 @@ export function PropertyDetail({ property }: PropertyDetailProps): React.ReactEl
         </div>
       </div>
 
-      {/* Mobile Floating Bar */}
-      <div className="border-charcoal-100 fixed inset-x-0 bottom-0 z-50 flex items-center justify-between border-t bg-white p-4 shadow-[0_-10px_30px_rgba(0,0,0,0.1)] lg:hidden">
+      {/* MOBILE CTA BAR */}
+      <div className="border-charcoal-100 fixed inset-x-0 bottom-0 z-40 flex items-center justify-between gap-4 border-t bg-white/95 p-4 shadow-[0_-10px_30px_rgba(0,0,0,0.1)] backdrop-blur-md lg:hidden">
         <div>
           <p className="text-navy text-2xl font-bold">
             {formatPrice(property.price, property.currency)}
@@ -489,7 +642,15 @@ export function PropertyDetail({ property }: PropertyDetailProps): React.ReactEl
             {purposeLabel[property.purpose]}
           </p>
         </div>
-        <Button className="h-12 rounded-full px-8 font-bold">CONTACTER</Button>
+        <div className="flex gap-3">
+          <button
+            onClick={() => setShareOpen(true)}
+            className="border-charcoal-200 flex h-12 w-12 items-center justify-center rounded-full border"
+          >
+            <Share2 className="text-charcoal-500 h-5 w-5" />
+          </button>
+          <Button className="h-12 rounded-full px-8 font-bold">CONTACTER</Button>
+        </div>
       </div>
     </article>
   );

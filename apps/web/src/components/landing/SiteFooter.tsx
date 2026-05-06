@@ -153,7 +153,7 @@ const socialItemClass =
 
 export function SiteFooter() {
   return (
-    <footer className="bg-navy-deep border-t border-white/10 px-4 py-16">
+    <footer className="bg-navy border-t border-white/10 px-4 py-16">
       {/* Brand Section */}
       <div className="relative mx-auto grid max-w-7xl items-center justify-center gap-12 border-b border-white/5 pb-16 md:flex md:gap-16">
         <Link href="/" className="flex items-center justify-center">
