@@ -6,20 +6,9 @@ import { useState, useEffect } from 'react';
 import { useSession } from 'next-auth/react';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
-import {
-  TrendingUp,
-  Heart,
-  CreditCard,
-  Eye,
-  Loader2,
-  ArrowUpRight,
-  ShieldCheck,
-  Clock,
-  MapPin,
-  Search,
-  MessageSquare,
-} from 'lucide-react';
+import { MessageSquare, Award } from 'lucide-react';
 import { Card, Badge, PropertyCard, Button } from '@afribayit/ui';
+import { AmbassadorStatus } from './AmbassadorStatus';
 import type { PropertyCardData } from '@afribayit/ui';
 import { api } from '@/lib/api';
 import { cn } from '@afribayit/ui/src/lib/cn';
@@ -129,13 +118,23 @@ const STATUS_VARIANTS: Record<string, 'default' | 'sky' | 'gold' | 'success' | '
 };
 
 const chartData = [
-  { name: 'Jan', value: 400 },
-  { name: 'Fév', value: 300 },
-  { name: 'Mar', value: 600 },
-  { name: 'Avr', value: 800 },
-  { name: 'Mai', value: 500 },
-  { name: 'Juin', value: 900 },
+  { name: 'Jan', value: 400, baseline: 350 },
+  { name: 'Fév', value: 300, baseline: 400 },
+  { name: 'Mar', value: 600, baseline: 450 },
+  { name: 'Avr', value: 800, baseline: 500 },
+  { name: 'Mai', value: 500, baseline: 520 },
+  { name: 'Juin', value: 900, baseline: 550 },
 ];
+
+const REPUTATION_LEVELS = [
+  { min: 0, max: 300, label: 'Acteur', color: 'text-charcoal-400' },
+  { min: 300, max: 600, label: 'Expert', color: 'text-navy' },
+  { min: 600, max: Infinity, label: 'Ambassadeur', color: 'text-gold' },
+];
+
+function getReputationLevel(score: number) {
+  return REPUTATION_LEVELS.find((l) => score >= l.min && score < l.max) || REPUTATION_LEVELS[0]!;
+}
 
 const containerVariants = {
   hidden: {},
@@ -239,18 +238,21 @@ export function DashboardOverview(): React.ReactElement {
           </h1>
         </div>
         <div className="flex gap-3">
+          <Badge
+            variant="gold"
+            className="px-6 py-2 text-[10px] font-bold uppercase tracking-widest"
+          >
+            {getReputationLevel(stats.reputation).label}
+          </Badge>
           <Button
             variant="outline"
             className="border-charcoal-200 h-14 rounded-full px-8 text-xs font-bold uppercase tracking-widest"
           >
             GÉRER MON PROFIL
           </Button>
-          {session?.user?.role === 'BUYER' && (
-            <Button className="bg-gold shadow-gold/20 h-14 rounded-full px-8 text-xs font-bold uppercase tracking-widest text-white shadow-lg">
-              CALCULATEUR ROI
-            </Button>
-          )}
-          {(session?.user?.role === 'SELLER' || session?.user?.role === 'GUESTHOUSE_OWNER') && (
+          {(session?.user?.role === 'SELLER' ||
+            session?.user?.role === 'GUESTHOUSE_OWNER' ||
+            session?.user?.role === 'AGENT') && (
             <Button className="bg-navy shadow-navy/20 h-14 rounded-full px-8 text-xs font-bold uppercase tracking-widest shadow-lg">
               NOUVELLE ANNONCE
             </Button>
@@ -258,8 +260,48 @@ export function DashboardOverview(): React.ReactElement {
         </div>
       </motion.div>
 
+      {/* Role-specific Metrics — 5.9.2 */}
+      <motion.div variants={itemVariants} className="grid grid-cols-1 gap-6 md:grid-cols-3">
+        <div className="border-charcoal-100 rounded-[32px] border bg-white p-8">
+          <div className="mb-4 flex items-center justify-between">
+            <span className="text-charcoal-400 text-[10px] font-bold uppercase tracking-widest">
+              Vues du profil
+            </span>
+            <Badge variant="success" className="text-[8px]">
+              +18%
+            </Badge>
+          </div>
+          <p className="text-navy font-serif text-4xl font-bold">1,284</p>
+          <p className="text-charcoal-300 mt-2 text-xs">Propulsé par ProMatch IA</p>
+        </div>
+        <div className="border-charcoal-100 rounded-[32px] border bg-white p-8">
+          <div className="mb-4 flex items-center justify-between">
+            <span className="text-charcoal-400 text-[10px] font-bold uppercase tracking-widest">
+              Apparition Recherche
+            </span>
+            <Badge variant="sky" className="text-[8px]">
+              Top 5%
+            </Badge>
+          </div>
+          <p className="text-navy font-serif text-4xl font-bold">452</p>
+          <p className="text-charcoal-300 mt-2 text-xs">Mots-clés: "Villa", "Bénin"</p>
+        </div>
+        <div className="border-charcoal-100 rounded-[32px] border bg-white p-8">
+          <div className="mb-4 flex items-center justify-between">
+            <span className="text-charcoal-400 text-[10px] font-bold uppercase tracking-widest">
+              Engagement Social
+            </span>
+            <Badge variant="gold" className="text-[8px]">
+              +42 pts
+            </Badge>
+          </div>
+          <p className="text-navy font-serif text-4xl font-bold">892</p>
+          <p className="text-charcoal-300 mt-2 text-xs">Likes & Partages communautaires</p>
+        </div>
+      </motion.div>
+
       {/* KYC Alert Banner — Section 10.1.2 */}
-      {stats.reputation < 50 && (
+      {stats.reputation < 300 && (
         <motion.div
           variants={itemVariants}
           className="border-gold/30 bg-gold/5 flex flex-col items-center justify-between gap-6 rounded-[32px] border p-8 md:flex-row"
@@ -270,11 +312,11 @@ export function DashboardOverview(): React.ReactElement {
             </div>
             <div>
               <h3 className="text-charcoal text-lg font-bold">
-                Complétez votre Vérification Institutionnelle
+                Devenez un {getReputationLevel(300).label} de confiance
               </h3>
               <p className="text-charcoal-400 text-sm">
                 Votre score est actuellement de{' '}
-                <span className="text-gold font-bold">{stats.reputation.toFixed(1)}/100</span>.
+                <span className="text-gold font-bold">{stats.reputation.toFixed(0)} points</span>.
                 Passez au niveau supérieur pour débloquer les transactions par Escrow.
               </p>
             </div>
@@ -326,12 +368,24 @@ export function DashboardOverview(): React.ReactElement {
         ))}
       </motion.div>
 
-      {/* Analytics Section — Section 3.1.1 */}
+      {/* Analytics Section — Section 5.9.3 */}
       <motion.div
         variants={itemVariants}
         className="border-charcoal-100 rounded-[40px] border bg-white p-8 shadow-sm"
       >
-        <h3 className="text-charcoal mb-8 font-serif text-2xl font-bold">Performance de l'Actif</h3>
+        <div className="mb-8 flex items-center justify-between">
+          <div>
+            <h3 className="text-charcoal font-serif text-2xl font-bold">Performance de l'Actif</h3>
+            <p className="text-charcoal-400 text-xs">
+              Comparaison avec la moyenne du marché (Cotonou)
+            </p>
+          </div>
+          <div className="flex gap-2">
+            <Badge variant="outline">7 jours</Badge>
+            <Badge variant="navy">30 jours</Badge>
+            <Badge variant="outline">90 jours</Badge>
+          </div>
+        </div>
         <div className="h-[300px] w-full">
           <ResponsiveContainer width="100%" height="100%">
             <LineChart data={chartData}>
@@ -354,13 +408,38 @@ export function DashboardOverview(): React.ReactElement {
               <Line
                 type="monotone"
                 dataKey="value"
+                name="Vos vues"
                 stroke="#003087"
                 strokeWidth={4}
                 dot={{ r: 6, fill: '#003087', strokeWidth: 0 }}
                 activeDot={{ r: 8, strokeWidth: 0 }}
               />
+              <Line
+                type="monotone"
+                dataKey="baseline"
+                name="Marché"
+                stroke="#D4AF37"
+                strokeWidth={2}
+                strokeDasharray="5 5"
+                dot={false}
+              />
             </LineChart>
           </ResponsiveContainer>
+        </div>
+        <div className="border-charcoal-50 mt-8 flex items-center justify-between border-t pt-8">
+          <div className="flex items-center gap-4">
+            <div className="bg-sky/10 text-sky rounded-xl p-3">
+              <TrendingUp className="h-5 w-5" />
+            </div>
+            <p className="text-charcoal-700 text-sm font-medium italic">
+              "Rebecca : Votre taux de conversion est{' '}
+              <span className="text-sky font-bold">18% supérieur</span> à la moyenne des agents de
+              Cotonou."
+            </p>
+          </div>
+          <Button variant="outline" className="rounded-full text-[10px] font-bold">
+            EXPORTER PDF (5.9.3)
+          </Button>
         </div>
       </motion.div>
 
@@ -438,6 +517,13 @@ export function DashboardOverview(): React.ReactElement {
 
         {/* Sidebar Stats (1/3) */}
         <motion.div className="space-y-8" variants={itemVariants}>
+          {/* Ambassador Status — 5.7.5 */}
+          <AmbassadorStatus
+            score={stats.reputation}
+            transactions={stats.transactions + 2} // Simulated completed txs for demo
+            seniorityMonths={8} // Simulated seniority
+          />
+
           {/* Escrow Card */}
           {escrow ? (
             <div className="bg-navy shadow-navy/20 relative overflow-hidden rounded-[40px] p-10 text-white shadow-2xl">

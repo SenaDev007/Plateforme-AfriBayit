@@ -12,6 +12,7 @@ import {
   Plus,
   Search,
   ArrowRight,
+  ShieldCheck,
 } from 'lucide-react';
 import { Badge, Button } from '@afribayit/ui';
 import { cn } from '@afribayit/ui/src/lib/cn';
@@ -104,6 +105,12 @@ function PostCard({ post }: { post: ApiPost }): React.ReactElement {
               {post.category}
             </Badge>
           )}
+          <Badge
+            variant="success"
+            className="bg-emerald/5 text-emerald flex items-center gap-1 border-none px-3 py-1 text-[8px] font-bold uppercase tracking-widest"
+          >
+            <ShieldCheck className="h-2.5 w-2.5" /> MODÉRATION IA
+          </Badge>
           <span className="text-charcoal-400 text-[11px] font-medium">
             {new Date(post.createdAt).toLocaleDateString('fr-FR', {
               day: 'numeric',
@@ -280,6 +287,54 @@ export default async function CommunautePage({ searchParams }: Props): Promise<R
 
           {/* Sidebar */}
           <aside className="flex-shrink-0 space-y-10 lg:w-80">
+            {/* Events Card — 5.7.3 */}
+            <div className="border-charcoal-100 rounded-[32px] border bg-white p-8 shadow-sm">
+              <div className="mb-8 flex items-center justify-between">
+                <h2 className="text-charcoal font-serif text-xl font-bold">Événements (5.7.3)</h2>
+                <Badge variant="sky">LIVE</Badge>
+              </div>
+              <div className="space-y-6">
+                {[
+                  {
+                    title: 'AfriBayit Summit #12',
+                    type: 'Webinaire Mensuel',
+                    date: '15 Août • 18:00',
+                    icon: Eye,
+                  },
+                  {
+                    title: 'Networking Cotonou',
+                    type: 'Rencontre Physique',
+                    date: '22 Août • Espace Cowork',
+                    icon: Users,
+                  },
+                  {
+                    title: 'Portes Ouvertes Virtuelle',
+                    type: 'Animé par Rebecca',
+                    date: '28 Août • En direct',
+                    icon: MessageSquare,
+                  },
+                ].map((ev, i) => (
+                  <div key={i} className="group cursor-pointer space-y-1">
+                    <div className="flex items-center justify-between">
+                      <p className="text-charcoal-400 text-[9px] font-bold uppercase tracking-widest">
+                        {ev.type}
+                      </p>
+                      <span className="text-navy text-[9px] font-bold">{ev.date}</span>
+                    </div>
+                    <p className="text-charcoal group-hover:text-navy text-sm font-bold transition-colors">
+                      {ev.title}
+                    </p>
+                  </div>
+                ))}
+              </div>
+              <Button
+                variant="navy"
+                className="mt-10 h-12 w-full rounded-full text-xs font-bold uppercase tracking-widest"
+              >
+                S'INSCRIRE AUX EVENTS
+              </Button>
+            </div>
+
             {/* Groups Card */}
             <div className="border-charcoal-100 rounded-[32px] border bg-white p-8 shadow-sm">
               <div className="mb-8 flex items-center justify-between">

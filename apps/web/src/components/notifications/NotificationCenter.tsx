@@ -25,18 +25,19 @@ const NOTIFICATIONS = [
   {
     id: 1,
     category: 'COMMUNITY',
-    title: 'Nouvel abonné',
-    desc: 'Kofi Mensah a commencé à vous suivre.',
+    title: 'Consultation de profil',
+    desc: 'Kofi Mensah et 3 autres personnes ont consulté votre profil.',
     time: '2h',
     icon: UserPlus,
-    color: 'navy',
+    color: 'sky',
     unread: true,
+    grouped: true,
   },
   {
     id: 2,
     category: 'REBECCA',
-    title: 'Matching IA réussi',
-    desc: 'Un nouvel acheteur correspond à votre annonce à Ouidah.',
+    title: 'Recommandation intelligente',
+    desc: 'Rebecca : Un nouvel acheteur recherche exactement ce que vous vendez à Cotonou.',
     time: '4h',
     icon: Zap,
     color: 'gold',
@@ -45,8 +46,8 @@ const NOTIFICATIONS = [
   {
     id: 3,
     category: 'TRANSACTIONS',
-    title: 'Paiement reçu',
-    desc: 'Le séquestre pour le dossier TRX-9921 a été alimenté.',
+    title: 'Fonds en Escrow',
+    desc: 'Le séquestre pour le dossier TRX-9921 a été alimenté. Signature attendue.',
     time: '1j',
     icon: ShieldCheck,
     color: 'emerald',
@@ -55,18 +56,19 @@ const NOTIFICATIONS = [
   {
     id: 4,
     category: 'LISTINGS',
-    title: 'Annonce populaire',
-    desc: 'Votre Villa Cocody a atteint 500 vues ce mois-ci.',
+    title: 'Favoris',
+    desc: '5 personnes ont ajouté votre Villa Cocody à leurs favoris.',
     time: '2j',
-    icon: TrendingUp,
+    icon: Heart,
     color: 'navy',
     unread: false,
+    grouped: true,
   },
   {
     id: 5,
     category: 'COMMUNITY',
-    title: 'Badge obtenu',
-    desc: 'Félicitations ! Vous êtes passé Ambassadeur Bronze.',
+    title: 'Niveau atteint',
+    desc: "Félicitations ! Votre score de 300 vous propulse au rang d'Expert.",
     time: '3j',
     icon: Award,
     color: 'gold',
@@ -97,7 +99,12 @@ export function NotificationCenter() {
           <h2 className="font-serif text-xl font-bold">Notifications</h2>
         </div>
         <div className="flex gap-2">
-          <Button variant="ghost" className="rounded-xl p-2 text-white hover:bg-white/10">
+          <Button
+            variant="ghost"
+            className="rounded-xl p-2 text-white hover:bg-white/10"
+            onClick={() => setNotifs((n) => n.map((it) => ({ ...it, unread: false })))}
+            title="Tout marquer comme lu (5.8.2)"
+          >
             <CheckCircle2 className="h-5 w-5" />
           </Button>
           <Button variant="ghost" className="rounded-xl p-2 text-white hover:bg-white/10">
