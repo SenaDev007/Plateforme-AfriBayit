@@ -1,5 +1,5 @@
+'use client';
 import type React from 'react';
-import type { Metadata } from 'next';
 import Link from 'next/link';
 import {
   TrendingUp,
@@ -17,12 +17,6 @@ import { SiteFooter } from '@/components/landing/SiteFooter';
 import { motion, useScroll, useTransform, useSpring } from 'framer-motion';
 import { cn } from '@afribayit/ui/src/lib/cn';
 import { Badge, Button } from '@afribayit/ui';
-
-export const metadata: Metadata = {
-  title: 'Investir en Afrique | AfriBayit',
-  description:
-    "Investissez dans l'immobilier africain en toute sécurité. Données de marché, zones à fort potentiel, escrow notarial et accompagnement juridique au Bénin, Côte d'Ivoire, Sénégal et Togo.",
-};
 
 const AVANTAGES = [
   {
