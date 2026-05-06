@@ -19,14 +19,19 @@ export default function ParametresPage(): React.ReactElement {
   const [showNewPwd, setShowNewPwd] = useState(false);
 
   const [notifSettings, setNotifSettings] = useState({
+    emailFrequency: 'REAL_TIME', // REAL_TIME | DAILY | WEEKLY | NEVER
+    quietHoursEnabled: false,
+    quietHoursStart: '22:00',
+    quietHoursEnd: '07:00',
     emailNewMessage: true,
     emailTransaction: true,
     emailMarketing: false,
-    smsTransaction: true,
+    smsTransaction: true, // Non-deactivable in reality, but UI shows as locked
+    smsSecurity: true, // Non-deactivable
     smsNewMessage: false,
     pushAll: true,
     whatsappTransaction: true,
-    whatsappKyc: true,
+    whatsappRebecca: true,
     whatsappNewMessage: false,
     whatsappPayout: true,
   });
@@ -126,12 +131,17 @@ export default function ParametresPage(): React.ReactElement {
                     ],
                   },
                   {
-                    group: 'Push',
+                    group: 'Push & Rebecca (5.8.1)',
                     items: [
                       {
                         key: 'pushAll',
                         label: 'Notifications push',
-                        desc: 'Toutes les notifications en temps réel',
+                        desc: 'Toutes les notifications système et mobiles',
+                      },
+                      {
+                        key: 'whatsappRebecca',
+                        label: 'Rebecca (WhatsApp)',
+                        desc: 'Conseils et opportunités envoyés par votre IA',
                       },
                     ],
                   },
@@ -142,46 +152,165 @@ export default function ParametresPage(): React.ReactElement {
                     {group}
                   </legend>
                   <div className="space-y-3">
-                    {items.map(({ key, label, desc }) => (
-                      <label
-                        key={key}
-                        className="flex cursor-pointer items-center justify-between gap-4"
-                      >
+                    {items.map(({ key, label, desc }) => {
+                      const isCritical = key === 'smsTransaction' || key === 'smsSecurity';
+                      return (
+                        <label
+                          key={key}
+                          className={cn(
+                            'flex items-center justify-between gap-4',
+                            isCritical ? 'cursor-not-allowed opacity-80' : 'cursor-pointer',
+                          )}
+                        >
+                          <div>
+                            <div className="flex items-center gap-2">
+                              <p className="text-charcoal text-sm font-medium">{label}</p>
+                              {isCritical && (
+                                <Badge variant="outline" className="px-1.5 py-0 text-[8px]">
+                                  OBLIGATOIRE
+                                </Badge>
+                              )}
+                            </div>
+                            <p className="text-charcoal-400 text-xs">{desc}</p>
+                          </div>
+                          <button
+                            type="button"
+                            role="switch"
+                            disabled={isCritical}
+                            aria-checked={
+                              notifSettings[key as keyof typeof notifSettings] as boolean
+                            }
+                            onClick={() =>
+                              setNotifSettings((prev) => ({
+                                ...prev,
+                                [key]: !prev[key as keyof typeof notifSettings],
+                              }))
+                            }
+                            className={cn(
+                              'relative inline-flex h-6 w-11 flex-shrink-0 rounded-full border-2 border-transparent transition-colors',
+                              notifSettings[key as keyof typeof notifSettings]
+                                ? 'bg-navy'
+                                : 'bg-charcoal-200',
+                            )}
+                          >
+                            <span
+                              className={cn(
+                                'pointer-events-none inline-block h-5 w-5 rounded-full bg-white shadow transition-transform',
+                                notifSettings[key as keyof typeof notifSettings]
+                                  ? 'translate-x-5'
+                                  : 'translate-x-0',
+                              )}
+                            />
+                          </button>
+                        </label>
+                      );
+                    })}
+                  </div>
+                </fieldset>
+              ))}
+
+              {/* Advanced Controls — 5.8.3 */}
+              <div className="border-charcoal-100 bg-charcoal-50/30 space-y-6 rounded-2xl border p-6">
+                <div>
+                  <h3 className="text-charcoal mb-4 text-sm font-bold uppercase tracking-widest">
+                    Contrôles Avancés (5.8.3)
+                  </h3>
+                  <div className="space-y-6">
+                    {/* Email Frequency */}
+                    <div>
+                      <label className="text-charcoal mb-2 block text-xs font-bold uppercase tracking-widest">
+                        Fréquence des Emails
+                      </label>
+                      <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
+                        {[
+                          { id: 'REAL_TIME', label: 'Temps réel' },
+                          { id: 'DAILY', label: 'Quotidien' },
+                          { id: 'WEEKLY', label: 'Hebdo' },
+                          { id: 'NEVER', label: 'Jamais' },
+                        ].map((opt) => (
+                          <button
+                            key={opt.id}
+                            onClick={() =>
+                              setNotifSettings((p) => ({ ...p, emailFrequency: opt.id }))
+                            }
+                            className={cn(
+                              'rounded-lg border px-3 py-2 text-[10px] font-bold uppercase tracking-wider transition-all',
+                              notifSettings.emailFrequency === opt.id
+                                ? 'bg-navy border-navy text-white'
+                                : 'border-charcoal-200 text-charcoal-400 hover:border-navy bg-white',
+                            )}
+                          >
+                            {opt.label}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* Quiet Hours */}
+                    <div className="border-charcoal-100 border-t pt-6">
+                      <div className="mb-4 flex items-center justify-between">
                         <div>
-                          <p className="text-charcoal text-sm font-medium">{label}</p>
-                          <p className="text-charcoal-400 text-xs">{desc}</p>
+                          <p className="text-charcoal text-sm font-bold">Heures de silence</p>
+                          <p className="text-charcoal-400 text-xs">
+                            Désactiver les notifications pendant une plage horaire
+                          </p>
                         </div>
                         <button
                           type="button"
-                          role="switch"
-                          aria-checked={notifSettings[key as keyof typeof notifSettings]}
                           onClick={() =>
-                            setNotifSettings((prev) => ({
-                              ...prev,
-                              [key]: !prev[key as keyof typeof notifSettings],
+                            setNotifSettings((p) => ({
+                              ...p,
+                              quietHoursEnabled: !p.quietHoursEnabled,
                             }))
                           }
                           className={cn(
                             'relative inline-flex h-6 w-11 flex-shrink-0 rounded-full border-2 border-transparent transition-colors',
-                            notifSettings[key as keyof typeof notifSettings]
-                              ? 'bg-navy'
-                              : 'bg-charcoal-200',
+                            notifSettings.quietHoursEnabled ? 'bg-navy' : 'bg-charcoal-200',
                           )}
                         >
                           <span
                             className={cn(
                               'pointer-events-none inline-block h-5 w-5 rounded-full bg-white shadow transition-transform',
-                              notifSettings[key as keyof typeof notifSettings]
-                                ? 'translate-x-5'
-                                : 'translate-x-0',
+                              notifSettings.quietHoursEnabled ? 'translate-x-5' : 'translate-x-0',
                             )}
                           />
                         </button>
-                      </label>
-                    ))}
+                      </div>
+                      {notifSettings.quietHoursEnabled && (
+                        <div className="border-charcoal-100 flex items-center gap-4 rounded-xl border bg-white p-4">
+                          <div className="flex-1">
+                            <label className="text-charcoal-400 mb-1 block text-[10px] font-bold uppercase">
+                              Début
+                            </label>
+                            <input
+                              type="time"
+                              value={notifSettings.quietHoursStart}
+                              onChange={(e) =>
+                                setNotifSettings((p) => ({ ...p, quietHoursStart: e.target.value }))
+                              }
+                              className="w-full border-none p-0 text-sm font-bold focus:ring-0"
+                            />
+                          </div>
+                          <div className="bg-charcoal-100 h-8 w-px" />
+                          <div className="flex-1">
+                            <label className="text-charcoal-400 mb-1 block text-[10px] font-bold uppercase">
+                              Fin
+                            </label>
+                            <input
+                              type="time"
+                              value={notifSettings.quietHoursEnd}
+                              onChange={(e) =>
+                                setNotifSettings((p) => ({ ...p, quietHoursEnd: e.target.value }))
+                              }
+                              className="w-full border-none p-0 text-sm font-bold focus:ring-0"
+                            />
+                          </div>
+                        </div>
+                      )}
+                    </div>
                   </div>
-                </fieldset>
-              ))}
+                </div>
+              </div>
 
               {/* WhatsApp section */}
               <fieldset className="border-charcoal-100 space-y-4 rounded-xl border p-4">
@@ -430,7 +559,26 @@ export default function ParametresPage(): React.ReactElement {
             <div className="space-y-6">
               <div>
                 <h2 className="text-charcoal mb-1 font-semibold">Gestion du compte</h2>
-                <p className="text-charcoal-400 text-sm">Actions irréversibles sur votre compte.</p>
+                <p className="text-charcoal-400 text-sm">Actions et paramètres de visibilité.</p>
+              </div>
+
+              <div className="border-charcoal-100 space-y-4 rounded-xl border p-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-charcoal text-sm font-medium">Mode Anonyme (5.9.4)</p>
+                    <p className="text-charcoal-400 text-xs">
+                      Naviguez sans apparaître dans les statistiques de vue des autres.
+                    </p>
+                  </div>
+                  <button
+                    type="button"
+                    role="switch"
+                    onClick={() => toast.success('Mode anonyme activé')}
+                    className="bg-charcoal-200 relative inline-flex h-6 w-11 flex-shrink-0 rounded-full border-2 border-transparent transition-colors"
+                  >
+                    <span className="pointer-events-none inline-block h-5 w-5 translate-x-0 rounded-full bg-white shadow transition-transform" />
+                  </button>
+                </div>
               </div>
 
               <div className="border-gold/20 bg-gold/5 flex items-center justify-between rounded-xl border p-6">

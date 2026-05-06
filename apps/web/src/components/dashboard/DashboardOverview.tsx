@@ -275,42 +275,174 @@ export function DashboardOverview(): React.ReactElement {
 
       {/* Role-specific Metrics — 5.9.2 */}
       <motion.div variants={itemVariants} className="grid grid-cols-1 gap-6 md:grid-cols-3">
-        <div className="border-charcoal-100 rounded-[32px] border bg-white p-8">
-          <div className="mb-4 flex items-center justify-between">
-            <span className="text-charcoal-400 text-[10px] font-bold uppercase tracking-widest">
-              Vues du profil
-            </span>
-            <Badge variant="success" className="text-[8px]">
-              +18%
-            </Badge>
-          </div>
-          <p className="text-navy font-serif text-4xl font-bold">1,284</p>
-          <p className="text-charcoal-300 mt-2 text-xs">Propulsé par ProMatch IA</p>
-        </div>
-        <div className="border-charcoal-100 rounded-[32px] border bg-white p-8">
-          <div className="mb-4 flex items-center justify-between">
-            <span className="text-charcoal-400 text-[10px] font-bold uppercase tracking-widest">
-              Apparition Recherche
-            </span>
-            <Badge variant="sky" className="text-[8px]">
-              Top 5%
-            </Badge>
-          </div>
-          <p className="text-navy font-serif text-4xl font-bold">452</p>
-          <p className="text-charcoal-300 mt-2 text-xs">Mots-clés: "Villa", "Bénin"</p>
-        </div>
-        <div className="border-charcoal-100 rounded-[32px] border bg-white p-8">
-          <div className="mb-4 flex items-center justify-between">
-            <span className="text-charcoal-400 text-[10px] font-bold uppercase tracking-widest">
-              Engagement Social
-            </span>
-            <Badge variant="gold" className="text-[8px]">
-              +42 pts
-            </Badge>
-          </div>
-          <p className="text-navy font-serif text-4xl font-bold">892</p>
-          <p className="text-charcoal-300 mt-2 text-xs">Likes & Partages communautaires</p>
-        </div>
+        {session?.user?.role === 'AGENT' && (
+          <>
+            <div className="border-charcoal-100 rounded-[32px] border bg-white p-8">
+              <div className="mb-4 flex items-center justify-between">
+                <span className="text-charcoal-400 text-[10px] font-bold uppercase tracking-widest">
+                  Taux de conversion
+                </span>
+                <Badge variant="success" className="text-[8px]">
+                  +12%
+                </Badge>
+              </div>
+              <p className="text-navy font-serif text-4xl font-bold">4.2%</p>
+              <p className="text-charcoal-300 mt-2 text-xs">Contact → Visite</p>
+            </div>
+            <div className="border-charcoal-100 rounded-[32px] border bg-white p-8">
+              <div className="mb-4 flex items-center justify-between">
+                <span className="text-charcoal-400 text-[10px] font-bold uppercase tracking-widest">
+                  Temps de vente moyen
+                </span>
+                <Badge variant="sky" className="text-[8px]">
+                  Top 10%
+                </Badge>
+              </div>
+              <p className="text-navy font-serif text-4xl font-bold">18j</p>
+              <p className="text-charcoal-300 mt-2 text-xs">Moyenne Marché: 45j</p>
+            </div>
+            <div className="border-charcoal-100 rounded-[32px] border bg-white p-8">
+              <div className="mb-4 flex items-center justify-between">
+                <span className="text-charcoal-400 text-[10px] font-bold uppercase tracking-widest">
+                  Classement Local
+                </span>
+                <Badge variant="gold" className="text-[8px]">
+                  Expert
+                </Badge>
+              </div>
+              <p className="text-navy font-serif text-4xl font-bold">#12</p>
+              <p className="text-charcoal-300 mt-2 text-xs">Sur 450 agents à Cotonou</p>
+            </div>
+          </>
+        )}
+
+        {session?.user?.role === 'ARTISAN' && (
+          <>
+            <div className="border-charcoal-100 rounded-[32px] border bg-white p-8">
+              <div className="mb-4 flex items-center justify-between">
+                <span className="text-charcoal-400 text-[10px] font-bold uppercase tracking-widest">
+                  Missions complétées
+                </span>
+                <Badge variant="success" className="text-[8px]">
+                  +5
+                </Badge>
+              </div>
+              <p className="text-navy font-serif text-4xl font-bold">124</p>
+              <p className="text-charcoal-300 mt-2 text-xs">Total via AfriBayit</p>
+            </div>
+            <div className="border-charcoal-100 rounded-[32px] border bg-white p-8">
+              <div className="mb-4 flex items-center justify-between">
+                <span className="text-charcoal-400 text-[10px] font-bold uppercase tracking-widest">
+                  Satisfaction Client
+                </span>
+                <Badge variant="gold" className="text-[8px]">
+                  4.9/5
+                </Badge>
+              </div>
+              <p className="text-navy font-serif text-4xl font-bold">98%</p>
+              <p className="text-charcoal-300 mt-2 text-xs">Délai de réponse: 2h</p>
+            </div>
+            <div className="border-charcoal-100 rounded-[32px] border bg-white p-8">
+              <div className="mb-4 flex items-center justify-between">
+                <span className="text-charcoal-400 text-[10px] font-bold uppercase tracking-widest">
+                  Classement Métier
+                </span>
+                <Badge variant="sky" className="text-[8px]">
+                  Top 3
+                </Badge>
+              </div>
+              <p className="text-navy font-serif text-4xl font-bold">#1</p>
+              <p className="text-charcoal-300 mt-2 text-xs">Plomberie - Zone Littoral</p>
+            </div>
+          </>
+        )}
+
+        {(session?.user?.role === 'INVESTOR' || session?.user?.role === 'BUYER') && (
+          <>
+            <div className="border-charcoal-100 rounded-[32px] border bg-white p-8">
+              <div className="mb-4 flex items-center justify-between">
+                <span className="text-charcoal-400 text-[10px] font-bold uppercase tracking-widest">
+                  Valeur Portfolio
+                </span>
+                <Badge variant="success" className="text-[8px]">
+                  +8.2%
+                </Badge>
+              </div>
+              <p className="text-navy font-serif text-4xl font-bold">85M</p>
+              <p className="text-charcoal-300 mt-2 text-xs">FCFA estimé (Marché)</p>
+            </div>
+            <div className="border-charcoal-100 rounded-[32px] border bg-white p-8">
+              <div className="mb-4 flex items-center justify-between">
+                <span className="text-charcoal-400 text-[10px] font-bold uppercase tracking-widest">
+                  ROI Locatif Moyen
+                </span>
+                <Badge variant="gold" className="text-[8px]">
+                  Premium
+                </Badge>
+              </div>
+              <p className="text-navy font-serif text-4xl font-bold">12.4%</p>
+              <p className="text-charcoal-300 mt-2 text-xs">Net de charges</p>
+            </div>
+            <div className="border-charcoal-100 rounded-[32px] border bg-white p-8">
+              <div className="mb-4 flex items-center justify-between">
+                <span className="text-charcoal-400 text-[10px] font-bold uppercase tracking-widest">
+                  Alertes Actives
+                </span>
+                <Badge variant="sky" className="text-[8px]">
+                  IA ON
+                </Badge>
+              </div>
+              <p className="text-navy font-serif text-4xl font-bold">24</p>
+              <p className="text-charcoal-300 mt-2 text-xs">Recherches surveillées</p>
+            </div>
+          </>
+        )}
+
+        {/* Default / Fallback — 5.9.1 */}
+        {(!session?.user?.role ||
+          (session?.user?.role !== 'AGENT' &&
+            session?.user?.role !== 'ARTISAN' &&
+            session?.user?.role !== 'INVESTOR' &&
+            session?.user?.role !== 'BUYER')) && (
+          <>
+            <div className="border-charcoal-100 rounded-[32px] border bg-white p-8">
+              <div className="mb-4 flex items-center justify-between">
+                <span className="text-charcoal-400 text-[10px] font-bold uppercase tracking-widest">
+                  Vues du profil
+                </span>
+                <Badge variant="success" className="text-[8px]">
+                  +18%
+                </Badge>
+              </div>
+              <p className="text-navy font-serif text-4xl font-bold">1,284</p>
+              <p className="text-charcoal-300 mt-2 text-xs">Propulsé par ProMatch IA</p>
+            </div>
+            <div className="border-charcoal-100 rounded-[32px] border bg-white p-8">
+              <div className="mb-4 flex items-center justify-between">
+                <span className="text-charcoal-400 text-[10px] font-bold uppercase tracking-widest">
+                  Apparition Recherche
+                </span>
+                <Badge variant="sky" className="text-[8px]">
+                  Top 5%
+                </Badge>
+              </div>
+              <p className="text-navy font-serif text-4xl font-bold">452</p>
+              <p className="text-charcoal-300 mt-2 text-xs">Mots-clés: "Villa", "Bénin"</p>
+            </div>
+            <div className="border-charcoal-100 rounded-[32px] border bg-white p-8">
+              <div className="mb-4 flex items-center justify-between">
+                <span className="text-charcoal-400 text-[10px] font-bold uppercase tracking-widest">
+                  Engagement Social
+                </span>
+                <Badge variant="gold" className="text-[8px]">
+                  +42 pts
+                </Badge>
+              </div>
+              <p className="text-navy font-serif text-4xl font-bold">892</p>
+              <p className="text-charcoal-300 mt-2 text-xs">Likes & Partages communautaires</p>
+            </div>
+          </>
+        )}
       </motion.div>
 
       {/* KYC Alert Banner — Section 10.1.2 */}
@@ -530,6 +662,43 @@ export function DashboardOverview(): React.ReactElement {
 
         {/* Sidebar Stats (1/3) */}
         <motion.div className="space-y-8" variants={itemVariants}>
+          {/* Wallet & Points — 5.7.2 */}
+          <div className="border-charcoal-100 rounded-[40px] border bg-white p-8 shadow-sm">
+            <div className="mb-6 flex items-center justify-between">
+              <h3 className="text-charcoal font-serif text-xl font-bold">Mon Wallet</h3>
+              <Badge variant="gold">VIP</Badge>
+            </div>
+            <div className="space-y-6">
+              <div>
+                <p className="text-charcoal-400 mb-1 text-[10px] font-bold uppercase tracking-widest">
+                  Solde Disponible
+                </p>
+                <p className="text-navy font-serif text-3xl font-bold">
+                  450,000 <span className="text-charcoal-300 font-sans text-sm">XOF</span>
+                </p>
+              </div>
+              <div className="bg-charcoal-50 flex items-center justify-between rounded-2xl p-4">
+                <div>
+                  <p className="text-charcoal-400 mb-0.5 text-[10px] font-bold uppercase tracking-widest">
+                    AfriBayit Points (5.7.2)
+                  </p>
+                  <p className="text-gold text-lg font-bold">
+                    450,000 <span className="text-[10px] uppercase">pts</span>
+                  </p>
+                </div>
+                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-white shadow-sm">
+                  <Award className="text-gold h-5 w-5" />
+                </div>
+              </div>
+              <p className="text-charcoal-400 text-[9px] italic">
+                "Règle : 1 XOF transigé = 1 point accumulé"
+              </p>
+              <Button className="h-12 w-full rounded-xl text-xs font-bold uppercase tracking-widest">
+                RECHARGER / RETIRER
+              </Button>
+            </div>
+          </div>
+
           {/* Ambassador Status — 5.7.5 */}
           <AmbassadorStatus
             score={stats.reputation}
@@ -601,6 +770,48 @@ export function DashboardOverview(): React.ReactElement {
                 </Link>
               ))}
             </div>
+          </div>
+
+          {/* Who Viewed Your Profile (5.8.4/5.9.1) — Premium Only */}
+          <div className="border-charcoal-100 rounded-[40px] border bg-white p-8 shadow-sm">
+            <div className="mb-6 flex items-center justify-between">
+              <h3 className="text-charcoal font-serif text-xl font-bold">
+                Vues Qualifiées (5.8.4)
+              </h3>
+              <Badge variant="sky">PREMIUM</Badge>
+            </div>
+            <div className="space-y-4">
+              {[
+                { name: 'Samba Diallo', role: 'Investisseur', match: '95%', time: '3h' },
+                { name: 'Marie Kouassi', role: 'Acheteur', match: '88%', time: '1j' },
+                { name: 'Jean Dupont', role: 'Agent Immob.', match: '72%', time: '2j' },
+              ].map((visitor, i) => (
+                <div
+                  key={i}
+                  className="hover:bg-charcoal-50 group flex cursor-pointer items-center gap-4 rounded-xl p-2 transition-colors"
+                >
+                  <div className="bg-navy/5 text-navy flex h-10 w-10 items-center justify-center rounded-full text-xs font-bold">
+                    {visitor.name[0]}
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <p className="text-charcoal truncate text-xs font-bold">{visitor.name}</p>
+                    <p className="text-charcoal-400 text-[10px] uppercase tracking-widest">
+                      {visitor.role}
+                    </p>
+                  </div>
+                  <div className="text-right">
+                    <p className="text-sky text-[10px] font-bold">{visitor.match}</p>
+                    <p className="text-charcoal-300 text-[9px]">{visitor.time}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+            <Button
+              variant="ghost"
+              className="mt-6 h-10 w-full rounded-lg text-[10px] font-bold uppercase tracking-widest"
+            >
+              Voir l'analyse complète
+            </Button>
           </div>
         </motion.div>
       </div>
