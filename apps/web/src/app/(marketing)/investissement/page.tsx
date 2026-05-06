@@ -14,6 +14,9 @@ import {
 } from 'lucide-react';
 import { SiteNavbar } from '@/components/landing/SiteNavbar';
 import { SiteFooter } from '@/components/landing/SiteFooter';
+import { motion, useScroll, useTransform, useSpring } from 'framer-motion';
+import { cn } from '@afribayit/ui/src/lib/cn';
+import { Badge, Button } from '@afribayit/ui';
 
 export const metadata: Metadata = {
   title: 'Investir en Afrique | AfriBayit',
@@ -120,75 +123,137 @@ const ETAPES = [
 ];
 
 export default function InvestissementPage(): React.ReactElement {
+  const { scrollYProgress } = useScroll();
+  const scaleProgress = useSpring(useTransform(scrollYProgress, [0, 0.1], [1, 0.95]), {
+    stiffness: 100,
+    damping: 30,
+  });
+  const opacityProgress = useTransform(scrollYProgress, [0, 0.2], [1, 0]);
+
   return (
-    <div className="min-h-screen bg-white">
+    <div className="selection:bg-gold selection:text-navy min-h-screen bg-white">
       <SiteNavbar />
 
-      {/* HERO */}
-      <header className="bg-navy relative overflow-hidden pb-32 pt-36">
+      {/* HERO — Apple Style Reveal */}
+      <motion.header
+        style={{ scale: scaleProgress }}
+        className="bg-navy relative flex min-h-screen flex-col justify-center overflow-hidden"
+      >
         <div className="pointer-events-none absolute inset-0">
-          <div className="bg-gold/10 absolute right-0 top-0 h-[600px] w-[600px] -translate-y-1/3 translate-x-1/3 rounded-full blur-[120px]" />
-          <div className="absolute bottom-0 left-0 h-[400px] w-[400px] -translate-x-1/4 translate-y-1/4 rounded-full bg-white/5 blur-[100px]" />
-          <div className="absolute inset-0 bg-[radial-gradient(#D4AF37_1px,transparent_1px)] opacity-5 [background-size:32px_32px]" />
+          <div className="bg-gold/20 absolute right-[-10%] top-[-10%] h-[800px] w-[800px] animate-pulse rounded-full blur-[160px]" />
+          <div className="absolute bottom-[-10%] left-[-10%] h-[600px] w-[600px] rounded-full bg-white/5 blur-[120px]" />
+          <div className="absolute inset-0 bg-[radial-gradient(#D4AF37_1px,transparent_1px)] opacity-[0.03] [background-size:48px_48px]" />
         </div>
 
-        <div className="relative z-10 mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <div className="max-w-3xl">
-            <div className="mb-8 inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-4 py-1.5 backdrop-blur-md">
+        <div className="relative z-10 mx-auto max-w-7xl px-4 pt-20 sm:px-6 lg:px-8">
+          <motion.div
+            initial={{ opacity: 0, y: 40 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 1.2, ease: [0.16, 1, 0.3, 1] }}
+            className="text-center"
+          >
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              transition={{ delay: 0.2, duration: 0.8 }}
+              className="border-gold/30 bg-gold/5 mb-10 inline-flex items-center gap-3 rounded-full border px-6 py-2 backdrop-blur-xl"
+            >
               <TrendingUp className="text-gold h-4 w-4" />
-              <span className="text-gold text-[10px] font-bold uppercase tracking-[0.2em]">
-                Rendements 6–13% · Données temps réel
+              <span className="text-gold text-[10px] font-black uppercase tracking-[0.4em]">
+                Exclusivité AfriBayit · Intelligence Foncière
               </span>
-            </div>
+            </motion.div>
 
-            <h1 className="mb-6 font-serif text-5xl font-bold leading-tight text-white md:text-7xl">
-              Investissez dans l'immobilier africain.{' '}
-              <span className="text-gold italic">En toute sécurité.</span>
+            <h1 className="mb-8 font-serif text-6xl font-bold leading-[1.1] tracking-tight text-white md:text-[100px] lg:text-[120px]">
+              Investir en <span className="text-gold italic">Afrique</span>.<br />
+              Sans{' '}
+              <span className="relative inline-block">
+                frontières.
+                <motion.span
+                  initial={{ width: 0 }}
+                  animate={{ width: '100%' }}
+                  transition={{ delay: 1, duration: 1 }}
+                  className="bg-gold/30 absolute bottom-4 left-0 -z-10 h-2"
+                />
+              </span>
             </h1>
 
-            <p className="mb-10 max-w-2xl text-lg font-light leading-relaxed text-white/80">
-              Des données de marché fiables, un escrow notarial, une vérification IA du titre
-              foncier. AfriBayit transforme l'investissement immobilier en Afrique de l'Ouest en une
-              opération transparente et sécurisée.
-            </p>
+            <motion.p
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.5, duration: 1 }}
+              className="mx-auto mb-12 max-w-3xl text-xl font-light leading-relaxed text-white/60 md:text-2xl"
+            >
+              La première plateforme technologique sécurisant l'acquisition d'actifs immobiliers en
+              Afrique de l'Ouest par l'IA et l'Escrow Notarial.
+            </motion.p>
 
-            <div className="flex flex-col gap-4 sm:flex-row">
-              <Link
-                href={'/recherche?but=SALE' as any}
-                className="bg-gold text-navy shadow-gold/20 group inline-flex items-center justify-center gap-2 rounded-full px-8 py-4 font-bold shadow-lg transition-all hover:scale-105"
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.8, duration: 0.8 }}
+              className="flex flex-col items-center justify-center gap-6 sm:flex-row"
+            >
+              <Button
+                variant="gold"
+                size="lg"
+                className="shadow-gold/20 h-16 rounded-full px-12 text-sm font-black uppercase tracking-widest shadow-2xl"
               >
-                Voir les opportunités
-                <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
-              </Link>
-              <Link
-                href={'/contact' as any}
-                className="inline-flex items-center justify-center rounded-full border-2 border-white/30 px-8 py-4 font-bold text-white transition-all hover:border-white hover:bg-white/5"
+                Explorer le catalogue
+              </Button>
+              <Button
+                variant="outline"
+                size="lg"
+                className="hover:text-navy h-16 rounded-full border-white/20 px-12 text-sm font-bold uppercase tracking-widest text-white hover:bg-white"
               >
                 Parler à un conseiller
-              </Link>
-            </div>
-          </div>
+              </Button>
+            </motion.div>
+          </motion.div>
         </div>
 
-        {/* Floating stats */}
-        <div className="relative z-10 mx-auto mt-16 max-w-7xl px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-2 gap-4 rounded-3xl border border-white/10 bg-white/5 p-6 backdrop-blur-md md:grid-cols-4">
+        {/* Scroll Indicator */}
+        <motion.div
+          style={{ opacity: opacityProgress }}
+          className="absolute bottom-10 left-1/2 -translate-x-1/2"
+        >
+          <div className="flex h-12 w-6 justify-center rounded-full border-2 border-white/20 p-2">
+            <motion.div
+              animate={{ y: [0, 16, 0] }}
+              transition={{ duration: 2, repeat: Infinity }}
+              className="bg-gold h-2 w-1 rounded-full"
+            />
+          </div>
+        </motion.div>
+      </motion.header>
+
+      {/* Floating Stats — Tesla Style */}
+      <section className="relative z-20 -mt-24 px-4">
+        <div className="mx-auto max-w-7xl">
+          <div className="grid grid-cols-2 gap-px overflow-hidden rounded-[40px] border border-white/10 bg-white/5 shadow-2xl backdrop-blur-3xl md:grid-cols-4">
             {[
               { label: 'Biens référencés', value: '4,200+' },
-              { label: 'Transactions sécurisées', value: '2,800+' },
-              { label: 'Rendement moyen', value: '9.4%' },
-              { label: 'Pays opérationnels', value: '4' },
-            ].map((s) => (
-              <div key={s.label} className="text-center">
-                <div className="text-2xl font-bold text-white sm:text-3xl">{s.value}</div>
-                <div className="mt-1 text-[10px] font-bold uppercase tracking-widest text-white/50">
+              { label: 'Transactions', value: '2,800+' },
+              { label: 'ROI moyen', value: '9.4%' },
+              { label: 'Confiance IA', value: '100%' },
+            ].map((s, i) => (
+              <motion.div
+                key={s.label}
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                transition={{ delay: i * 0.1 }}
+                viewport={{ once: true }}
+                className="bg-navy/40 group relative p-10 text-center transition-colors hover:bg-white/5"
+              >
+                <div className="mb-2 font-serif text-4xl font-bold text-white">{s.value}</div>
+                <div className="text-gold/60 group-hover:text-gold text-[10px] font-black uppercase tracking-[0.3em] transition-colors">
                   {s.label}
                 </div>
-              </div>
+              </motion.div>
             ))}
           </div>
         </div>
-      </header>
+      </section>
 
       {/* AVANTAGES */}
       <section className="bg-white py-24">
@@ -220,53 +285,165 @@ export default function InvestissementPage(): React.ReactElement {
         </div>
       </section>
 
+      {/* MARKET PULSE — Section 5.9.3 Style */}
+      <section className="bg-charcoal-50 overflow-hidden py-32">
+        <div className="mx-auto max-w-7xl px-4">
+          <div className="grid grid-cols-1 items-center gap-20 lg:grid-cols-2">
+            <motion.div
+              initial={{ opacity: 0, x: -40 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              viewport={{ once: true }}
+            >
+              <Badge variant="navy" className="mb-6 px-4 py-1">
+                Market Pulse (5.9.3)
+              </Badge>
+              <h2 className="text-navy mb-8 font-serif text-5xl font-bold leading-tight">
+                Des données <span className="text-gold italic">actionnables</span>,<br />
+                pas seulement des chiffres.
+              </h2>
+              <p className="text-charcoal-500 mb-10 text-lg font-light leading-relaxed">
+                Notre IA analyse des millions de points de données pour vous offrir une vision
+                limpide du marché. De l'évolution du prix au m² à Fidjrossè jusqu'aux prévisions de
+                croissance à Cocody.
+              </p>
+              <div className="space-y-6">
+                {[
+                  { label: 'Précision des prévisions IA', val: '98.2%' },
+                  { label: 'Mise à jour des données', val: 'Temps Réel' },
+                  { label: 'Sources certifiées', val: 'Notaires & Géomètres' },
+                ].map((item) => (
+                  <div key={item.label} className="flex items-center gap-4">
+                    <div className="bg-gold/20 flex h-6 w-6 items-center justify-center rounded-full">
+                      <CheckCircle className="text-gold h-4 w-4" />
+                    </div>
+                    <span className="text-navy text-sm font-bold uppercase tracking-wider">
+                      {item.label}
+                    </span>
+                    <div className="border-charcoal-100 flex-1 border-b border-dotted" />
+                    <span className="text-gold text-sm font-black">{item.val}</span>
+                  </div>
+                ))}
+              </div>
+            </motion.div>
+
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9 }}
+              whileInView={{ opacity: 1, scale: 1 }}
+              viewport={{ once: true }}
+              className="relative"
+            >
+              <div className="bg-navy group relative overflow-hidden rounded-[48px] p-12 shadow-2xl">
+                <div className="animate-shimmer absolute inset-0 bg-[linear-gradient(45deg,transparent_25%,rgba(212,175,55,0.05)_50%,transparent_75%)] bg-[length:250%_250%]" />
+                <div className="relative z-10">
+                  <div className="mb-12 flex items-center justify-between">
+                    <div>
+                      <p className="text-gold mb-2 text-[10px] font-black uppercase tracking-widest">
+                        Indice de Potentiel
+                      </p>
+                      <h4 className="font-serif text-3xl font-bold text-white">Dakar Plateau</h4>
+                    </div>
+                    <div className="text-right">
+                      <p className="text-emerald text-2xl font-bold">+14.2%</p>
+                      <p className="text-[10px] font-bold uppercase tracking-wider text-white/40">
+                        vs 2024
+                      </p>
+                    </div>
+                  </div>
+                  <div className="mb-8 flex h-48 items-end gap-3">
+                    {[40, 60, 45, 90, 65, 80, 100].map((h, i) => (
+                      <motion.div
+                        key={i}
+                        initial={{ height: 0 }}
+                        whileInView={{ height: `${h}%` }}
+                        transition={{ delay: i * 0.1, duration: 1 }}
+                        className="bg-gold/20 group-hover:bg-gold/40 flex-1 rounded-t-lg transition-colors"
+                      />
+                    ))}
+                  </div>
+                  <div className="rounded-2xl border border-white/10 bg-white/5 p-6 backdrop-blur-md">
+                    <p className="text-xs font-light italic text-white/80">
+                      "Rebecca : La zone du Plateau présente un risque foncier faible (98/100) avec
+                      une demande locative en hausse constante."
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </motion.div>
+          </div>
+        </div>
+      </section>
+
       {/* ZONES À FORT POTENTIEL */}
-      <section className="bg-charcoal-50 py-24">
+      <section className="bg-white py-32">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <div className="mx-auto mb-16 max-w-2xl text-center">
-            <p className="text-gold mb-4 text-[10px] font-bold uppercase tracking-[0.4em]">
-              Cartographie du potentiel
-            </p>
-            <h2 className="text-navy font-serif text-4xl font-bold md:text-5xl">
-              Zones identifiées à <span className="text-gold italic">fort rendement</span>
-            </h2>
+          <div className="mx-auto mb-24 max-w-3xl text-center">
+            <motion.p
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              className="text-gold mb-6 text-[10px] font-black uppercase tracking-[0.6em]"
+            >
+              Écosystème AfriBayit
+            </motion.p>
+            <motion.h2
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.1 }}
+              className="text-navy font-serif text-5xl font-bold leading-tight md:text-6xl"
+            >
+              Zones identifiées à <span className="text-gold italic">haut rendement</span>
+            </motion.h2>
           </div>
 
-          <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-            {ZONES.map((z) => (
-              <div
+          <div className="grid grid-cols-1 gap-12 md:grid-cols-2">
+            {ZONES.map((z, idx) => (
+              <motion.div
                 key={z.pays}
-                className={`group relative overflow-hidden rounded-3xl ${z.bg} p-8 transition-all hover:shadow-2xl`}
+                initial={{ opacity: 0, y: 40 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                transition={{ delay: idx * 0.2 }}
+                viewport={{ once: true }}
+                className={cn(
+                  'hover:shadow-3xl group relative overflow-hidden rounded-[48px] p-12 transition-all duration-700 hover:-translate-y-4',
+                  z.bg,
+                )}
               >
-                <div className="bg-gold/10 absolute right-0 top-0 h-48 w-48 -translate-y-1/3 translate-x-1/3 rounded-full blur-[60px]" />
+                <div className="bg-gold/10 absolute right-0 top-0 h-80 w-80 -translate-y-1/2 translate-x-1/2 rounded-full blur-[100px] transition-all group-hover:blur-[140px]" />
                 <div className="relative z-10">
-                  <div className="mb-6 flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      <span className="text-4xl">{z.flag}</span>
-                      <h3 className="font-serif text-2xl font-bold text-white">{z.pays}</h3>
+                  <div className="mb-10 flex items-center justify-between">
+                    <div className="flex items-center gap-6">
+                      <span className="text-5xl">{z.flag}</span>
+                      <h3 className="font-serif text-3xl font-bold text-white">{z.pays}</h3>
                     </div>
-                    <div className="border-gold/30 bg-gold/10 rounded-full border px-4 py-1.5">
-                      <span className="text-gold text-sm font-bold">Rdt: {z.rendement}</span>
+                    <div className="border-gold/30 bg-gold/10 rounded-full border px-6 py-2 backdrop-blur-md">
+                      <span className="text-gold text-sm font-black tracking-widest">
+                        RDT: {z.rendement}
+                      </span>
                     </div>
                   </div>
 
-                  <div className="space-y-3">
+                  <div className="mb-12 space-y-4">
                     {z.zones.map((zone) => (
-                      <div key={zone} className="flex items-center gap-3 text-white/80">
-                        <CheckCircle className="text-gold h-4 w-4 flex-shrink-0" />
-                        <span className="text-sm font-medium">{zone}</span>
+                      <div key={zone} className="group/item flex items-center gap-4 text-white/70">
+                        <div className="bg-gold h-1.5 w-1.5 rounded-full transition-transform group-hover/item:scale-150" />
+                        <span className="text-base font-medium tracking-wide">{zone}</span>
                       </div>
                     ))}
                   </div>
 
                   <Link
                     href={`/recherche?pays=${z.pays}` as any}
-                    className="hover:text-gold mt-8 inline-flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest text-white/60 transition-all"
+                    className="hover:text-gold inline-flex items-center gap-4 text-xs font-black uppercase tracking-[0.3em] text-white transition-colors"
                   >
-                    Explorer les biens <ArrowRight className="h-3 w-3" />
+                    Explorer les opportunités
+                    <motion.span
+                      animate={{ x: [0, 5, 0] }}
+                      transition={{ duration: 1.5, repeat: Infinity }}
+                    >
+                      <ArrowRight className="h-4 w-4" />
+                    </motion.span>
                   </Link>
                 </div>
-              </div>
+              </motion.div>
             ))}
           </div>
         </div>
