@@ -328,7 +328,7 @@ export default async function CommunautePage({ searchParams }: Props): Promise<R
                 ))}
               </div>
               <Button
-                variant="navy"
+                variant="primary"
                 className="mt-10 h-12 w-full rounded-full text-xs font-bold uppercase tracking-widest"
               >
                 S'INSCRIRE AUX EVENTS
