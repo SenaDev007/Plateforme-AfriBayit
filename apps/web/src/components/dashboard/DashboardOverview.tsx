@@ -6,7 +6,20 @@ import { useState, useEffect } from 'react';
 import { useSession } from 'next-auth/react';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
-import { MessageSquare, Award } from 'lucide-react';
+import {
+  TrendingUp,
+  Heart,
+  CreditCard,
+  Eye,
+  Loader2,
+  ArrowUpRight,
+  ShieldCheck,
+  Clock,
+  MapPin,
+  Search,
+  MessageSquare,
+  Award,
+} from 'lucide-react';
 import { Card, Badge, PropertyCard, Button } from '@afribayit/ui';
 import { AmbassadorStatus } from './AmbassadorStatus';
 import type { PropertyCardData } from '@afribayit/ui';
