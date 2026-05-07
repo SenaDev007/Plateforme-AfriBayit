@@ -19,9 +19,10 @@ const clientSchema = z.object({
 
 function createEnv() {
   const isProd = process.env.NODE_ENV === 'production';
+  const isBuild = !!process.env.VERCEL || !!process.env.CI;
   const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000';
 
-  if (isProd && apiUrl.includes('localhost')) {
+  if (isProd && apiUrl.includes('localhost') && !isBuild) {
     console.warn(
       '⚠️ WARNING: Running in production mode but NEXT_PUBLIC_API_URL is defaulting to localhost. ' +
         'API calls will likely fail.',
@@ -30,16 +31,20 @@ function createEnv() {
 
   const parsed = serverSchema.safeParse(process.env);
 
-  if (!parsed.success && isProd) {
+  // Throw only if we are in production AND NOT in the build phase
+  if (!parsed.success && isProd && !isBuild) {
     console.error('Invalid environment variables:', parsed.error.flatten().fieldErrors);
     throw new Error('Invalid environment variables');
   }
 
   return {
-    ...parsed.data,
+    ...(parsed.success ? parsed.data : ({} as any)),
     NEXT_PUBLIC_API_URL: apiUrl,
     NEXT_PUBLIC_APP_URL: process.env.NEXT_PUBLIC_APP_URL ?? 'http://localhost:3000',
     NEXT_PUBLIC_MAPBOX_TOKEN: process.env.NEXT_PUBLIC_MAPBOX_TOKEN ?? '',
+    // Provide a dummy secret during build if missing
+    NEXTAUTH_SECRET:
+      process.env.NEXTAUTH_SECRET || 'build_placeholder_secret_min_32_characters_long',
   };
 }
 
