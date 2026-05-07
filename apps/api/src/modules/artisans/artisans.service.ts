@@ -95,10 +95,16 @@ export class ArtisansService {
     });
   }
 
-  async addService(dto: { artisanId: string; name: string; description?: string; basePrice?: number; unit?: string }) {
+  async addService(dto: {
+    artisanId: string;
+    name: string;
+    description?: string;
+    basePrice?: number;
+    unit?: string;
+  }) {
     return this.prisma.artisanService.create({ data: dto });
   }
-
+  async addReview(dto: CreateReviewDto, reviewerId: string) {
     const artisan = await this.prisma.artisan.findUnique({ where: { id: dto.artisanId } });
     if (!artisan) throw new NotFoundException('Artisan introuvable');
 
