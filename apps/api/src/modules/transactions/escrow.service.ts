@@ -63,7 +63,6 @@ export class EscrowService {
           amount: transaction.amount,
           currency: transaction.currency,
           checksum: 'placeholder', // Add required checksum
-          description: `${transaction.status} → ${toStatus}${note ? ` | ${note}` : ''} | Acteur: ${actorId}`,
           balanceBefore: transaction.escrowAccount?.balance ?? new Decimal(0),
           balanceAfter: this.getNewBalance(
             transaction.escrowAccount?.balance,

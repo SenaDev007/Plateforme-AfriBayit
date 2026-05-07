@@ -99,6 +99,7 @@ export class ArtisansService {
     return this.prisma.artisanService.create({ data: dto });
   }
 
+  async addReview(dto: CreateReviewDto, reviewerId: string) {
     const artisan = await this.prisma.artisan.findUnique({ where: { id: dto.artisanId } });
     if (!artisan) throw new NotFoundException('Artisan introuvable');
 

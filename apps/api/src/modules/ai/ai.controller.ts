@@ -1,13 +1,15 @@
 import { Controller, Post, Get, Body, Param, UseGuards, Request } from '@nestjs/common';
 import { RebeccaService } from './rebecca.service';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
-import { DocumentAIPipeline } from '@afribayit/ai/src/document-pipeline';
-import { MarketAnalysisService } from '@afribayit/ai/src/market-analysis';
-import { AntiFraudeEngine } from '@afribayit/ai/src/anti-fraude';
-import { BlockchainService } from '@afribayit/ai/src/innovation';
-import { RebeccaProactiveTriggers } from '@afribayit/ai/src/proactive-triggers';
-import { RAGPipeline } from '@afribayit/ai/src/rag-pipeline';
-import { WhatsAppAdapter } from '@afribayit/ai/src/channels';
+import {
+  DocumentAIPipeline,
+  MarketAnalysisService,
+  AntiFraudeEngine,
+  BlockchainService,
+  RebeccaProactiveTriggers,
+  RAGPipeline,
+  WhatsAppAdapter,
+} from '@afribayit/ai';
 
 @Controller('v1/ai')
 export class AiController {
