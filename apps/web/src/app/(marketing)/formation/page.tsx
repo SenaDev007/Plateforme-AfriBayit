@@ -130,6 +130,39 @@ export default async function FormationPage(): Promise<React.ReactElement> {
           </div>
         </div>
 
+        {/* Reprendre l'apprentissage (LinkedIn Learning Style) */}
+        <div className="border-charcoal-100 bg-charcoal-50/50 mb-16 rounded-[32px] border p-8 shadow-sm">
+          <h3 className="text-charcoal mb-6 font-serif text-2xl font-bold">
+            Reprendre l'apprentissage
+          </h3>
+          <div className="flex flex-col gap-6 md:flex-row md:items-center">
+            <div className="bg-charcoal-200 h-32 w-48 flex-shrink-0 overflow-hidden rounded-2xl">
+              <img
+                src="https://images.unsplash.com/photo-1560518883-ce09059eeffa"
+                alt="Course"
+                className="h-full w-full object-cover"
+              />
+            </div>
+            <div className="flex-1 space-y-3">
+              <h4 className="text-navy text-lg font-bold">
+                Maîtriser l'Investissement Immobilier en Afrique
+              </h4>
+              <p className="text-charcoal-400 text-sm font-medium">Leçon 2: Les pièges à éviter</p>
+              <div className="flex items-center gap-4">
+                <div className="bg-charcoal-200 h-2 w-full max-w-md overflow-hidden rounded-full">
+                  <div className="bg-gold h-full w-[45%] rounded-full"></div>
+                </div>
+                <span className="text-charcoal-500 text-xs font-bold">45%</span>
+              </div>
+            </div>
+            <div className="flex-shrink-0">
+              <Button variant="primary" className="gap-2 rounded-full px-8 py-3 font-bold">
+                <Play className="h-4 w-4" /> Continuer
+              </Button>
+            </div>
+          </div>
+        </div>
+
         {/* Courses Grid */}
         <div className="grid grid-cols-1 gap-10 md:grid-cols-2 lg:grid-cols-3">
           {courses.map((course) => (

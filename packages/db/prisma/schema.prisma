@@ -4,15 +4,14 @@
 generator client {
   provider        = "prisma-client-js"
   output          = "../generated/client"
-  previewFeatures = ["postgresqlExtensions", "multiSchema"]
+  previewFeatures = ["postgresqlExtensions"]
 }
 
 datasource db {
   provider   = "postgresql"
   url        = env("DATABASE_URL")
   directUrl  = env("DIRECT_URL")
-  extensions = [postgis, pg_trgm, unaccent]
-  schemas    = ["public", "bj", "ci", "bf", "tg"]
+  extensions = [postgis, pg_trgm, unaccent, vector]
 }
 
 // ─── ENUMS ───────────────────────────────────────────────────────────────────
@@ -62,12 +61,6 @@ enum PropertyType {
   DUPLEX
   STUDIO
   WAREHOUSE
-}
-
-enum CourseLevel {
-  BEGINNER
-  INTERMEDIATE
-  ADVANCED
 }
 
 enum PropertyStatus {
@@ -176,7 +169,7 @@ enum NotificationCategory {
   MARKETING
   SOCIAL
 }
- 
+
 enum CommissionStatus {
   PENDING
   APPROVED
@@ -187,102 +180,102 @@ enum CommissionStatus {
 // ─── USERS ────────────────────────────────────────────────────────────────────
 
 model User {
-  id            String    @id @default(cuid())
-  email         String    @unique
-  emailVerified DateTime?
-  phone         String?   @unique
-  phoneVerified Boolean   @default(false)
-  passwordHash  String?
-  firstName     String
-  lastName      String
-  avatar        String?
-  bio           String?
-  role          UserRole  @default(BUYER)
-  country       Country   @default(BJ)
-  city          String?
-  kycLevel      KycLevel  @default(NONE)
-  isActive      Boolean   @default(true)
-  isBanned      Boolean   @default(false)
-  reputationScore Float   @default(0)
-  twoFactorSecret String?
-  twoFactorEnabled Boolean @default(false)
-  referralCode    String?   @unique
-  referredById    String?
-  points          Int       @default(0)
-  totalEarnings   Float     @default(0)
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
-  
+  id               String    @id @default(cuid())
+  email            String    @unique
+  emailVerified    DateTime?
+  phone            String?   @unique
+  phoneVerified    Boolean   @default(false)
+  passwordHash     String?
+  firstName        String
+  lastName         String
+  avatar           String?
+  bio              String?
+  role             UserRole  @default(BUYER)
+  country          Country   @default(BJ)
+  city             String?
+  kycLevel         KycLevel  @default(NONE)
+  isActive         Boolean   @default(true)
+  isBanned         Boolean   @default(false)
+  reputationScore  Float     @default(0)
+  twoFactorSecret  String?
+  twoFactorEnabled Boolean   @default(false)
+  referralCode     String?   @unique
+  referredById     String?
+  points           Int       @default(0)
+  totalEarnings    Float     @default(0)
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+
   // Onboarding (Section 4.2)
-  onboardingStep      Int       @default(1)
-  onboardingCompleted Boolean   @default(false)
-  geoPreferences      Json?     // { countries: string[], cities: string[] }
+  onboardingStep      Int     @default(1)
+  onboardingCompleted Boolean @default(false)
+  geoPreferences      Json? // { countries: string[], cities: string[] }
   budgetMin           Float?
   budgetMax           Float?
   objectives          String?
-  aiAssistantEnabled  Boolean   @default(false)
+  aiAssistantEnabled  Boolean @default(false)
 
   // Relations
-  accounts        Account[]
-  sessions        Session[]
-  properties      Property[]
-  favorites       Favorite[]
-  buyerTransactions   Transaction[] @relation("BuyerTransactions")
-  sellerTransactions  Transaction[] @relation("SellerTransactions")
-  kycDocuments    KycDocument[]
-  reviews         Review[]        @relation("ReviewAuthor")
-  receivedReviews Review[]        @relation("ReviewTarget")
-  notifications   Notification[]
-  artisanProfile  Artisan?
-  enrollments     Enrollment[]
-  instructorCourses Course[]      @relation("InstructorCourses")
-  posts           CommunityPost[]
-  postLikes       PostLike[]
-  postComments    PostComment[]
-  groupMemberships GroupMember[]
-  createdGroups       CommunityGroup[]  @relation("GroupCreator")
-  hotelBookings       HotelBooking[]
-  hotelOwned          Hotel[]           @relation("HotelOwner")
-  conversationsAsA    Conversation[]    @relation("ConversationA")
-  conversationsAsB    Conversation[]    @relation("ConversationB")
-  sentMessages        DirectMessage[]
-  payouts             Payout[]        @relation("UserPayouts")
-  quizAttempts        QuizAttempt[]
-  certificates        Certificate[]
-  notaryProfile       Notary?
-  surveyorProfile     Surveyor?
-  notificationPrefs   NotificationPreference[]
-  notaryReviews       NotaryReview[]
-  referredBy          User?     @relation("ReferralTree", fields: [referredById], references: [id])
-  referrals           User[]    @relation("ReferralTree")
-  commissions         Commission[]
-  lessonProgress      LessonProgress[]
+  accounts           Account[]
+  sessions           Session[]
+  properties         Property[]
+  favorites          Favorite[]
+  buyerTransactions  Transaction[]            @relation("BuyerTransactions")
+  sellerTransactions Transaction[]            @relation("SellerTransactions")
+  kycDocuments       KycDocument[]
+  reviews            Review[]                 @relation("ReviewAuthor")
+  receivedReviews    Review[]                 @relation("ReviewTarget")
+  notifications      Notification[]
+  artisanProfile     Artisan?
+  enrollments        Enrollment[]
+  instructorCourses  Course[]                 @relation("InstructorCourses")
+  posts              CommunityPost[]
+  postLikes          PostLike[]
+  postComments       PostComment[]
+  groupMemberships   GroupMember[]
+  createdGroups      CommunityGroup[]         @relation("GroupCreator")
+  hotelBookings      HotelBooking[]
+  hotelOwned         Hotel[]                  @relation("HotelOwner")
+  conversationsAsA   Conversation[]           @relation("ConversationA")
+  conversationsAsB   Conversation[]           @relation("ConversationB")
+  sentMessages       DirectMessage[]
+  payouts            Payout[]                 @relation("UserPayouts")
+  quizAttempts       QuizAttempt[]
+  certificates       Certificate[]
+  notaryProfile      Notary?
+  surveyorProfile    Surveyor?
+  notificationPrefs  NotificationPreference[]
+  notaryReviews      NotaryReview[]
+  referredBy         User?                    @relation("ReferralTree", fields: [referredById], references: [id])
+  referrals          User[]                   @relation("ReferralTree")
+  commissions        Commission[]
+  lessonProgress     LessonProgress[]
 
   // Social & Community (Section 5.7)
-  followers           Follow[]        @relation("UserFollowed")
-  following           Follow[]        @relation("UserFollowing")
-  connectionsSent     Connection[]    @relation("ConnectionSender")
-  connectionsReceived  Connection[]    @relation("ConnectionReceiver")
-  skillEndorsementsGiven SkillEndorsement[] @relation("EndorsementAuthor")
+  followers                 Follow[]           @relation("UserFollowed")
+  following                 Follow[]           @relation("UserFollowing")
+  connectionsSent           Connection[]       @relation("ConnectionSender")
+  connectionsReceived       Connection[]       @relation("ConnectionReceiver")
+  skillEndorsementsGiven    SkillEndorsement[] @relation("EndorsementAuthor")
   skillEndorsementsReceived SkillEndorsement[] @relation("EndorsementTarget")
-  
-  // Academy & Expert (Section 5.6)
-  coursesAuthored     Course[]        @relation("CourseAuthor")
-  certificatesEarned  Certificate[]   @relation("CertificateUser")
-  
+
   // Analytics (Section 5.9)
-  profileViews        ProfileView[]   @relation("ViewedUser")
-  profileViewsMade    ProfileView[]   @relation("ViewerUser")
+  profileViews     ProfileView[] @relation("ViewedUser")
+  profileViewsMade ProfileView[] @relation("ViewerUser")
 
   // Premium (Section 5.5b)
-  premiumTier         String          @default("STARTER") // STARTER, PRO_ESSENTIAL, PRO_ADVANCED, ELITE, ENTERPRISE
-  premiumExpiresAt    DateTime?
-  inMailCredits       Int             @default(0)
-  reputationScore     Int             @default(0) // Section 5.7.2 (0-1000)
-  reputationLevel     String          @default("DECOUVREUR") // DECOUVREUR, ACTEUR, EXPERT, AMBASSADEUR
+  premiumTier      String    @default("STARTER") // STARTER, PRO_ESSENTIAL, PRO_ADVANCED, ELITE, ENTERPRISE
+  premiumExpiresAt DateTime?
+  inMailCredits    Int       @default(0)
+  reputationLevel  String    @default("DECOUVREUR") // DECOUVREUR, ACTEUR, EXPERT, AMBASSADEUR
 
   // Subscriptions (Section 11.2.2)
-  subscriptions       Subscription[]
+  subscriptions      Subscription[]
+  wallet             Wallet?
+  geometerProfile    GeometerProfile?
+  agent              Agent?
+  guesthouses        Guesthouse[]
+  guesthouseBookings GuesthouseBooking[]
 
   @@index([email])
   @@index([phone])
@@ -334,18 +327,18 @@ model VerificationToken {
 model KycDocument {
   id            String    @id @default(cuid())
   userId        String
-  type          String    // ID_CARD, PASSPORT, SELFIE, PROOF_OF_ADDRESS
+  type          String // ID_CARD, PASSPORT, SELFIE, PROOF_OF_ADDRESS
   fileUrl       String
-  fileKey       String    // R2 object key
+  fileKey       String // R2 object key
   status        KycStatus @default(PENDING)
   level         KycLevel
   reviewNote    String?
   reviewedAt    DateTime?
   reviewedBy    String?
   // AI validation fields
-  aiStatus      String?   // VALID | SUSPICIOUS | INVALID | ERROR
-  aiScore       Float?    // 0-100 confidence score
-  aiAnalysis    Json?     // Full structured AI response
+  aiStatus      String? // VALID | SUSPICIOUS | INVALID | ERROR
+  aiScore       Float? // 0-100 confidence score
+  aiAnalysis    Json? // Full structured AI response
   aiValidatedAt DateTime?
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
@@ -359,22 +352,22 @@ model KycDocument {
 // ─── NOTAIRES ─────────────────────────────────────────────────────────────────
 
 model Notary {
-  id            String    @id @default(cuid())
-  userId        String    @unique
-  chamberId     String?   // ID Chambre des Notaires
-  jurisdiction  Country   // Pays de compétence
-  city          String?
-  isAvailable   Boolean   @default(true)
-  specialization String?  // ex: "VENTE_IMMOBILIERE", "SUCCESSION"
-  rating        Float     @default(0)
-  reviewCount   Int       @default(0)
-  transactionsCount Int   @default(0)
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
+  id                String   @id @default(cuid())
+  userId            String   @unique
+  chamberId         String? // ID Chambre des Notaires
+  jurisdiction      Country // Pays de compétence
+  city              String?
+  isAvailable       Boolean  @default(true)
+  specialization    String? // ex: "VENTE_IMMOBILIERE", "SUCCESSION"
+  rating            Float    @default(0)
+  reviewCount       Int      @default(0)
+  transactionsCount Int      @default(0)
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
 
-  user         User              @relation(fields: [userId], references: [id], onDelete: Cascade)
-  assignments  NotaryAssignment[]
-  reviews      NotaryReview[]
+  user        User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+  assignments NotaryAssignment[]
+  reviews     NotaryReview[]
 
   @@index([jurisdiction, city])
   @@index([isAvailable])
@@ -382,19 +375,19 @@ model Notary {
 }
 
 model NotaryAssignment {
-  id            String            @id @default(cuid())
-  transactionId String            @unique
+  id            String    @id @default(cuid())
+  transactionId String    @unique
   notaryId      String
-  assignedAt    DateTime          @default(now())
+  assignedAt    DateTime  @default(now())
   completedAt   DateTime?
-  deedHash      String?           // Hash SHA-256 de l'acte notarié
-  polygonTxHash String?           // Hash de transaction Polygon (ancrage on-chain)
-  status        String            @default("ASSIGNED") // ASSIGNED, IN_PROGRESS, SIGNED, REGISTERED
-  notes         String?           @db.Text
+  deedHash      String? // Hash SHA-256 de l'acte notarié
+  polygonTxHash String? // Hash de transaction Polygon (ancrage on-chain)
+  status        String    @default("ASSIGNED") // ASSIGNED, IN_PROGRESS, SIGNED, REGISTERED
+  notes         String?   @db.Text
   metadata      Json?
 
-  transaction   Transaction       @relation(fields: [transactionId], references: [id])
-  notary        Notary            @relation(fields: [notaryId], references: [id])
+  transaction Transaction @relation(fields: [transactionId], references: [id])
+  notary      Notary      @relation(fields: [notaryId], references: [id])
 
   @@index([notaryId])
   @@index([status])
@@ -402,16 +395,16 @@ model NotaryAssignment {
 }
 
 model NotaryReview {
-  id          String   @id @default(cuid())
-  notaryId    String
-  userId      String
-  rating      Int      @db.SmallInt // 1-5
-  comment     String?  @db.Text
-  isVerified  Boolean  @default(false)
-  createdAt   DateTime @default(now())
+  id         String   @id @default(cuid())
+  notaryId   String
+  userId     String
+  rating     Int      @db.SmallInt // 1-5
+  comment    String?  @db.Text
+  isVerified Boolean  @default(false)
+  createdAt  DateTime @default(now())
 
-  notary  Notary  @relation(fields: [notaryId], references: [id], onDelete: Cascade)
-  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  notary Notary @relation(fields: [notaryId], references: [id], onDelete: Cascade)
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([notaryId])
   @@map("notary_reviews")
@@ -420,23 +413,23 @@ model NotaryReview {
 // ─── GEOTRUST & SURVEYORS ───────────────────────────────────────────────────
 
 model Surveyor {
-  id            String    @id @default(cuid())
-  userId        String    @unique
-  licenseNumber String    @unique // Numéro d'agrément
+  id            String  @id @default(cuid())
+  userId        String  @unique
+  licenseNumber String  @unique // Numéro d'agrément
   jurisdiction  Country
   city          String?
-  isAvailable   Boolean   @default(true)
-  rating        Float     @default(0)
-  reviewCount   Int       @default(0)
-  
-  // Section 8.3.2 - ProMatch IA
-  embedding    Unsupported("vector(1536)")?
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
+  isAvailable   Boolean @default(true)
+  rating        Float   @default(0)
+  reviewCount   Int     @default(0)
 
-  user         User              @relation(fields: [userId], references: [id], onDelete: Cascade)
-  assignments  SurveyAssignment[]
-  droneData    DroneMapping[]
+  // Section 8.3.2 - ProMatch IA
+  embedding Unsupported("vector(1536)")?
+  createdAt DateTime                     @default(now())
+  updatedAt DateTime                     @updatedAt
+
+  user        User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+  assignments SurveyAssignment[]
+  droneData   DroneMapping[]
 
   @@index([jurisdiction, city])
   @@map("surveyors")
@@ -447,14 +440,14 @@ model SurveyAssignment {
   transactionId String?  @unique
   propertyId    String
   surveyorId    String
-  status        String   // PENDING, IN_PROGRESS, COMPLETED, CANCELLED
-  reportUrl     String?  // PDF du rapport d'expertise
+  status        String // PENDING, IN_PROGRESS, COMPLETED, CANCELLED
+  reportUrl     String? // PDF du rapport d'expertise
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
 
-  property      Property    @relation(fields: [propertyId], references: [id])
-  surveyor      Surveyor    @relation(fields: [surveyorId], references: [id])
-  transaction   Transaction? @relation(fields: [transactionId], references: [id])
+  property    Property     @relation(fields: [propertyId], references: [id])
+  surveyor    Surveyor     @relation(fields: [surveyorId], references: [id])
+  transaction Transaction? @relation(fields: [transactionId], references: [id])
 
   @@index([propertyId])
   @@index([surveyorId])
@@ -465,15 +458,15 @@ model DroneMapping {
   id            String   @id @default(cuid())
   propertyId    String   @unique
   surveyorId    String
-  orthophotoUrl String   // URL de l'image haute résolution
-  polygonData   Json     // Coordonnées du polygone (GeoJSON)
-  area          Float    // Surface calculée par drone
-  elevationData Json?    // Données d'élévation
+  orthophotoUrl String // URL de l'image haute résolution
+  polygonData   Json // Coordonnées du polygone (GeoJSON)
+  area          Float // Surface calculée par drone
+  elevationData Json? // Données d'élévation
   capturedAt    DateTime
   createdAt     DateTime @default(now())
 
-  property      Property @relation(fields: [propertyId], references: [id])
-  surveyor      Surveyor @relation(fields: [surveyorId], references: [id])
+  property Property @relation(fields: [propertyId], references: [id])
+  surveyor Surveyor @relation(fields: [surveyorId], references: [id])
 
   @@map("drone_mappings")
 }
@@ -481,12 +474,12 @@ model DroneMapping {
 // ─── NOTIFICATION PREFERENCES ────────────────────────────────────────────────
 
 model NotificationPreference {
-  id        String   @id @default(cuid())
+  id        String               @id @default(cuid())
   userId    String
   category  NotificationCategory @default(SYSTEM)
   channel   NotificationChannel
-  isEnabled Boolean  @default(true)
-  updatedAt DateTime @updatedAt
+  isEnabled Boolean              @default(true)
+  updatedAt DateTime             @updatedAt
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
@@ -508,7 +501,7 @@ model Property {
   price           Decimal         @db.Decimal(15, 2)
   currency        Currency        @default(XOF)
   priceNegotiable Boolean         @default(false)
-  surface         Float?          // m²
+  surface         Float? // m²
   rooms           Int?
   bedrooms        Int?
   bathrooms       Int?
@@ -522,7 +515,7 @@ model Property {
   latitude        Float?
   longitude       Float?
   // PostGIS point stored as JSON for Prisma compatibility
-  features        Json?           // Array of amenities
+  features        Json? // Array of amenities
   isVerified      Boolean         @default(false)
   isFeatured      Boolean         @default(false)
   viewCount       Int             @default(0)
@@ -532,36 +525,36 @@ model Property {
   publishedAt     DateTime?
 
   // Section 5.0.2 - Workflow Validation
-  isVerifiedDocs      Boolean         @default(false)
-  legalDocuments      Json?           // Array of { type: string, url: string, status: string }
-  verificationStatus  PropertyStatus  @default(DRAFT)
-  rejectionReason     String?
-  agentId             String?         // If published by an agent
-  documents           Json?     // Array of { type: string, url: string, status: string }
-  
+  isVerifiedDocs     Boolean        @default(false)
+  legalDocuments     Json? // Array of { type: string, url: string, status: string }
+  verificationStatus PropertyStatus @default(DRAFT)
+  rejectionReason    String?
+  agentId            String? // If published by an agent
+  documents          Json? // Array of { type: string, url: string, status: string }
+
   // Section 5.1.2 - Advanced Media
   vrTourUrl           String?
   droneVideoUrl       String?
   reconstruction3dUrl String?
-  
-  notaryId            String?         // Linked notary for validation
-  
-  // Section 8.1.2 - AI RAG & Semantic Search
-  embedding           Unsupported("vector(1536)")? 
 
-  owner           User            @relation(fields: [ownerId], references: [id])
-  images          PropertyImage[]
-  virtualTours    VirtualTour[]
-  favorites       Favorite[]
-  transactions    Transaction[]
-  reviews         Review[]
+  notaryId String? // Linked notary for validation
+
+  // Section 8.1.2 - AI RAG & Semantic Search
+  embedding Unsupported("vector(1536)")?
+
+  owner             User               @relation(fields: [ownerId], references: [id])
+  images            PropertyImage[]
+  virtualTours      VirtualTour[]
+  favorites         Favorite[]
+  transactions      Transaction[]
+  reviews           Review[]
   surveyAssignments SurveyAssignment[]
-  droneData        DroneMapping?
-  agent            Agent?          @relation(fields: [agentId], references: [id])
-  geometerMissions GeometerMission[]
-  conflictA        ConflictZone[]    @relation("ConflictA")
-  conflictB        ConflictZone[]    @relation("ConflictB")
-  listingAIScore   ListingAIScore?
+  droneData         DroneMapping?
+  agent             Agent?             @relation(fields: [agentId], references: [id])
+  geometerMissions  GeometerMission[]
+  conflictA         ConflictZone[]     @relation("ConflictA")
+  conflictB         ConflictZone[]     @relation("ConflictB")
+  listingAIScore    ListingAIScore?
 
   @@index([country, city, status])
   @@index([ownerId])
@@ -591,7 +584,7 @@ model VirtualTour {
   propertyId String
   title      String
   url        String
-  type       String   // MATTERPORT, YOUTUBE_360, IFRAME
+  type       String // MATTERPORT, YOUTUBE_360, IFRAME
   createdAt  DateTime @default(now())
 
   property Property @relation(fields: [propertyId], references: [id], onDelete: Cascade)
@@ -635,7 +628,7 @@ model Hotel {
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
-  owner    User?        @relation("HotelOwner", fields: [ownerId], references: [id])
+  owner    User?          @relation("HotelOwner", fields: [ownerId], references: [id])
   rooms    HotelRoom[]
   bookings HotelBooking[]
 
@@ -656,168 +649,85 @@ model HotelRoom {
   amenities     Json?
   isAvailable   Boolean       @default(true)
 
-  hotel    Hotel         @relation(fields: [hotelId], references: [id], onDelete: Cascade)
+  hotel    Hotel          @relation(fields: [hotelId], references: [id], onDelete: Cascade)
   bookings HotelBooking[]
 
   @@index([hotelId])
   @@map("hotel_rooms")
 }
 
-// ─── ACADEMY (Section 5.6) ────────────────────────────────────────────────────
-
-model Course {
-  id            String    @id @default(cuid())
-  authorId      String
-  title         String
-  slug          String    @unique
-  description   String    @db.Text
-  category      String
-  price         Decimal   @db.Decimal(12, 2)
-  currency      Currency  @default(XOF)
-  thumbnail     String?
-  level         CourseLevel @default(BEGINNER)
-  status        String    @default("DRAFT") // DRAFT, UNDER_REVIEW, PUBLISHED
-  rating        Float     @default(0)
-  reviewCount   Int       @default(0)
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
-
-  author        User            @relation("CourseAuthor", fields: [authorId], references: [id])
-  modules       CourseModule[]
-  enrollments   Enrollment[]
-  certificates  Certificate[]
-
-  @@map("courses")
-}
-
-model CourseModule {
-  id          String   @id @default(cuid())
-  courseId    String
-  title       String
-  order       Int
-  lessons     Lesson[]
-
-  course      Course   @relation(fields: [courseId], references: [id], onDelete: Cascade)
-
-  @@map("course_modules")
-}
-
-model Lesson {
-  id          String   @id @default(cuid())
-  moduleId    String
-  title       String
-  content     String?  @db.Text
-  videoUrl    String?
-  duration    Int?     // minutes
-  order       Int
-
-  module      CourseModule @relation(fields: [moduleId], references: [id], onDelete: Cascade)
-  progress    LessonProgress[]
-
-  @@map("lessons")
-}
-
-model Enrollment {
-  id          String   @id @default(cuid())
-  userId      String
-  courseId    String
-  progress    Float    @default(0)
-  completed   Boolean  @default(false)
-  enrolledAt  DateTime @default(now())
-
-  user        User     @relation(fields: [userId], references: [id])
-  course      Course   @relation(fields: [courseId], references: [id])
-
-  @@unique([userId, courseId])
-  @@map("enrollments")
-}
-
-model Certificate {
-  id            String   @id @default(cuid())
-  userId        String
-  courseId      String
-  certificateNo String   @unique // Unique ID for QR verification
-  issuedAt      DateTime @default(now())
-  fileUrl       String?
-
-  user          User     @relation("CertificateUser", fields: [userId], references: [id])
-  course        Course   @relation(fields: [courseId], references: [id])
-
-  @@map("certificates")
-}
-
 // ─── SOCIAL & COMMUNITY (Section 5.7) ──────────────────────────────────────────
 
 model Follow {
-  id          String   @id @default(cuid())
-  followerId  String
-  followedId  String
-  createdAt   DateTime @default(now())
+  id         String   @id @default(cuid())
+  followerId String
+  followedId String
+  createdAt  DateTime @default(now())
 
-  follower    User     @relation("UserFollowing", fields: [followerId], references: [id])
-  followed    User     @relation("UserFollowed", fields: [followedId], references: [id])
+  follower User @relation("UserFollowing", fields: [followerId], references: [id])
+  followed User @relation("UserFollowed", fields: [followedId], references: [id])
 
   @@unique([followerId, followedId])
   @@map("follows")
 }
 
 model Connection {
-  id          String   @id @default(cuid())
-  senderId    String
-  receiverId  String
-  status      String   @default("PENDING") // PENDING, ACCEPTED, REJECTED
-  createdAt   DateTime @default(now())
+  id         String   @id @default(cuid())
+  senderId   String
+  receiverId String
+  status     String   @default("PENDING") // PENDING, ACCEPTED, REJECTED
+  createdAt  DateTime @default(now())
 
-  sender      User     @relation("ConnectionSender", fields: [senderId], references: [id])
-  receiver    User     @relation("ConnectionReceiver", fields: [receiverId], references: [id])
+  sender   User @relation("ConnectionSender", fields: [senderId], references: [id])
+  receiver User @relation("ConnectionReceiver", fields: [receiverId], references: [id])
 
   @@unique([senderId, receiverId])
   @@map("connections")
 }
 
 model SkillEndorsement {
-  id          String   @id @default(cuid())
-  authorId    String
-  targetId    String
-  skill       String
-  createdAt   DateTime @default(now())
+  id        String   @id @default(cuid())
+  authorId  String
+  targetId  String
+  skill     String
+  createdAt DateTime @default(now())
 
-  author      User     @relation("EndorsementAuthor", fields: [authorId], references: [id])
-  target      User     @relation("EndorsementTarget", fields: [targetId], references: [id])
+  author User @relation("EndorsementAuthor", fields: [authorId], references: [id])
+  target User @relation("EndorsementTarget", fields: [targetId], references: [id])
 
   @@map("skill_endorsements")
 }
 
 model ProfileView {
-  id          String   @id @default(cuid())
-  viewerId    String?  // Null for anonymous
-  viewedId    String
-  createdAt   DateTime @default(now())
+  id        String   @id @default(cuid())
+  viewerId  String? // Null for anonymous
+  viewedId  String
+  createdAt DateTime @default(now())
 
-  viewer      User?    @relation("ViewerUser", fields: [viewerId], references: [id])
-  viewed      User     @relation("ViewedUser", fields: [viewedId], references: [id])
+  viewer User? @relation("ViewerUser", fields: [viewerId], references: [id])
+  viewed User  @relation("ViewedUser", fields: [viewedId], references: [id])
 
   @@map("profile_views")
 }
 
 model HotelBooking {
-  id          String        @id @default(cuid())
-  userId      String
-  hotelId     String
-  roomId      String
-  checkIn     DateTime
-  checkOut    DateTime
-  guests      Int
-  totalPrice  Decimal       @db.Decimal(12, 2)
-  currency    Currency      @default(XOF)
-  status      BookingStatus @default(PENDING)
-  notes       String?
-  createdAt   DateTime      @default(now())
-  updatedAt   DateTime      @updatedAt
+  id         String        @id @default(cuid())
+  userId     String
+  hotelId    String
+  roomId     String
+  checkIn    DateTime
+  checkOut   DateTime
+  guests     Int
+  totalPrice Decimal       @db.Decimal(12, 2)
+  currency   Currency      @default(XOF)
+  status     BookingStatus @default(PENDING)
+  notes      String?
+  createdAt  DateTime      @default(now())
+  updatedAt  DateTime      @updatedAt
 
-  user  User      @relation(fields: [userId], references: [id])
-  hotel Hotel     @relation(fields: [hotelId], references: [id])
-  room  HotelRoom @relation(fields: [roomId], references: [id])
+  user        User         @relation(fields: [userId], references: [id])
+  hotel       Hotel        @relation(fields: [hotelId], references: [id])
+  room        HotelRoom    @relation(fields: [roomId], references: [id])
   transaction Transaction?
 
   @@index([userId])
@@ -828,39 +738,39 @@ model HotelBooking {
 // ─── ARTISANS ─────────────────────────────────────────────────────────────────
 
 model Artisan {
-  id           String   @id @default(cuid())
-  userId       String   @unique
-  companyName  String
-  slug         String   @unique
-  category     String
-  bio          String   @db.Text
-  country      Country
-  city         String
-  district     String?
-  portfolio    Json?    // Array of portfolio images
+  id             String  @id @default(cuid())
+  userId         String  @unique
+  companyName    String
+  slug           String  @unique
+  category       String
+  bio            String  @db.Text
+  country        Country
+  city           String
+  district       String?
+  portfolio      Json? // Array of portfolio images
   certifications Json?
-  isCertified  Boolean  @default(false)
-  isAvailable  Boolean  @default(true)
-  isActive     Boolean  @default(true)
-  rating       Float    @default(0)
-  reviewCount  Int      @default(0)
-  jobsDone     Int      @default(0)
-  
-  // Section 5.4b.3 - Artisan Specifics
-  trades        Json?     // Array of { type: string, primary: boolean }
-  dailyRate     Decimal?  @db.Decimal(12, 2)
-  yearsExp      Int       @default(0)
-  location      String?   // Zone d'intervention
-  projects      ArtisanProject[]
-  
-  // Section 8.3.2 - ProMatch IA
-  embedding     Unsupported("vector(1536)")?
+  isCertified    Boolean @default(false)
+  isAvailable    Boolean @default(true)
+  isActive       Boolean @default(true)
+  rating         Float   @default(0)
+  reviewCount    Int     @default(0)
+  jobsDone       Int     @default(0)
 
-  currency     Currency @default(XOF)
-  phone        String
-  whatsapp     String?
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+  // Section 5.4b.3 - Artisan Specifics
+  trades    Json? // Array of { type: string, primary: boolean }
+  dailyRate Decimal?         @db.Decimal(12, 2)
+  yearsExp  Int              @default(0)
+  location  String? // Zone d'intervention
+  projects  ArtisanProject[]
+
+  // Section 8.3.2 - ProMatch IA
+  embedding Unsupported("vector(1536)")?
+
+  currency  Currency @default(XOF)
+  phone     String
+  whatsapp  String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   user     User             @relation(fields: [userId], references: [id], onDelete: Cascade)
   services ArtisanService[]
@@ -869,14 +779,14 @@ model Artisan {
 }
 
 model ArtisanProject {
-  id          String   @id @default(cuid())
+  id          String  @id @default(cuid())
   artisanId   String
   title       String
-  description String?  @db.Text
+  description String? @db.Text
   images      Json?
   year        Int?
-  
-  artisan     Artisan  @relation(fields: [artisanId], references: [id], onDelete: Cascade)
+
+  artisan Artisan @relation(fields: [artisanId], references: [id], onDelete: Cascade)
 
   @@map("artisan_projects")
 }
@@ -887,7 +797,7 @@ model ArtisanService {
   name        String
   description String?
   price       Decimal? @db.Decimal(12, 2)
-  priceUnit   String?  // HOUR, DAY, PROJECT, SQMETER
+  priceUnit   String? // HOUR, DAY, PROJECT, SQMETER
   currency    Currency @default(XOF)
   isActive    Boolean  @default(true)
 
@@ -900,36 +810,37 @@ model ArtisanService {
 // ─── FINTECH & ESCROW (Section 7B) ──────────────────────────────────────────
 
 model Wallet {
-  id                String          @id @default(cuid())
-  userId            String          @unique
-  balanceAvailable  Decimal         @default(0) @db.Decimal(18, 4)
-  balanceEscrowHeld Decimal         @default(0) @db.Decimal(18, 4)
-  balancePending    Decimal         @default(0) @db.Decimal(18, 4)
-  currency          Currency        @default(XOF)
-  totalTransacted   Decimal         @default(0) @db.Decimal(18, 4)
-  user              User            @relation(fields: [userId], references: [id])
+  id                String        @id @default(cuid())
+  userId            String        @unique
+  balanceAvailable  Decimal       @default(0) @db.Decimal(18, 4)
+  balanceEscrowHeld Decimal       @default(0) @db.Decimal(18, 4)
+  balancePending    Decimal       @default(0) @db.Decimal(18, 4)
+  currency          Currency      @default(XOF)
+  totalTransacted   Decimal       @default(0) @db.Decimal(18, 4)
+  user              User          @relation(fields: [userId], references: [id])
   ledgerEntries     LedgerEntry[]
-  
-  createdAt         DateTime        @default(now())
-  updatedAt         DateTime        @updatedAt
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@map("wallets")
 }
 
 model LedgerEntry {
-  id            String      @id @default(cuid())
+  id            String     @id @default(cuid())
   walletId      String
   transactionId String?
   type          LedgerType
   debitAccount  String
   creditAccount String
-  amount        Decimal     @db.Decimal(18, 4)
+  amount        Decimal    @db.Decimal(18, 4)
   currency      Currency
   providerRef   String?
-  checksum      String      // SHA-256 for integrity
-  wallet        Wallet      @relation(fields: [walletId], references: [id])
-  
-  createdAt     DateTime    @default(now())
+  checksum      String // SHA-256 for integrity
+  wallet        Wallet     @relation(fields: [walletId], references: [id])
+
+  createdAt   DateTime     @default(now())
+  transaction Transaction? @relation(fields: [transactionId], references: [id])
 
   @@map("ledger_entries")
 }
@@ -943,27 +854,27 @@ enum LedgerType {
 }
 
 model Escrow {
-  id                String          @id @default(cuid())
-  transactionId     String          @unique
-  status            EscrowStatus    @default(PENDING)
-  amount            Decimal         @db.Decimal(18, 4)
-  commission        Decimal         @db.Decimal(18, 4)
-  conditions        Json?           // { buyerConfirm: bool, docsValid: bool, inspectionValid: bool }
-  
+  id            String       @id @default(cuid())
+  transactionId String       @unique
+  status        EscrowStatus @default(CREATED)
+  amount        Decimal      @db.Decimal(18, 4)
+  commission    Decimal      @db.Decimal(18, 4)
+  conditions    Json? // { buyerConfirm: bool, docsValid: bool, inspectionValid: bool }
+
   // Section 7C.5.1 - GeoTrust Extended Fields
-  geometerMissionId String?
+  geometerMissionId        String?
   geometerValidationStatus GeometerValidationStatus @default(PENDING)
-  adminValidationRequired Boolean @default(false)
-  
-  releaseTriggered  Boolean         @default(false)
-  disputeId         String?
-  
-  transaction       Transaction     @relation(fields: [transactionId], references: [id])
-  dispute           Dispute?        @relation(fields: [disputeId], references: [id])
-  geometerMission   GeometerMission? @relation(fields: [geometerMissionId], references: [id])
-  
-  createdAt         DateTime        @default(now())
-  updatedAt         DateTime        @updatedAt
+  adminValidationRequired  Boolean                  @default(false)
+
+  releaseTriggered Boolean @default(false)
+  disputeId        String?
+
+  transaction     Transaction      @relation(fields: [transactionId], references: [id])
+  dispute         Dispute?         @relation(fields: [disputeId], references: [id])
+  geometerMission GeometerMission? @relation(fields: [geometerMissionId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@map("escrows")
 }
@@ -988,18 +899,19 @@ enum GeometerValidationStatus {
 }
 
 model Dispute {
-  id            String      @id @default(cuid())
-  escrowId      String
-  raisedById    String
-  reason        String      @db.Text
-  status        DisputeStatus @default(OPEN)
-  evidenceUrls  String[]
-  resolution    String?     @db.Text
-  metadata      Json?       // { step: 'COLLECTION', deadline: Date }
-  escrows       Escrow[]
-  
-  createdAt     DateTime    @default(now())
-  updatedAt     DateTime    @updatedAt
+  id           String        @id @default(cuid())
+  escrowId     String
+  raisedById   String
+  reason       String        @db.Text
+  status       DisputeStatus @default(OPEN)
+  evidenceUrls String[]
+  resolution   String?       @db.Text
+  metadata     Json? // { step: 'COLLECTION', deadline: Date }
+  escrows      Escrow[]
+
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+  transactions Transaction[]
 
   @@map("disputes")
 }
@@ -1016,81 +928,81 @@ enum DisputeStatus {
 // ─── GEOTRUST & GEOSPATIAL (Section 7C) ──────────────────────────────────────
 
 model GeometerProfile {
-  id              String      @id @default(cuid())
-  userId          String      @unique
-  orderNumber     String      @unique
-  specialties     String[]    // TOPO, BORNAGE, DRONE, 3D
-  isCertified     Boolean     @default(false)
-  user            User        @relation(fields: [userId], references: [id])
-  missions        GeometerMission[]
-  
-  createdAt       DateTime    @default(now())
-  updatedAt       DateTime    @updatedAt
+  id          String            @id @default(cuid())
+  userId      String            @unique
+  orderNumber String            @unique
+  specialties String[] // TOPO, BORNAGE, DRONE, 3D
+  isCertified Boolean           @default(false)
+  user        User              @relation(fields: [userId], references: [id])
+  missions    GeometerMission[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@map("geometer_profiles")
 }
 
 model GeometerMission {
-  id                String          @id @default(cuid())
-  propertyId        String
-  geometerId        String
-  serviceCode       String          // GEO_TOPO, GEO_DRON, etc.
-  status            MissionStatus   @default(PENDING)
-  scheduledAt       DateTime?
-  reportUrl         String?
-  geojsonUrl        String?
-  aiScore           Float?
-  blockchainHash    String?
-  
-  property          Property        @relation(fields: [propertyId], references: [id])
-  geometer          GeometerProfile @relation(fields: [geometerId], references: [id])
-  escrows           Escrow[]
-  waypoints         GpsWaypoint[]
-  droneCoverage     DroneCoverage?
-  
-  createdAt         DateTime        @default(now())
-  updatedAt         DateTime        @updatedAt
+  id             String        @id @default(cuid())
+  propertyId     String
+  geometerId     String
+  serviceCode    String // GEO_TOPO, GEO_DRON, etc.
+  status         MissionStatus @default(PENDING)
+  scheduledAt    DateTime?
+  reportUrl      String?
+  geojsonUrl     String?
+  aiScore        Float?
+  blockchainHash String?
+
+  property      Property        @relation(fields: [propertyId], references: [id])
+  geometer      GeometerProfile @relation(fields: [geometerId], references: [id])
+  escrows       Escrow[]
+  waypoints     GpsWaypoint[]
+  droneCoverage DroneCoverage?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@map("geometer_missions")
 }
 
 model GpsWaypoint {
-  id                String          @id @default(cuid())
-  missionId         String
-  pointGeom         String          // WKT or GeoJSON string
-  altitude          Float?
-  accuracy          Float?
-  capturedAt        DateTime        @default(now())
-  
-  mission           GeometerMission @relation(fields: [missionId], references: [id])
+  id         String   @id @default(cuid())
+  missionId  String
+  pointGeom  String // WKT or GeoJSON string
+  altitude   Float?
+  accuracy   Float?
+  capturedAt DateTime @default(now())
+
+  mission GeometerMission @relation(fields: [missionId], references: [id])
 
   @@map("gps_waypoints")
 }
 
 model DroneCoverage {
-  id                String          @id @default(cuid())
-  missionId         String          @unique
-  orthophotoUrl     String
-  mntUrl            String?
-  resolutionCm      Float?
-  capturedAt        DateTime
-  bboxPolygon       String          // GeoJSON boundary
-  
-  mission           GeometerMission @relation(fields: [missionId], references: [id])
+  id            String   @id @default(cuid())
+  missionId     String   @unique
+  orthophotoUrl String
+  mntUrl        String?
+  resolutionCm  Float?
+  capturedAt    DateTime
+  bboxPolygon   String // GeoJSON boundary
+
+  mission GeometerMission @relation(fields: [missionId], references: [id])
 
   @@map("drone_coverages")
 }
 
 model ConflictZone {
-  id                String          @id @default(cuid())
-  propertyIdA       String
-  propertyIdB       String
-  overlapPolygon    String          // WKT or GeoJSON
-  overlapArea       Float
-  detectedAt        DateTime        @default(now())
-  
-  propertyA         Property        @relation("ConflictA", fields: [propertyIdA], references: [id])
-  propertyB         Property        @relation("ConflictB", fields: [propertyIdB], references: [id])
+  id             String   @id @default(cuid())
+  propertyIdA    String
+  propertyIdB    String
+  overlapPolygon String // WKT or GeoJSON
+  overlapArea    Float
+  detectedAt     DateTime @default(now())
+
+  propertyA Property @relation("ConflictA", fields: [propertyIdA], references: [id])
+  propertyB Property @relation("ConflictB", fields: [propertyIdB], references: [id])
 
   @@map("conflict_zones")
 }
@@ -1104,110 +1016,25 @@ enum MissionStatus {
   REJECTED
 }
 
-// ─── HOSPITALITY (Section 7D) ───────────────────────────────────────────────
-
-model Hotel {
-  id              String      @id @default(cuid())
-  ownerId         String
-  name            String
-  level           HotelLevel  @default(DIRECT)
-  starRating      Int?
-  description     String?     @db.Text
-  policies        Json?
-  otaRefs         Json?       // { bookingId, expediaId }
-  status          String      @default("ACTIVE")
-  rooms           HotelRoom[]
-  bookings        HotelBooking[]
-  
-  owner           User        @relation(fields: [ownerId], references: [id])
-  
-  createdAt       DateTime    @default(now())
-  updatedAt       DateTime    @updatedAt
-
-  @@map("hotels")
-}
-
-enum HotelLevel {
-  OTA
-  DIRECT
-}
-
-model HotelRoom {
-  id              String          @id @default(cuid())
-  hotelId         String
-  type            HotelRoomType
-  capacity        Int
-  amenities       String[]
-  basePrice       Decimal         @db.Decimal(15, 2)
-  photos          String[]
-  availability    RoomAvailability[]
-  bookings        HotelBooking[]
-  
-  hotel           Hotel           @relation(fields: [hotelId], references: [id])
-
-  @@map("hotel_rooms")
-}
-
-model RoomAvailability {
-  id              String      @id @default(cuid())
-  roomId          String
-  date            DateTime
-  status          AvailabilityStatus @default(AVAILABLE)
-  priceOverride   Decimal?    @db.Decimal(15, 2)
-  
-  room            HotelRoom   @relation(fields: [roomId], references: [id])
-
-  @@index([roomId, date])
-  @@map("room_availabilities")
-}
-
-enum AvailabilityStatus {
-  AVAILABLE
-  BOOKED
-  BLOCKED
-}
-
-model HotelBooking {
-  id              String      @id @default(cuid())
-  hotelId         String
-  roomId          String
-  userId          String
-  checkIn         DateTime
-  checkOut        DateTime
-  totalAmount     Decimal     @db.Decimal(15, 2)
-  currency        Currency    @default(XOF)
-  status          BookingStatus @default(PENDING)
-  paymentRef      String?
-  
-  hotel           Hotel       @relation(fields: [hotelId], references: [id])
-  room            HotelRoom   @relation(fields: [roomId], references: [id])
-  user            User        @relation(fields: [userId], references: [id])
-  
-  createdAt       DateTime    @default(now())
-  updatedAt       DateTime    @updatedAt
-
-  @@map("hotel_bookings")
-}
-
 // ─── AGENTS ───────────────────────────────────────────────────────────────────
 
 model Agent {
-  id            String    @id @default(cuid())
-  userId        String    @unique
-  licenseNumber String?   @unique
-  agencyName    String?
-  slug          String    @unique
-  isCertified   Boolean   @default(false)
+  id                String    @id @default(cuid())
+  userId            String    @unique
+  licenseNumber     String?   @unique
+  agencyName        String?
+  slug              String    @unique
+  isCertified       Boolean   @default(false)
   certificationDate DateTime?
-  languages     Json?     // Array of strings
-  specialties   Json?     // Array of strings
-  rating        Float     @default(0)
-  reviewCount   Int       @default(0)
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
+  languages         Json? // Array of strings
+  specialties       Json? // Array of strings
+  rating            Float     @default(0)
+  reviewCount       Int       @default(0)
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
 
-  user          User       @relation(fields: [userId], references: [id], onDelete: Cascade)
-  properties    Property[]
+  user       User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  properties Property[]
 
   @@map("agents")
 }
@@ -1215,85 +1042,85 @@ model Agent {
 // ─── GUESTHOUSES ──────────────────────────────────────────────────────────────
 
 model Guesthouse {
-  id              String    @id @default(cuid())
-  ownerId         String
-  name            String
-  slug            String    @unique
-  description     String    @db.Text
-  country         Country
-  city            String
-  address         String
-  isCertified     Boolean   @default(false)
-  score           Float     @default(0)
-  amenities       Json?
-  createdAt       DateTime  @default(now())
-  updatedAt       DateTime  @updatedAt
+  id          String   @id @default(cuid())
+  ownerId     String
+  name        String
+  slug        String   @unique
+  description String   @db.Text
+  country     Country
+  city        String
+  address     String
+  isCertified Boolean  @default(false)
+  score       Float    @default(0)
+  amenities   Json?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 
-  owner           User              @relation(fields: [ownerId], references: [id])
-  rooms           GuesthouseRoom[]
-  staff           GuesthouseStaff[]
-  pricingRules    GuesthousePricingRule[]
-  bookings        GuesthouseBooking[]
+  owner        User                    @relation(fields: [ownerId], references: [id])
+  rooms        GuesthouseRoom[]
+  staff        GuesthouseStaff[]
+  pricingRules GuesthousePricingRule[]
+  bookings     GuesthouseBooking[]
 
   @@map("guesthouses")
 }
 
 model GuesthouseRoom {
-  id            String   @id @default(cuid())
-  guesthouseId  String
-  name          String
-  capacity      Int
-  priceBase     Decimal  @db.Decimal(12, 2)
-  images        Json?
-  amenities     Json?
-  isAvailable   Boolean  @default(true)
+  id           String  @id @default(cuid())
+  guesthouseId String
+  name         String
+  capacity     Int
+  priceBase    Decimal @db.Decimal(12, 2)
+  images       Json?
+  amenities    Json?
+  isAvailable  Boolean @default(true)
 
-  guesthouse    Guesthouse          @relation(fields: [guesthouseId], references: [id], onDelete: Cascade)
-  bookings      GuesthouseBooking[]
+  guesthouse Guesthouse          @relation(fields: [guesthouseId], references: [id], onDelete: Cascade)
+  bookings   GuesthouseBooking[]
 
   @@map("guesthouse_rooms")
 }
 
 model GuesthouseStaff {
-  id            String   @id @default(cuid())
-  guesthouseId  String
-  name          String
-  role          String   // RECEPTIONIST, CLEANER, etc.
-  planning      Json?
-  accessLevel   String   @default("LIMITED")
+  id           String @id @default(cuid())
+  guesthouseId String
+  name         String
+  role         String // RECEPTIONIST, CLEANER, etc.
+  planning     Json?
+  accessLevel  String @default("LIMITED")
 
-  guesthouse    Guesthouse @relation(fields: [guesthouseId], references: [id], onDelete: Cascade)
+  guesthouse Guesthouse @relation(fields: [guesthouseId], references: [id], onDelete: Cascade)
 
   @@map("guesthouse_staff")
 }
 
 model GuesthousePricingRule {
-  id            String   @id @default(cuid())
-  guesthouseId  String
-  periodStart   DateTime
-  periodEnd     DateTime
-  multiplier    Float    @default(1.0)
-  reason        String?  // Holiday, Event, etc.
+  id           String   @id @default(cuid())
+  guesthouseId String
+  periodStart  DateTime
+  periodEnd    DateTime
+  multiplier   Float    @default(1.0)
+  reason       String? // Holiday, Event, etc.
 
-  guesthouse    Guesthouse @relation(fields: [guesthouseId], references: [id], onDelete: Cascade)
+  guesthouse Guesthouse @relation(fields: [guesthouseId], references: [id], onDelete: Cascade)
 
   @@map("guesthouse_pricing_rules")
 }
 
 model GuesthouseBooking {
-  id            String        @id @default(cuid())
-  guesthouseId  String
-  roomId        String
-  userId        String
-  checkIn       DateTime
-  checkOut      DateTime
-  totalPrice    Decimal       @db.Decimal(12, 2)
-  status        BookingStatus @default(PENDING)
-  createdAt     DateTime      @default(now())
+  id           String        @id @default(cuid())
+  guesthouseId String
+  roomId       String
+  userId       String
+  checkIn      DateTime
+  checkOut     DateTime
+  totalPrice   Decimal       @db.Decimal(12, 2)
+  status       BookingStatus @default(PENDING)
+  createdAt    DateTime      @default(now())
 
-  guesthouse    Guesthouse      @relation(fields: [guesthouseId], references: [id])
-  room          GuesthouseRoom  @relation(fields: [roomId], references: [id])
-  user          User            @relation(fields: [userId], references: [id])
+  guesthouse Guesthouse     @relation(fields: [guesthouseId], references: [id])
+  room       GuesthouseRoom @relation(fields: [roomId], references: [id])
+  user       User           @relation(fields: [userId], references: [id])
 
   @@map("guesthouse_bookings")
 }
@@ -1321,19 +1148,21 @@ model Transaction {
   completedAt      DateTime?
   disputedAt       DateTime?
 
-  buyer          User            @relation("BuyerTransactions", fields: [buyerId], references: [id])
-  seller         User            @relation("SellerTransactions", fields: [sellerId], references: [id])
-  property       Property?       @relation(fields: [propertyId], references: [id])
-  hotelBooking   HotelBooking?   @relation(fields: [hotelBookingId], references: [id])
-  artisanService ArtisanService? @relation(fields: [artisanServiceId], references: [id])
-  escrowAccount  EscrowAccount?
-  ledgerEntries  LedgerEntry[]
-  payments       Payment[]
-  dispute        Dispute?
-  payout         Payout?
+  buyer            User              @relation("BuyerTransactions", fields: [buyerId], references: [id])
+  seller           User              @relation("SellerTransactions", fields: [sellerId], references: [id])
+  property         Property?         @relation(fields: [propertyId], references: [id])
+  hotelBooking     HotelBooking?     @relation(fields: [hotelBookingId], references: [id])
+  artisanService   ArtisanService?   @relation(fields: [artisanServiceId], references: [id])
+  escrowAccount    EscrowAccount?
+  ledgerEntries    LedgerEntry[]
+  payments         Payment[]
+  dispute          Dispute?          @relation(fields: [disputeId], references: [id])
+  payout           Payout?
   notaryAssignment NotaryAssignment?
   surveyAssignment SurveyAssignment?
   commissions      Commission[]
+  escrow           Escrow?
+  disputeId        String?
 
   @@index([buyerId])
   @@index([sellerId])
@@ -1342,72 +1171,36 @@ model Transaction {
 }
 
 model EscrowAccount {
-  id              String   @id @default(cuid())
-  transactionId   String   @unique
-  balance         Decimal  @db.Decimal(15, 2) @default(0)
-  currency        Currency @default(XOF)
-  lockedAt        DateTime?
-  releasedAt      DateTime?
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
+  id            String    @id @default(cuid())
+  transactionId String    @unique
+  balance       Decimal   @default(0) @db.Decimal(15, 2)
+  currency      Currency  @default(XOF)
+  lockedAt      DateTime?
+  releasedAt    DateTime?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
 
   transaction Transaction @relation(fields: [transactionId], references: [id])
 
   @@map("escrow_accounts")
 }
 
-model LedgerEntry {
-  id            String   @id @default(cuid())
-  transactionId String
-  type          String   // CREDIT, DEBIT, FEE, REFUND
-  amount        Decimal  @db.Decimal(15, 2)
-  currency      Currency @default(XOF)
-  description   String
-  balanceBefore Decimal  @db.Decimal(15, 2)
-  balanceAfter  Decimal  @db.Decimal(15, 2)
-  metadata      Json?
-  createdAt     DateTime @default(now())
-
-  transaction Transaction @relation(fields: [transactionId], references: [id])
-
-  @@index([transactionId])
-  @@map("ledger_entries")
-}
-
 model Payment {
-  id              String        @id @default(cuid())
-  transactionId   String
-  method          PaymentMethod
-  amount          Decimal       @db.Decimal(15, 2)
-  currency        Currency      @default(XOF)
-  providerRef     String?       // FedaPay or Stripe payment ID
-  providerStatus  String?
-  metadata        Json?
-  createdAt       DateTime      @default(now())
-  updatedAt       DateTime      @updatedAt
+  id             String        @id @default(cuid())
+  transactionId  String
+  method         PaymentMethod
+  amount         Decimal       @db.Decimal(15, 2)
+  currency       Currency      @default(XOF)
+  providerRef    String? // FedaPay or Stripe payment ID
+  providerStatus String?
+  metadata       Json?
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
 
   transaction Transaction @relation(fields: [transactionId], references: [id])
 
   @@index([transactionId])
   @@map("payments")
-}
-
-model Dispute {
-  id            String   @id @default(cuid())
-  transactionId String   @unique
-  reason        String   @db.Text
-  description   String?  @db.Text
-  status        String   @default("OPEN") // OPEN, UNDER_REVIEW, RESOLVED, REFUNDED
-  resolution    String?  @db.Text
-  resolvedBy    String?
-  resolvedAt    DateTime?
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
-
-  transaction Transaction @relation(fields: [transactionId], references: [id])
-
-  @@index([status])
-  @@map("disputes")
 }
 
 // ─── PAYOUTS ──────────────────────────────────────────────────────────────────
@@ -1419,9 +1212,9 @@ model Payout {
   amount        Decimal   @db.Decimal(15, 2)
   currency      Currency  @default(XOF)
   phone         String?
-  operator      String?   // mtn_bj | moov_bj | mtn_ci | orange_ci | orange_bf | moov_tg
+  operator      String? // mtn_bj | moov_bj | mtn_ci | orange_ci | orange_bf | moov_tg
   status        String    @default("PENDING") // PENDING | INITIATED | COMPLETED | FAILED
-  providerRef   String?   // FedaPay payout external_id
+  providerRef   String? // FedaPay payout external_id
   failureReason String?   @db.Text
   initiatedAt   DateTime?
   completedAt   DateTime?
@@ -1445,7 +1238,7 @@ model Course {
   description   String      @db.Text
   category      String?
   level         CourseLevel
-  duration      Int?        // minutes
+  duration      Int? // minutes
   price         Decimal?    @db.Decimal(10, 2)
   currency      Currency    @default(XOF)
   isFree        Boolean     @default(false)
@@ -1475,12 +1268,12 @@ model Lesson {
   title     String
   content   String?  @db.Text
   videoUrl  String?
-  duration  Int?     // minutes
+  duration  Int? // minutes
   order     Int      @default(0)
   isFree    Boolean  @default(false)
   createdAt DateTime @default(now())
 
-  course Course @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  course         Course           @relation(fields: [courseId], references: [id], onDelete: Cascade)
   lessonProgress LessonProgress[]
 
   @@index([courseId])
@@ -1488,14 +1281,14 @@ model Lesson {
 }
 
 model Enrollment {
-  id          String   @id @default(cuid())
+  id          String    @id @default(cuid())
   userId      String
   courseId    String
-  progress    Int      @default(0) // 0-100
-  status      String   @default("ACTIVE")
+  progress    Int       @default(0) // 0-100
+  status      String    @default("ACTIVE")
   completedAt DateTime?
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
 
   user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
   course Course @relation(fields: [courseId], references: [id], onDelete: Cascade)
@@ -1503,17 +1296,17 @@ model Enrollment {
   @@unique([userId, courseId])
   @@map("enrollments")
 }
- 
+
 model LessonProgress {
-  id        String   @id @default(cuid())
-  userId    String
-  lessonId  String
-  isCompleted Boolean @default(true)
+  id          String   @id @default(cuid())
+  userId      String
+  lessonId    String
+  isCompleted Boolean  @default(true)
   completedAt DateTime @default(now())
- 
+
   user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
   lesson Lesson @relation(fields: [lessonId], references: [id], onDelete: Cascade)
- 
+
   @@unique([userId, lessonId])
   @@map("lesson_progress")
 }
@@ -1539,8 +1332,8 @@ model QuizQuestion {
   id      String @id @default(cuid())
   quizId  String
   text    String
-  options Json   // string[]
-  answer  Int    // index of correct option (0-based) — never sent to client
+  options Json // string[]
+  answer  Int // index of correct option (0-based) — never sent to client
   order   Int    @default(0)
 
   quiz Quiz @relation(fields: [quizId], references: [id], onDelete: Cascade)
@@ -1553,8 +1346,8 @@ model QuizAttempt {
   id        String   @id @default(cuid())
   quizId    String
   userId    String
-  answers   Json     // number[] — user's submitted answers
-  score     Int      // 0-100 percentage
+  answers   Json // number[] — user's submitted answers
+  score     Int // 0-100 percentage
   passed    Boolean
   createdAt DateTime @default(now())
 
@@ -1597,7 +1390,7 @@ model CommunityGroup {
   creatorId   String
   createdAt   DateTime @default(now())
 
-  creator User          @relation("GroupCreator", fields: [creatorId], references: [id])
+  creator User            @relation("GroupCreator", fields: [creatorId], references: [id])
   members GroupMember[]
   posts   CommunityPost[]
 
@@ -1691,21 +1484,21 @@ model Review {
   @@index([targetId])
   @@map("reviews")
 }
- 
+
 model Commission {
   id            String           @id @default(cuid())
-  userId        String           // L'ambassadeur qui reçoit la commission
-  transactionId String           // La transaction parente
-  amount        Float            // Montant de la commission
+  userId        String // L'ambassadeur qui reçoit la commission
+  transactionId String // La transaction parente
+  amount        Float // Montant de la commission
   currency      String           @default("XOF")
   status        CommissionStatus @default(PENDING)
   notes         String?
   createdAt     DateTime         @default(now())
   updatedAt     DateTime         @updatedAt
- 
-  user          User             @relation(fields: [userId], references: [id])
-  transaction   Transaction      @relation(fields: [transactionId], references: [id])
- 
+
+  user        User        @relation(fields: [userId], references: [id])
+  transaction Transaction @relation(fields: [transactionId], references: [id])
+
   @@index([userId])
   @@index([transactionId])
   @@map("commissions")
@@ -1733,11 +1526,11 @@ model Notification {
 // ─── DIRECT MESSAGING ────────────────────────────────────────────────────────
 
 model Conversation {
-  id           String    @id @default(cuid())
-  participantA String
-  participantB String
+  id            String   @id @default(cuid())
+  participantA  String
+  participantB  String
   lastMessageAt DateTime @default(now())
-  createdAt    DateTime  @default(now())
+  createdAt     DateTime @default(now())
 
   userA    User            @relation("ConversationA", fields: [participantA], references: [id])
   userB    User            @relation("ConversationB", fields: [participantB], references: [id])
@@ -1768,17 +1561,17 @@ model DirectMessage {
 // ─── AUDIT & SECURITY ─────────────────────────────────────────────────────────
 
 model AuditLog {
-  id          String   @id @default(cuid())
-  actorId     String?
-  actorIp     String?
-  actorRole   String?
-  action      String
-  resource    String
-  resourceId  String?
-  tenantId    String?
-  metadata    Json?
-  result      String   @default("SUCCESS")
-  createdAt   DateTime @default(now())
+  id         String   @id @default(cuid())
+  actorId    String?
+  actorIp    String?
+  actorRole  String?
+  action     String
+  resource   String
+  resourceId String?
+  tenantId   String?
+  metadata   Json?
+  result     String   @default("SUCCESS")
+  createdAt  DateTime @default(now())
 
   @@index([actorId])
   @@index([action])
@@ -1790,17 +1583,17 @@ model AuditLog {
 // ─── SECTION 8.5 — BLOCKCHAIN AUDIT TRAIL ─────────────────────────────────────
 
 model BlockchainAnchor {
-  id            String   @id @default(cuid())
-  documentId    String
-  documentType  String   // TITRE_FONCIER, GEOTRUST_REPORT, CONTRAT, LEDGER_ENTRY
-  contentHash   String   // SHA-256 du contenu
-  txHash        String   // Transaction hash Polygon PoS
-  network       String   @default("Polygon PoS")
-  blockNumber   Int?
-  anchoredAt    DateTime @default(now())
-  
+  id           String   @id @default(cuid())
+  documentId   String
+  documentType String // TITRE_FONCIER, GEOTRUST_REPORT, CONTRAT, LEDGER_ENTRY
+  contentHash  String // SHA-256 du contenu
+  txHash       String // Transaction hash Polygon PoS
+  network      String   @default("Polygon PoS")
+  blockNumber  Int?
+  anchoredAt   DateTime @default(now())
+
   // QR-code verifiable link
-  verifyUrl     String?
+  verifyUrl String?
 
   @@index([documentId])
   @@index([txHash])
@@ -1810,16 +1603,16 @@ model BlockchainAnchor {
 // ─── SECTION 8.3.4 — DOCUMENT AI AUDIT TRAIL ──────────────────────────────────
 
 model DocumentAuditLog {
-  id              String   @id @default(cuid())
-  documentId      String
-  documentType    String   // TITRE_FONCIER, ACTE_NOTARIE, etc.
-  model           String   // claude-3-5-sonnet-20241022
-  coherenceScore  Int
-  visualScore     Int
-  finalScore      Int
-  decision        String   // AUTO_VALIDATED, HUMAN_QUEUE, REJECTED
-  mismatches      String[]
-  processedAt     DateTime @default(now())
+  id             String   @id @default(cuid())
+  documentId     String
+  documentType   String // TITRE_FONCIER, ACTE_NOTARIE, etc.
+  model          String // claude-3-5-sonnet-20241022
+  coherenceScore Int
+  visualScore    Int
+  finalScore     Int
+  decision       String // AUTO_VALIDATED, HUMAN_QUEUE, REJECTED
+  mismatches     String[]
+  processedAt    DateTime @default(now())
 
   @@index([documentId])
   @@index([decision])
@@ -1831,14 +1624,14 @@ model DocumentAuditLog {
 model ListingAIScore {
   id                  String   @id @default(cuid())
   propertyId          String   @unique
-  totalScore          Int      // 0-100
+  totalScore          Int // 0-100
   completenessScore   Int
   priceCoherenceScore Int
   certificationScore  Int
   fraudFlags          String[]
   computedAt          DateTime @default(now())
 
-  property            Property @relation(fields: [propertyId], references: [id])
+  property Property @relation(fields: [propertyId], references: [id])
 
   @@map("listing_ai_scores")
 }
@@ -1846,21 +1639,21 @@ model ListingAIScore {
 // ─── SECTION 11.2.2 — SUBSCRIPTION PLANS ──────────────────────────────────────
 
 model Subscription {
-  id            String   @id @default(cuid())
-  userId        String
-  planId        String   // HELM_SEED, HELM_GROW, HELM_LEAD, PMS_STARTER, etc.
-  status        String   @default("ACTIVE") // ACTIVE, PAUSED, CANCELLED, EXPIRED
-  priceXOF      Int
-  currency      String   @default("XOF")
-  billingCycle  String   @default("MONTHLY") // MONTHLY, ANNUAL
-  startDate     DateTime @default(now())
-  endDate       DateTime?
-  autoRenew     Boolean  @default(true)
-  tenantId      String?
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
+  id           String    @id @default(cuid())
+  userId       String
+  planId       String // HELM_SEED, HELM_GROW, HELM_LEAD, PMS_STARTER, etc.
+  status       String    @default("ACTIVE") // ACTIVE, PAUSED, CANCELLED, EXPIRED
+  priceXOF     Int
+  currency     String    @default("XOF")
+  billingCycle String    @default("MONTHLY") // MONTHLY, ANNUAL
+  startDate    DateTime  @default(now())
+  endDate      DateTime?
+  autoRenew    Boolean   @default(true)
+  tenantId     String?
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
 
-  user          User     @relation(fields: [userId], references: [id])
+  user User @relation(fields: [userId], references: [id])
 
   @@index([userId])
   @@index([planId])
@@ -1871,17 +1664,17 @@ model Subscription {
 // ─── SECTION 10.7 — SECURITY INCIDENTS ────────────────────────────────────────
 
 model SecurityIncident {
-  id            String   @id @default(cuid())
-  type          String   // AUTH_FAILURE, CROSS_TENANT, SCRAPING, TRANSACTION_ANOMALY
-  severity      String   // CRITICAL, HIGH, MEDIUM, LOW
-  phase         String   @default("DETECTION") // DETECTION, CONTAINMENT, ANALYSIS, REMEDIATION
+  id            String    @id @default(cuid())
+  type          String // AUTH_FAILURE, CROSS_TENANT, SCRAPING, TRANSACTION_ANOMALY
+  severity      String // CRITICAL, HIGH, MEDIUM, LOW
+  phase         String    @default("DETECTION") // DETECTION, CONTAINMENT, ANALYSIS, REMEDIATION
   description   String
-  affectedUsers Int      @default(0)
+  affectedUsers Int       @default(0)
   actorIp       String?
   actorId       String?
   tenantId      String?
   metadata      Json?
-  detectedAt    DateTime @default(now())
+  detectedAt    DateTime  @default(now())
   containedAt   DateTime?
   resolvedAt    DateTime?
 

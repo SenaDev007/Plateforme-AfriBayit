@@ -10,10 +10,11 @@
     "db:migrate": "prisma migrate dev",
     "db:migrate:deploy": "prisma migrate deploy",
     "db:studio": "prisma studio",
-    "db:seed": "ts-node ./src/seed.ts"
+    "db:seed": "cross-env DATABASE_URL=\"$DIRECT_URL\" ts-node ./src/seed.ts"
   },
   "dependencies": {
-    "@prisma/client": "^6.1.0"
+    "@prisma/client": "^6.1.0",
+    "pg": "^8.20.0"
   },
   "devDependencies": {
     "prisma": "^6.1.0",

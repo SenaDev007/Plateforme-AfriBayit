@@ -192,6 +192,43 @@ export default async function CommunautePage({ searchParams }: Props): Promise<R
         <div className="flex flex-col gap-12 lg:flex-row">
           {/* Main feed */}
           <main className="min-w-0 flex-1 space-y-10">
+            {/* Create Post Box (LinkedIn Style) */}
+            <div className="border-charcoal-100 rounded-[32px] border bg-white p-6 shadow-sm">
+              <div className="flex gap-4">
+                <div className="bg-navy flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full text-lg font-bold text-white shadow-lg">
+                  U
+                </div>
+                <button className="border-charcoal-200 text-charcoal-400 hover:bg-charcoal-50 flex-1 rounded-full border bg-white px-6 text-left text-sm font-medium transition-colors">
+                  Commencer un post...
+                </button>
+              </div>
+              <div className="mt-4 flex items-center justify-between px-2 pt-4">
+                <div className="flex gap-2">
+                  <Button
+                    variant="ghost"
+                    className="text-charcoal-500 hover:bg-charcoal-50 gap-2 rounded-full font-bold"
+                  >
+                    <MessageSquare className="h-4 w-4 text-sky-500" />
+                    Média
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    className="text-charcoal-500 hover:bg-charcoal-50 gap-2 rounded-full font-bold"
+                  >
+                    <TrendingUp className="text-emerald h-4 w-4" />
+                    Sondage
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    className="text-charcoal-500 hover:bg-charcoal-50 gap-2 rounded-full font-bold"
+                  >
+                    <Pin className="text-gold h-4 w-4" />
+                    Article
+                  </Button>
+                </div>
+              </div>
+            </div>
+
             {/* Category filter */}
             <div className="border-charcoal-100 no-scrollbar flex items-center justify-between gap-6 overflow-x-auto border-b pb-4">
               <div className="flex gap-2">
