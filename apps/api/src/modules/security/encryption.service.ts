@@ -40,7 +40,7 @@ export class EncryptionService {
     const decipher = createDecipheriv(this.algorithm, this.key, iv);
     decipher.setAuthTag(authTag);
 
-    let decrypted = decipher.update(ciphertext, 'hex', 'utf8');
+    let decrypted = decipher.update(ciphertext!, 'hex', 'utf8');
     decrypted += decipher.final('utf8');
     return decrypted;
   }
