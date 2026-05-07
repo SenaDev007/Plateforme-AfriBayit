@@ -62,13 +62,16 @@ export class AntiScrapingMiddleware implements NestMiddleware {
 export class ProfileDataProtection {
   /** Mask email: k***@gmail.com */
   static maskEmail(email: string): string {
-    const [user, domain] = email.split('@');
-    return `${user[0]}***@${domain}`;
+    if (!email) return '****';
+    const parts = email.split('@');
+    if (parts.length < 2) return email;
+    const [user, domain] = parts;
+    return `${user?.[0] || '*'}***@${domain}`;
   }
 
   /** Mask phone: never in clear — revealed only after authenticated action */
   static maskPhone(phone: string): string {
-    if (phone.length < 6) return '****';
+    if (!phone || phone.length < 6) return '****';
     return `${phone.slice(0, 3)}***${phone.slice(-2)}`;
   }
 

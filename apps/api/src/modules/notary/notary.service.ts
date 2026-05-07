@@ -28,6 +28,7 @@ export class NotaryService {
     }
 
     const selectedNotary = availableNotaries[0];
+    if (!selectedNotary) throw new NotFoundException('Erreur de sélection du notaire.');
 
     // 2. Create the assignment
     const assignment = await this.prisma.notaryAssignment.create({
@@ -123,7 +124,7 @@ export class NotaryService {
           },
         },
       },
-      orderBy: { createdAt: 'desc' },
+      orderBy: { assignedAt: 'desc' },
     });
   }
 }

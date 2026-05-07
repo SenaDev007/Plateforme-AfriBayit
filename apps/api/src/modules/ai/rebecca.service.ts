@@ -35,6 +35,8 @@ export class RebeccaService {
       });
 
       const textContent = response.content[0];
+      if (!textContent) throw new Error('Empty AI response');
+
       return {
         reply:
           textContent.type === 'text'

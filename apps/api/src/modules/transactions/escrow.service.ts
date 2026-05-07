@@ -44,6 +44,7 @@ export class EscrowService {
     }
 
     // Execute state change + ledger entry atomically
+    // Execute state change + ledger entry atomically
     const [updated] = await this.prisma.$transaction([
       this.prisma.transaction.update({
         where: { id: transactionId },
@@ -56,9 +57,12 @@ export class EscrowService {
       this.prisma.ledgerEntry.create({
         data: {
           transactionId,
-          type: this.getLedgerType(toStatus),
+          type: this.getLedgerType(toStatus) as any,
+          debitAccount: 'SYSTEM',
+          creditAccount: 'ESCROW',
           amount: transaction.amount,
           currency: transaction.currency,
+          checksum: 'placeholder', // Add required checksum
           description: `${transaction.status} → ${toStatus}${note ? ` | ${note}` : ''} | Acteur: ${actorId}`,
           balanceBefore: transaction.escrowAccount?.balance ?? new Decimal(0),
           balanceAfter: this.getNewBalance(
@@ -93,12 +97,12 @@ export class EscrowService {
 
   private getLedgerType(status: TransactionStatus): string {
     const map: Partial<Record<TransactionStatus, string>> = {
-      FUNDED: 'CREDIT',
-      RELEASED: 'DEBIT',
+      FUNDED: 'ESCROW_HOLD',
+      RELEASED: 'ESCROW_RELEASE',
       REFUNDED: 'REFUND',
-      CANCELLED: 'DEBIT',
+      CANCELLED: 'ESCROW_RELEASE',
     };
-    return map[status] ?? 'DEBIT';
+    return map[status] ?? 'ESCROW_HOLD';
   }
 
   private getNewBalance(

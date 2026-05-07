@@ -30,29 +30,28 @@ export class BlockchainAnchorService {
     );
 
     // Store the proof in the database
-    return this.prisma.property.update({
-      where: { id: propertyId },
+    return this.prisma.blockchainAnchor.create({
       data: {
-        metadata: {
-          blockchainProof: {
-            hash,
-            txHash,
-            blockNumber,
-            network: 'Polygon Mainnet',
-            timestamp: new Date().toISOString(),
-          },
-        },
+        documentId: propertyId,
+        documentType: 'TITRE_FONCIER',
+        contentHash: hash,
+        txHash: txHash,
+        network: 'Polygon PoS',
+        blockNumber: blockNumber,
+        anchoredAt: new Date(),
       },
     });
   }
 
   /** Verifies a hash against a stored proof */
   async verifyProof(propertyId: string, currentData: any): Promise<boolean> {
-    const prop = await this.prisma.property.findUnique({ where: { id: propertyId } });
-    const proof = (prop?.metadata as any)?.blockchainProof;
+    const proof = await this.prisma.blockchainAnchor.findFirst({
+      where: { documentId: propertyId },
+      orderBy: { anchoredAt: 'desc' },
+    });
     if (!proof) return false;
 
     const currentHash = this.generateHash(currentData);
-    return currentHash === proof.hash;
+    return currentHash === proof.contentHash;
   }
 }

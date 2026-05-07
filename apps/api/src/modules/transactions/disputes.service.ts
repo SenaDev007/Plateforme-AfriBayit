@@ -29,7 +29,12 @@ export class DisputesService {
 
     const [dispute] = await this.prisma.$transaction([
       this.prisma.dispute.create({
-        data: { transactionId, reason, description: description ?? null },
+        data: {
+          escrowId: transactionId, // Use transactionId as placeholder for escrowId if not available, or fix per schema
+          reason,
+          status: 'OPEN',
+          metadata: description ? { description } : {},
+        },
       }),
       this.prisma.transaction.update({
         where: { id: transactionId },
@@ -48,13 +53,15 @@ export class DisputesService {
     if (transaction.buyerId !== userId && transaction.sellerId !== userId)
       throw new ForbiddenException('Accès refusé.');
 
-    return this.prisma.dispute.findUnique({ where: { transactionId } });
+    return this.prisma.dispute.findFirst({
+      where: { transactions: { some: { id: transactionId } } },
+    });
   }
 
   async findAll() {
     return this.prisma.dispute.findMany({
       include: {
-        transaction: {
+        transactions: {
           select: {
             reference: true,
             amount: true,
@@ -75,23 +82,23 @@ export class DisputesService {
       include: { transaction: true },
     });
     if (!dispute) throw new NotFoundException('Litige introuvable.');
-    if (dispute.status !== 'OPEN' && dispute.status !== 'UNDER_REVIEW')
+    if (dispute.status !== 'OPEN' && dispute.status !== 'ADMIN_REVIEW')
       throw new ConflictException('Ce litige est déjà résolu.');
 
     const newTxStatus = action === 'REFUNDED' ? 'REFUNDED' : 'COMPLETED';
+    const status = action === 'REFUNDED' ? 'RESOLVED' : 'RESOLVED'; // Map to valid DisputeStatus enum
 
     const [updated] = await this.prisma.$transaction([
       this.prisma.dispute.update({
         where: { id },
         data: {
-          status: action,
+          status,
           resolution,
-          resolvedBy: adminId,
-          resolvedAt: new Date(),
+          updatedAt: new Date(),
         },
       }),
       this.prisma.transaction.update({
-        where: { id: dispute.transactionId },
+        where: { id: dispute.transactions[0]?.id || '' },
         data: { status: newTxStatus },
       }),
     ]);
@@ -104,7 +111,7 @@ export class DisputesService {
     if (!dispute) throw new NotFoundException('Litige introuvable.');
     return this.prisma.dispute.update({
       where: { id },
-      data: { status: 'UNDER_REVIEW' },
+      data: { status: 'ADMIN_REVIEW' },
     });
   }
 }

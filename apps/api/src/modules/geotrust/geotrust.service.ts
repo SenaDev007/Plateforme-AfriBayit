@@ -28,6 +28,7 @@ export class GeoTrustService {
     }
 
     const selected = availableSurveyors[0];
+    if (!selected) throw new NotFoundException('Erreur de sélection du géomètre.');
 
     return this.prisma.surveyAssignment.create({
       data: {

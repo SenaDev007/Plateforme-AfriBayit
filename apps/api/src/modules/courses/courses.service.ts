@@ -87,7 +87,7 @@ export class CoursesService {
         ...(dto.price !== undefined ? { price: dto.price } : {}),
         ...(dto.thumbnailUrl !== undefined ? { thumbnailUrl: dto.thumbnailUrl } : {}),
         ...(dto.tags !== undefined ? { tags: dto.tags } : {}),
-        currency: dto.currency ?? 'XOF',
+        currency: (dto.currency as any) ?? 'XOF',
         isPublished: false,
         isFeatured: false,
         enrolledCount: 0,

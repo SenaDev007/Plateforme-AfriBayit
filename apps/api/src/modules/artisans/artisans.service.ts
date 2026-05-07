@@ -1,5 +1,5 @@
 import { Injectable, Inject, NotFoundException } from '@nestjs/common';
-import type { PrismaClient } from '@prisma/client';
+import type { PrismaClient } from '@afribayit/db';
 
 export interface SearchArtisansDto {
   ville?: string;
@@ -69,7 +69,7 @@ export class ArtisansService {
         reviews: {
           take: 10,
           orderBy: { createdAt: 'desc' },
-          include: { reviewer: { select: { firstName: true, lastName: true } } },
+          include: { author: { select: { firstName: true, lastName: true } } },
         },
       },
     });
@@ -99,11 +99,13 @@ export class ArtisansService {
     return this.prisma.artisanService.create({ data: dto });
   }
 
-  async addReview(dto: CreateReviewDto, reviewerId: string) {
+    const artisan = await this.prisma.artisan.findUnique({ where: { id: dto.artisanId } });
+    if (!artisan) throw new NotFoundException('Artisan introuvable');
+
     const review = await this.prisma.review.create({
       data: {
-        artisanId: dto.artisanId,
-        reviewerId,
+        targetId: artisan.userId,
+        authorId: reviewerId,
         rating: dto.rating,
         comment: dto.comment,
       },
@@ -111,7 +113,7 @@ export class ArtisansService {
 
     // Recompute average rating
     const agg = await this.prisma.review.aggregate({
-      where: { artisanId: dto.artisanId },
+      where: { targetId: artisan.userId },
       _avg: { rating: true },
       _count: true,
     });

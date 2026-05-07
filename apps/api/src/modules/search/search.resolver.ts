@@ -5,10 +5,10 @@ import { ObjectType, Field } from '@nestjs/graphql';
 @ObjectType()
 class SearchResult {
   @Field()
-  id: string;
+  id!: string;
 
   @Field()
-  title: string;
+  title!: string;
 
   @Field({ nullable: true })
   description?: string;

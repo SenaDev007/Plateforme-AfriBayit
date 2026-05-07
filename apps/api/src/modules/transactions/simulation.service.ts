@@ -1,5 +1,6 @@
 import { Injectable, Inject, NotFoundException } from '@nestjs/common';
 import { PrismaClient, Transaction, Country, UserRole } from '@afribayit/db';
+import * as bcrypt from 'bcryptjs';
 import { EscrowService } from './escrow.service';
 import { NotaryService } from '../notary/notary.service';
 import { GeoTrustService } from '../geotrust/geotrust.service';
@@ -15,6 +16,8 @@ export class TransactionSimulationService {
 
   /** Seeds a complete test environment */
   async seedTestEnvironment() {
+    const passwordHash = await bcrypt.hash('Password123!', 12);
+
     // 1. Create Test Users
     const buyer = await this.prisma.user.upsert({
       where: { email: 'buyer@test.com' },
@@ -23,7 +26,7 @@ export class TransactionSimulationService {
         email: 'buyer@test.com',
         firstName: 'Acheteur',
         lastName: 'Test',
-        password: 'Password123!',
+        passwordHash,
         role: 'BUYER',
       },
     });
@@ -35,7 +38,7 @@ export class TransactionSimulationService {
         email: 'seller@test.com',
         firstName: 'Vendeur',
         lastName: 'Test',
-        password: 'Password123!',
+        passwordHash,
         role: 'SELLER',
       },
     });
@@ -47,7 +50,7 @@ export class TransactionSimulationService {
         email: 'notaire@test.com',
         firstName: 'Maitre',
         lastName: 'Notaire',
-        password: 'Password123!',
+        passwordHash,
         role: 'NOTARY',
       },
     });

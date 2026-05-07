@@ -62,9 +62,9 @@ export class AuthService {
         country: dto.country ?? 'BJ',
         onboardingCompleted: true, // For now, we mark it true if they finish the stepper
         geoPreferences: dto.geoPreferences,
-        budgetMin: dto.budgetMin,
-        budgetMax: dto.budgetMax,
-        objectives: dto.objectives,
+        budgetMin: dto.budgetMin ?? null,
+        budgetMax: dto.budgetMax ?? null,
+        objectives: dto.objectives ?? null,
         aiAssistantEnabled: dto.aiAssistantEnabled ?? false,
       },
     });

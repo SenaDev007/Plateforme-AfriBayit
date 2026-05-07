@@ -30,9 +30,12 @@ export class EncryptionService {
 
   /** Decrypt a previously encrypted string */
   decrypt(encryptedData: string): string {
-    const [ivHex, authTagHex, ciphertext] = encryptedData.split(':');
-    const iv = Buffer.from(ivHex, 'hex');
-    const authTag = Buffer.from(authTagHex, 'hex');
+    const parts = encryptedData.split(':');
+    if (parts.length < 3) throw new Error('Format de données chiffrées invalide');
+    const [ivHex, authTagHex, ciphertext] = parts;
+
+    const iv = Buffer.from(ivHex || '', 'hex');
+    const authTag = Buffer.from(authTagHex || '', 'hex');
 
     const decipher = createDecipheriv(this.algorithm, this.key, iv);
     decipher.setAuthTag(authTag);
