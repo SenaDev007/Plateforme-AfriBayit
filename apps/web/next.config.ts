@@ -77,7 +77,7 @@ const baseConfig: NextConfig = {
               "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
               "font-src 'self' https://fonts.gstatic.com",
               "img-src 'self' data: blob: https: http:",
-              "connect-src 'self' https://*.mapbox.com https://api.fedapay.com https://api.stripe.com wss://*.afribayit.com ws://localhost:*",
+              "connect-src 'self' https://*.mapbox.com https://api.fedapay.com https://api.stripe.com https://*.afribayit.com https://*.vercel.app wss://*.afribayit.com wss://*.vercel.app ws://localhost:*",
               "frame-src 'none'",
             ].join('; '),
           },

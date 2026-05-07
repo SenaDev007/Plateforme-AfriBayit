@@ -79,7 +79,7 @@ export function SearchResults({ searchParams }: SearchResultsProps): React.React
         params.set('page', searchParams['page'] ?? '1');
         params.set('limit', '12');
 
-        const apiUrl = process.env['NEXT_PUBLIC_API_URL'] ?? 'http://localhost:4000';
+        const apiUrl = process.env['NEXT_PUBLIC_API_URL'] || 'http://localhost:4000';
         const res = await fetch(`${apiUrl}/api/v1/properties?${params.toString()}`);
 
         if (res.ok) {

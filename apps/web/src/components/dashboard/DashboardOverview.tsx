@@ -187,27 +187,31 @@ export function DashboardOverview(): React.ReactElement {
       api.users.me(token),
     ])
       .then(([annoncesRes, favRes, txRes, userRes]) => {
-        const annonces = annoncesRes.data as ApiMineProperty[];
-        const favs = favRes.data as FavoriteRecord[];
-        const txs = txRes.data as ApiTransaction[];
-        const user = userRes.data as ApiUser;
+        const annonces = (annoncesRes?.data as ApiMineProperty[]) || [];
+        const favs = (favRes?.data as FavoriteRecord[]) || [];
+        const txs = (txRes?.data as ApiTransaction[]) || [];
+        const user = userRes?.data as ApiUser;
 
         const activeAnnonces = annonces.filter((p) => p.status !== 'ARCHIVED');
         const activeTxs = txs.filter((tx) => !['CANCELLED', 'COMPLETED'].includes(tx.status));
 
         setStats({
-          annonces: activeAnnonces.length,
-          favoris: favs.length,
-          transactions: activeTxs.length,
-          reputation: user.reputationScore ?? 0,
+          annonces: (activeAnnonces || []).length,
+          favoris: (favs || []).length,
+          transactions: (activeTxs || []).length,
+          reputation: user?.reputationScore ?? 0,
         });
 
         const fundedTxs = txs.filter(
           (tx) => tx.buyerId === userId && ['FUNDED', 'VALIDATED'].includes(tx.status),
         );
-        if (fundedTxs.length > 0) {
-          const total = fundedTxs.reduce((sum, tx) => sum + Number(tx.amount), 0);
-          setEscrow({ total, currency: fundedTxs[0]!.currency, count: fundedTxs.length });
+        if (fundedTxs && fundedTxs.length > 0) {
+          const total = fundedTxs.reduce((sum, tx) => sum + (Number(tx.amount) || 0), 0);
+          setEscrow({
+            total,
+            currency: fundedTxs[0]?.currency || 'XOF',
+            count: fundedTxs.length,
+          });
         }
 
         const sorted = [...txs].sort(

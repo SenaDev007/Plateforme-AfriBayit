@@ -1,6 +1,7 @@
 /** Typed API client for AfriBayit backend */
 
-const BASE_URL = process.env['NEXT_PUBLIC_API_URL'] ?? 'http://localhost:4000';
+import { env } from '@/env';
+const BASE_URL = env.NEXT_PUBLIC_API_URL;
 
 interface RequestOptions extends Omit<RequestInit, 'body'> {
   body?: unknown;

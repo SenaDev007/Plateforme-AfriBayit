@@ -23,8 +23,8 @@ export interface InteractiveMenuProps {
 const defaultItems: InteractiveMenuItem[] = [
   { label: 'Accueil', icon: Home, href: '/' },
   { label: 'Recherche', icon: Search, href: '/recherche' },
-  { label: 'Publier', icon: PlusCircle, href: '/publier' },
-  { label: 'Favoris', icon: Heart, href: '/favoris' },
+  { label: 'Publier', icon: PlusCircle, href: '/dashboard/annonces/nouvelle' },
+  { label: 'Favoris', icon: Heart, href: '/dashboard/favoris' },
   { label: 'Profil', icon: User, href: '/dashboard' },
 ];
 

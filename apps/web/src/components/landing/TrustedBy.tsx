@@ -15,22 +15,22 @@ const PARTNERS = [
   },
   {
     name: 'ECOBANK',
-    logo: 'https://logo.clearbit.com/ecobank.com',
+    logo: 'https://www.google.com/s2/favicons?domain=ecobank.com&sz=128',
     fullName: 'The Pan-African Bank',
   },
   {
     name: 'ORABANK',
-    logo: 'https://logo.clearbit.com/orabank.net',
+    logo: 'https://www.google.com/s2/favicons?domain=orabank.net&sz=128',
     fullName: 'Un Partenaire à votre Écoute',
   },
   {
     name: 'CORIS BANK',
-    logo: 'https://logo.clearbit.com/coris-bank.com',
+    logo: 'https://www.google.com/s2/favicons?domain=coris-bank.com&sz=128',
     fullName: 'La Banque Autrement',
   },
   {
     name: 'FEDA PAY',
-    logo: 'https://logo.clearbit.com/fedapay.com',
+    logo: 'https://www.google.com/s2/favicons?domain=fedapay.com&sz=128',
     fullName: 'Passerelle de Paiement Sécurisée',
   },
 ];

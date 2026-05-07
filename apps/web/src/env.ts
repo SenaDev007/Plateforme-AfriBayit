@@ -18,16 +18,26 @@ const clientSchema = z.object({
 });
 
 function createEnv() {
+  const isProd = process.env.NODE_ENV === 'production';
+  const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000';
+
+  if (isProd && apiUrl.includes('localhost')) {
+    console.warn(
+      '⚠️ WARNING: Running in production mode but NEXT_PUBLIC_API_URL is defaulting to localhost. ' +
+        'API calls will likely fail.',
+    );
+  }
+
   const parsed = serverSchema.safeParse(process.env);
 
-  if (!parsed.success && process.env.NODE_ENV === 'production') {
+  if (!parsed.success && isProd) {
     console.error('Invalid environment variables:', parsed.error.flatten().fieldErrors);
     throw new Error('Invalid environment variables');
   }
 
   return {
     ...parsed.data,
-    NEXT_PUBLIC_API_URL: process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:4000',
+    NEXT_PUBLIC_API_URL: apiUrl,
     NEXT_PUBLIC_APP_URL: process.env.NEXT_PUBLIC_APP_URL ?? 'http://localhost:3000',
     NEXT_PUBLIC_MAPBOX_TOKEN: process.env.NEXT_PUBLIC_MAPBOX_TOKEN ?? '',
   };

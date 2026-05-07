@@ -43,7 +43,7 @@ export function SiteNavbar(): React.ReactElement {
   };
 
   const handlePublish = (): void => {
-    router.push('/publier' as any);
+    router.push('/dashboard/annonces/nouvelle' as any);
   };
 
   return (
