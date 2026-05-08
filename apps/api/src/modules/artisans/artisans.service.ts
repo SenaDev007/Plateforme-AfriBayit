@@ -66,10 +66,14 @@ export class ArtisansService {
       where: { slug },
       include: {
         services: true,
-        reviews: {
-          take: 10,
-          orderBy: { createdAt: 'desc' },
-          include: { author: { select: { firstName: true, lastName: true } } },
+        user: {
+          include: {
+            receivedReviews: {
+              take: 10,
+              orderBy: { createdAt: 'desc' },
+              include: { author: { select: { firstName: true, lastName: true } } },
+            },
+          },
         },
       },
     });
@@ -84,7 +88,7 @@ export class ArtisansService {
         ...dto,
         slug,
         userId,
-        currency: dto.currency ?? 'XOF',
+        currency: (dto.currency as any) ?? 'XOF',
         rating: 0,
         reviewCount: 0,
         jobsDone: 0,

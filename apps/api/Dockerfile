@@ -8,6 +8,7 @@ COPY package*.json ./
 COPY apps/api/package*.json ./apps/api/
 COPY packages/db/package*.json ./packages/db/
 COPY packages/config/package*.json ./packages/config/
+COPY packages/ai/package*.json ./packages/ai/
 RUN npm ci --workspace=apps/api --workspace=packages/db --workspace=packages/config --workspace=packages/ai --ignore-scripts
 
 # ─── Builder ─────────────────────────────────────────────────────────────────

@@ -30,7 +30,8 @@ export class DisputesService {
     const [dispute] = await this.prisma.$transaction([
       this.prisma.dispute.create({
         data: {
-          escrowId: transactionId, // Use transactionId as placeholder for escrowId if not available, or fix per schema
+          escrowId: transactionId,
+          raisedById: userId,
           reason,
           status: 'OPEN',
           metadata: description ? { description } : {},
@@ -79,7 +80,7 @@ export class DisputesService {
   async resolve(id: string, adminId: string, resolution: string, action: 'RESOLVED' | 'REFUNDED') {
     const dispute = await this.prisma.dispute.findUnique({
       where: { id },
-      include: { transaction: true },
+      include: { transactions: true },
     });
     if (!dispute) throw new NotFoundException('Litige introuvable.');
     if (dispute.status !== 'OPEN' && dispute.status !== 'ADMIN_REVIEW')
@@ -98,7 +99,7 @@ export class DisputesService {
         },
       }),
       this.prisma.transaction.update({
-        where: { id: dispute.transactions[0]?.id || '' },
+        where: { id: (dispute as any).transactions[0]?.id || '' },
         data: { status: newTxStatus },
       }),
     ]);
