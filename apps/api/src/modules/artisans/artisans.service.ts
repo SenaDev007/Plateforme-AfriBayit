@@ -86,6 +86,7 @@ export class ArtisansService {
     return this.prisma.artisan.create({
       data: {
         ...dto,
+        country: dto.country as any,
         slug,
         userId,
         currency: (dto.currency as any) ?? 'XOF',

@@ -25,7 +25,8 @@ export class AICore {
         max_tokens: 1024,
         messages: [{ role: 'user', content: prompt }],
       });
-      return response.content[0].type === 'text' ? response.content[0].text : '';
+      const firstContent = response.content[0];
+      return firstContent?.type === 'text' ? firstContent.text : '';
     } else if (taskComplexity === 'VISION') {
       // Claude Vision (Section 8.1.1)
       return 'Vision analysis result (Mocked)';
@@ -35,7 +36,7 @@ export class AICore {
         model: 'gpt-4o-mini',
         messages: [{ role: 'user', content: prompt }],
       });
-      return response.choices[0].message.content;
+      return response.choices[0]?.message.content || '';
     }
   }
 
@@ -48,7 +49,7 @@ export class AICore {
       input: text,
       encoding_format: 'float',
     });
-    return response.data[0].embedding;
+    return response.data[0]?.embedding || [];
   }
 }
 

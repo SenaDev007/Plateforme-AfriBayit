@@ -1,7 +1,4 @@
-import { PrismaClient } from '@prisma/client';
 import crypto from 'crypto';
-
-const prisma = new PrismaClient();
 
 /**
  * Section 8.5 - Blockchain & Smart Contracts

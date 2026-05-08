@@ -34,11 +34,16 @@ export class WhatsAppAdapter {
         ]
       : undefined;
 
-    return {
+    const result: {
+      type: 'text' | 'interactive';
+      body: string;
+      buttons?: { id: string; title: string }[];
+    } = {
       type: buttons ? 'interactive' : 'text',
       body: clean,
-      buttons,
     };
+    if (buttons) result.buttons = buttons;
+    return result;
   }
 
   /**

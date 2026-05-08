@@ -64,7 +64,7 @@ export class EscrowService {
           amount: transaction.amount,
           currency: transaction.currency,
           checksum: 'placeholder',
-          providerRef: note,
+          providerRef: note ?? null,
         },
       }),
     ]);
