@@ -64,13 +64,23 @@ import { HealthController } from './health.controller';
       imports: [ConfigModule],
       inject: [ConfigService],
       useFactory: async (config: ConfigService) => {
+        const host = config.get<string>('REDIS_HOST');
+        const url = config.get<string>('REDIS_URL');
+        if (!host && !url) {
+          // Fallback to in-memory cache if Redis is not configured
+          return { ttl: config.get<number>('CACHE_TTL_SECONDS', 300) };
+        }
+
         const password = config.get<string>('REDIS_PASSWORD');
         return {
           store: await redisStore({
-            socket: {
-              host: config.get<string>('REDIS_HOST', 'localhost'),
-              port: config.get<number>('REDIS_PORT', 6379),
-            },
+            url,
+            socket: !url
+              ? {
+                  host: host || 'localhost',
+                  port: config.get<number>('REDIS_PORT', 6379),
+                }
+              : undefined,
             ...(password ? { password } : {}),
             ttl: config.get<number>('CACHE_TTL_SECONDS', 300),
           }),
