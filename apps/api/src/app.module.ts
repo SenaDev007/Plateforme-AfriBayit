@@ -26,6 +26,7 @@ import { GeoTrustModule } from './modules/geotrust/geotrust.module';
 import { GraphQLModule } from '@nestjs/graphql';
 import { ApolloDriver, ApolloDriverConfig } from '@nestjs/apollo';
 import { join } from 'path';
+import { HealthController } from './health.controller';
 
 @Module({
   imports: [
@@ -48,17 +49,16 @@ import { join } from 'path';
       inject: [ConfigService],
       useFactory: () => ({
         throttlers: [
-          { name: 'default', ttl: 60_000, limit: 100 }, // API authentifiée (100 req/min)
-          { name: 'auth', ttl: 60_000, limit: 5 }, // Auth: login, OTP, register (5 req/min)
-          { name: 'public', ttl: 60_000, limit: 30 }, // API publique anonyme (30 req/min)
-          { name: 'premium', ttl: 60_000, limit: 200 }, // Agent Premium (200 req/min)
-          { name: 'sensitive', ttl: 3600_000, limit: 10 }, // Escrow, KYC (10 req/heure)
-          { name: 'partner', ttl: 60_000, limit: 500 }, // API partenaires (500 req/min)
+          { name: 'default', ttl: 60_000, limit: 100 },
+          { name: 'auth', ttl: 60_000, limit: 5 },
+          { name: 'public', ttl: 60_000, limit: 30 },
+          { name: 'premium', ttl: 60_000, limit: 200 },
+          { name: 'sensitive', ttl: 3600_000, limit: 10 },
+          { name: 'partner', ttl: 60_000, limit: 500 },
         ],
       }),
     }),
 
-    // Redis cache — global
     CacheModule.registerAsync({
       isGlobal: true,
       imports: [ConfigModule],
@@ -78,13 +78,8 @@ import { join } from 'path';
       },
     }),
 
-    // Async job queue (BullMQ + Redis)
     QueueModule,
-
-    // WebSocket gateways
     GatewaysModule,
-
-    // Feature modules
     DatabaseModule,
     SecurityModule,
     AuthModule,
@@ -103,9 +98,7 @@ import { join } from 'path';
     AiModule,
     GeoTrustModule,
   ],
-  providers: [
-    // Apply ThrottlerGuard globally — every route is rate-limited by default
-    { provide: APP_GUARD, useClass: ThrottlerGuard },
-  ],
+  controllers: [HealthController],
+  providers: [{ provide: APP_GUARD, useClass: ThrottlerGuard }],
 })
 export class AppModule {}
