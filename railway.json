@@ -6,7 +6,6 @@
     "context": "."
   },
   "deploy": {
-    "startCommand": "npm run start --workspace=apps/api",
     "healthcheckPath": "/api/v1/health",
     "restartPolicyType": "ON_FAILURE"
   }
